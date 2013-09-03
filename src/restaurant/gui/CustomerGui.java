@@ -19,6 +19,10 @@ public class CustomerGui implements Gui{
 	private enum Command {noCommand, GoToSeat, LeaveRestaurant};
 	private Command command=Command.noCommand;
 
+	//Get rid of the "magic numbers"
+	static final int CUSTWIDTH = 20;
+	static final int CUSTHEIGHT = 20;
+	
 	public static final int xTable = 200;
 	public static final int yTable = 250;
 
@@ -57,7 +61,7 @@ public class CustomerGui implements Gui{
 
 	public void draw(Graphics2D g) {
 		g.setColor(Color.GREEN);
-		g.fillRect(xPos, yPos, 20, 20);
+		g.fillRect(xPos, yPos, CUSTWIDTH, CUSTHEIGHT);
 	}
 
 	public boolean isPresent() {

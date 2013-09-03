@@ -42,6 +42,13 @@ public class RestaurantPanel extends JPanel {
         add(restLabel);
         add(group);
     }
+    
+    /**
+     * Returns the text from RestaurantGui's infoLabel
+     */
+    public String getInfoText() {
+    	return gui.getInfoLabelText();
+    }
 
     /**
      * Sets up the restaurant label that includes the menu,

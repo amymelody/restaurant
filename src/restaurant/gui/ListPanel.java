@@ -52,8 +52,9 @@ public class ListPanel extends JPanel implements ActionListener {
      */
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == addPersonB) {
-        	// Chapter 2.19 describes showInputDialog()
-            addPerson(JOptionPane.showInputDialog("Please enter a name:"));
+        	if (!restPanel.getInfoText().equals("")) {
+        		addPerson(restPanel.getInfoText());
+        	}
         }
         else {
         	// Isn't the second for loop more beautiful?

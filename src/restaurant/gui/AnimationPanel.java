@@ -10,6 +10,12 @@ import java.util.ArrayList;
 
 public class AnimationPanel extends JPanel implements ActionListener {
 
+	//Get rid of the "magic numbers"
+	static final int TABLEX = 200;
+	static final int TABLEY = 250;
+	static final int TABLEWIDTH = 50;
+	static final int TABLEHEIGHT = 50;
+	
     private final int WINDOWX = 450;
     private final int WINDOWY = 350;
     private Image bufferImage;
@@ -40,7 +46,7 @@ public class AnimationPanel extends JPanel implements ActionListener {
 
         //Here is the table
         g2.setColor(Color.ORANGE);
-        g2.fillRect(200, 250, 50, 50);//200 and 250 need to be table params
+        g2.fillRect(TABLEX, TABLEY, TABLEWIDTH, TABLEHEIGHT);//200 and 250 need to be table params
 
 
         for(Gui gui : guis) {

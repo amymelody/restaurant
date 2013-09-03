@@ -26,13 +26,13 @@ public class RestaurantGui extends JFrame implements ActionListener {
     
     /* infoPanel holds information about the clicked customer, if there is one*/
     private JPanel infoPanel;
-    private JLabel infoLabel; //part of infoPanel
+    private JTextField infoLabel; //part of infoPanel
     private JCheckBox stateCB;//part of infoLabel
     
     private JPanel idPanel;
     private JLabel idLabel;
-    private ImageIcon icon;
-    private JLabel iconLabel;
+    //private ImageIcon icon;
+    //private JLabel iconLabel;
 
     private Object currentPerson;/* Holds the agent that the info is about.
     								Seems like a hack */
@@ -69,13 +69,15 @@ public class RestaurantGui extends JFrame implements ActionListener {
         infoPanel.setBorder(BorderFactory.createTitledBorder("Information"));
 
         stateCB = new JCheckBox();
-        stateCB.setVisible(false);
+        //stateCB.setVisible(false);
+        stateCB.setText("Hungry?");
         stateCB.addActionListener(this);
+        stateCB.setEnabled(false);
 
         infoPanel.setLayout(new GridLayout(1, 2, 30, 0));
         
-        infoLabel = new JLabel(); 
-        infoLabel.setText("<html><pre><i>Click Add to make customers</i></pre></html>");
+        infoLabel = new JTextField(); 
+        //infoLabel.setText("<html><pre><i>Click Add to make customers</i></pre></html>");
         infoPanel.add(infoLabel);
         infoPanel.add(stateCB);
         add(infoPanel, BorderLayout.NORTH);
@@ -89,12 +91,20 @@ public class RestaurantGui extends JFrame implements ActionListener {
         idLabel.setText("Josh DiGiovanni");
         idPanel.add(idLabel);
         
-        icon = new ImageIcon("C:/Users/Josh/CS201/restaurant_jmdigiov/src/restaurant/gui/icon.png");
-        iconLabel = new JLabel(icon);
-        idPanel.add(iconLabel);
+        //icon = new ImageIcon("C:/Users/Josh/CS201/restaurant_jmdigiov/src/restaurant/gui/icon.png");
+        //iconLabel = new JLabel(icon);
+        //idPanel.add(iconLabel);
         
         add(idPanel, BorderLayout.SOUTH);
     }
+    
+    /**
+     * Returns the text from infoLabel
+     */
+    public String getInfoLabelText() {
+    	return infoLabel.getText();
+    }
+    
     /**
      * updateInfoPanel() takes the given customer (or, for v3, Host) object and
      * changes the information panel to hold that person's info.
@@ -102,19 +112,16 @@ public class RestaurantGui extends JFrame implements ActionListener {
      * @param person customer (or waiter) object
      */
     public void updateInfoPanel(Object person) {
-        stateCB.setVisible(true);
         currentPerson = person;
 
         if (person instanceof CustomerAgent) {
             CustomerAgent customer = (CustomerAgent) person;
-            stateCB.setText("Hungry?");
           //Should checkmark be there? 
             stateCB.setSelected(customer.getGui().isHungry());
           //Is customer hungry? Hack. Should ask customerGui
             stateCB.setEnabled(!customer.getGui().isHungry());
           // Hack. Should ask customerGui
-            infoLabel.setText(
-               "<html><pre>     Name: " + customer.getName() + " </pre></html>");
+            infoLabel.setText(customer.getName());
         }
         infoPanel.validate();
     }
