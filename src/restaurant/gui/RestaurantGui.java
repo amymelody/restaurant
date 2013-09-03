@@ -3,6 +3,7 @@ package restaurant.gui;
 import restaurant.CustomerAgent;
 
 import javax.swing.*;
+
 import java.awt.*;
 import java.awt.event.*;
 /**
@@ -27,6 +28,11 @@ public class RestaurantGui extends JFrame implements ActionListener {
     private JPanel infoPanel;
     private JLabel infoLabel; //part of infoPanel
     private JCheckBox stateCB;//part of infoLabel
+    
+    private JPanel idPanel;
+    private JLabel idLabel;
+    private ImageIcon icon;
+    private JLabel iconLabel;
 
     private Object currentPerson;/* Holds the agent that the info is about.
     								Seems like a hack */
@@ -46,17 +52,16 @@ public class RestaurantGui extends JFrame implements ActionListener {
     	
     	setBounds(50, 50, WINDOWX, WINDOWY);
 
-        setLayout(new BoxLayout((Container) getContentPane(), 
-        		BoxLayout.Y_AXIS));
+        setLayout(new BorderLayout());
 
         Dimension restDim = new Dimension(WINDOWX, (int) (WINDOWY * .6));
         restPanel.setPreferredSize(restDim);
         restPanel.setMinimumSize(restDim);
         restPanel.setMaximumSize(restDim);
-        add(restPanel);
+        add(restPanel, BorderLayout.CENTER);
         
         // Now, setup the info panel
-        Dimension infoDim = new Dimension(WINDOWX, (int) (WINDOWY * .25));
+        Dimension infoDim = new Dimension(WINDOWX, (int) (WINDOWY * .15));
         infoPanel = new JPanel();
         infoPanel.setPreferredSize(infoDim);
         infoPanel.setMinimumSize(infoDim);
@@ -73,7 +78,22 @@ public class RestaurantGui extends JFrame implements ActionListener {
         infoLabel.setText("<html><pre><i>Click Add to make customers</i></pre></html>");
         infoPanel.add(infoLabel);
         infoPanel.add(stateCB);
-        add(infoPanel);
+        add(infoPanel, BorderLayout.NORTH);
+        
+        //Set up the ID panel
+        idPanel = new JPanel();
+        idPanel.setBorder(BorderFactory.createTitledBorder("ID"));
+        idPanel.setLayout(new GridLayout(2,2));
+        
+        idLabel = new JLabel();
+        idLabel.setText("Josh DiGiovanni");
+        idPanel.add(idLabel);
+        
+        icon = new ImageIcon("C:/Users/Josh/CS201/restaurant_jmdigiov/src/restaurant/gui/icon.png");
+        iconLabel = new JLabel(icon);
+        idPanel.add(iconLabel);
+        
+        add(idPanel, BorderLayout.SOUTH);
     }
     /**
      * updateInfoPanel() takes the given customer (or, for v3, Host) object and
