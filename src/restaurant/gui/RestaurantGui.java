@@ -26,6 +26,7 @@ public class RestaurantGui extends JFrame implements ActionListener {
     
     /* infoPanel holds information about the clicked customer, if there is one*/
     private JPanel infoPanel;
+    //private JButton pause;
     private JTextField infoLabel; //part of infoPanel
     private JCheckBox stateCB;//part of infoLabel
     
@@ -77,7 +78,18 @@ public class RestaurantGui extends JFrame implements ActionListener {
         infoPanel.setLayout(new GridLayout(1, 2, 30, 0));
         
         infoLabel = new JTextField(); 
-        //infoLabel.setText("<html><pre><i>Click Add to make customers</i></pre></html>");
+        /*pause = new JButton("Pause");
+        pause.addActionListener(new ActionListener() {
+        	@Override
+        	public void actionPerformed(ActionEvent e) {
+        		if (pause.getText().equals("Pause")) {
+        			pause.setText("Restart");
+        		} else {
+        			pause.setText("Pause");
+        		}
+        	}
+        });*/
+
         infoPanel.add(infoLabel);
         infoPanel.add(stateCB);
         add(infoPanel, BorderLayout.NORTH);

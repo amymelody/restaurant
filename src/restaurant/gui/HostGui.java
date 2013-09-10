@@ -17,8 +17,10 @@ public class HostGui implements Gui {
     static final int HOSTWIDTH = 20;
 	static final int HOSTHEIGHT = 20;
 	
-    public static final int xTable = 200;
+    public static final int xTable = 150;
     public static final int yTable = 250;
+    public static final int tableWidth = 50;
+    public static final int tableHeight = 50;
 
     public HostGui(HostAgent agent) {
         this.agent = agent;
@@ -35,9 +37,13 @@ public class HostGui implements Gui {
         else if (yPos > yDestination)
             yPos--;
 
-        if (xPos == xDestination && yPos == yDestination
-        		& (xDestination == xTable + 20) & (yDestination == yTable - 20)) {
-           agent.msgAtTable();
+        if (xPos == xDestination && yPos == yDestination) {
+        	if ((xDestination >= xTable + 20) && (yDestination == yTable - 20)) {
+        		agent.msgAtTable();
+        	}
+        	if (xDestination == -20 && yDestination == -20) {
+        		agent.msgReadyToSeat();
+        	}
         }
     }
 
@@ -50,8 +56,8 @@ public class HostGui implements Gui {
         return true;
     }
 
-    public void DoBringToTable(CustomerAgent customer) {
-        xDestination = xTable + 20;
+    public void DoBringToTable(CustomerAgent customer, int tableNumber) {
+        xDestination = xTable + (tableNumber-1)*2*tableWidth + 20;
         yDestination = yTable - 20;
     }
 

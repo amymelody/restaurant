@@ -11,7 +11,7 @@ import java.util.ArrayList;
 public class AnimationPanel extends JPanel implements ActionListener {
 
 	//Get rid of the "magic numbers"
-	static final int TABLEX = 200;
+	static final int TABLEX = 150;
 	static final int TABLEY = 250;
 	static final int TABLEWIDTH = 50;
 	static final int TABLEHEIGHT = 50;
@@ -44,9 +44,11 @@ public class AnimationPanel extends JPanel implements ActionListener {
         g2.setColor(getBackground());
         g2.fillRect(0, 0, WINDOWX, WINDOWY );
 
-        //Here is the table
+        //Here are the tables
         g2.setColor(Color.ORANGE);
         g2.fillRect(TABLEX, TABLEY, TABLEWIDTH, TABLEHEIGHT);//200 and 250 need to be table params
+        g2.fillRect(TABLEX+TABLEWIDTH*2, TABLEY, TABLEWIDTH, TABLEHEIGHT);
+        g2.fillRect(TABLEX+TABLEWIDTH*4, TABLEY, TABLEWIDTH, TABLEHEIGHT);
 
 
         for(Gui gui : guis) {

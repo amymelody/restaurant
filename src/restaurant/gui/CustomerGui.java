@@ -23,8 +23,10 @@ public class CustomerGui implements Gui{
 	static final int CUSTWIDTH = 20;
 	static final int CUSTHEIGHT = 20;
 	
-	public static final int xTable = 200;
+	public static final int xTable = 150;
 	public static final int yTable = 250;
+	public static final int tableWidth = 50;
+	public static final int tableHeight = 50;
 
 	public CustomerGui(CustomerAgent c, RestaurantGui gui){ //HostAgent m) {
 		agent = c;
@@ -81,7 +83,7 @@ public class CustomerGui implements Gui{
 	}
 
 	public void DoGoToSeat(int seatnumber) {//later you will map seatnumber to table coordinates.
-		xDestination = xTable;
+		xDestination = xTable + (seatnumber-1)*2*tableWidth;
 		yDestination = yTable;
 		command = Command.GoToSeat;
 	}

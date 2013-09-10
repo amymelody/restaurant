@@ -15,6 +15,8 @@ public class CustomerAgent extends Agent {
 	private int hungerLevel = 5;        // determines length of meal
 	Timer timer = new Timer();
 	private CustomerGui customerGui;
+	
+	public int tableNumber; //Number of the table at which the customer is being seated
 
 	// agent correspondents
 	private HostAgent host;
@@ -57,7 +59,8 @@ public class CustomerAgent extends Agent {
 		stateChanged();
 	}
 
-	public void msgSitAtTable() {
+	public void msgSitAtTable(int tableNumber) {
+		this.tableNumber = tableNumber;
 		print("Received msgSitAtTable");
 		event = AgentEvent.followHost;
 		stateChanged();
@@ -118,7 +121,7 @@ public class CustomerAgent extends Agent {
 
 	private void SitDown() {
 		Do("Being seated. Going to table");
-		customerGui.DoGoToSeat(1);//hack; only one table
+		customerGui.DoGoToSeat(tableNumber);//hack; only one table
 	}
 
 	private void EatFood() {

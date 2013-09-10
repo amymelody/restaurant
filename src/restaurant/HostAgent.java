@@ -14,7 +14,7 @@ import java.util.concurrent.Semaphore;
 //the HostAgent. A Host is the manager of a restaurant who sees that all
 //is proceeded as he wishes.
 public class HostAgent extends Agent {
-	static final int NTABLES = 1;//a global for the number of tables.
+	static final int NTABLES = 3;//a global for the number of tables.
 	//Notice that we implement waitingCustomers using ArrayList, but type it
 	//with List semantics.
 	public List<CustomerAgent> waitingCustomers
@@ -25,6 +25,7 @@ public class HostAgent extends Agent {
 
 	private String name;
 	private Semaphore atTable = new Semaphore(0,true);
+	private boolean readyToSeat = true;
 
 	public HostGui hostGui = null;
 
@@ -70,6 +71,11 @@ public class HostAgent extends Agent {
 			}
 		}
 	}
+	
+	public void msgReadyToSeat() {
+		readyToSeat = true;
+		stateChanged();
+	}
 
 	public void msgAtTable() {//from animation
 		//print("msgAtTable() called");
@@ -86,11 +92,14 @@ public class HostAgent extends Agent {
             so that table is unoccupied and customer is waiting.
             If so seat him at the table.
 		 */
-		for (Table table : tables) {
-			if (!table.isOccupied()) {
-				if (!waitingCustomers.isEmpty()) {
-					seatCustomer(waitingCustomers.get(0), table);//the action
-					return true;//return true to the abstract agent to reinvoke the scheduler.
+		if (readyToSeat) {
+			for (Table table : tables) {
+				if (!table.isOccupied()) {
+					if (!waitingCustomers.isEmpty()) {
+						seatCustomer(waitingCustomers.get(0), table);//the action
+						readyToSeat = false;
+						return true;//return true to the abstract agent to reinvoke the scheduler.
+					}
 				}
 			}
 		}
@@ -104,7 +113,7 @@ public class HostAgent extends Agent {
 	// Actions
 
 	private void seatCustomer(CustomerAgent customer, Table table) {
-		customer.msgSitAtTable();
+		customer.msgSitAtTable(table.getTableNumber());
 		DoSeatCustomer(customer, table);
 		try {
 			atTable.acquire();
@@ -122,7 +131,7 @@ public class HostAgent extends Agent {
 		//Notice how we print "customer" directly. It's toString method will do it.
 		//Same with "table"
 		print("Seating " + customer + " at " + table);
-		hostGui.DoBringToTable(customer); 
+		hostGui.DoBringToTable(customer, table.getTableNumber()); 
 
 	}
 
@@ -162,6 +171,10 @@ public class HostAgent extends Agent {
 
 		public String toString() {
 			return "table " + tableNumber;
+		}
+		
+		public int getTableNumber() {
+			return tableNumber;
 		}
 	}
 }
