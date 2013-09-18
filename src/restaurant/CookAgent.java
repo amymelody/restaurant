@@ -3,7 +3,7 @@ package restaurant;
 import agent.Agent;
 
 import java.util.*;
-import java.util.concurrent.Semaphore;
+
 
 /**
  * Restaurant Cook Agent
@@ -16,6 +16,11 @@ public class CookAgent extends Agent {
 	private String name;
 	private Timer timer;
 	
+	Food steak = new Food("steak", 50);
+	Food chicken = new Food("chicken", 30);
+	Food salad = new Food("salad", 10);
+	Food pizza = new Food("pizza", 40);
+	
 	Map<String, Food> foods;
 	
 	public enum OrderState
@@ -23,8 +28,12 @@ public class CookAgent extends Agent {
 
 	public CookAgent(String name) {
 		super();
-
 		this.name = name;
+		
+		foods.put("steak", steak);
+		foods.put("chicken", chicken);
+		foods.put("salad", salad);
+		foods.put("pizza", pizza);
 	}
 	
 
@@ -40,10 +49,11 @@ public class CookAgent extends Agent {
 	
 	public void msgHereIsOrder(WaiterAgent waiter, String choice, int table) {
 		orders.add(new Order(waiter, choice, table, OrderState.Pending));
+		stateChanged();
 	}
 	
 	public void msgFoodDone(Order o) {
-		o.setState(OrderState.Done);
+		
 	}
 
 	/**
@@ -71,11 +81,18 @@ public class CookAgent extends Agent {
 
 	private void cookIt(Order o) {
 		o.setState(OrderState.Cooking);
-		//timer.start(run(FoodDone(o)), foods.get(o.choice.getCookingTime()));
+		timer.schedule(new CookingTimerTask(o) {
+			@Override
+			public void run() {
+				order.setState(OrderState.Done);
+				stateChanged();
+			}
+		},
+		foods.get(o.choice).getCookingTime() * 1000);
 	}
 	
 	private void plateIt(Order o) {
-		o.getWaiter().OrderDone(o.getChoice(), o.getTable());
+		o.getWaiter().msgOrderDone(o.getChoice(), o.getTable());
 		o.setState(OrderState.Finished);
 	}
 	
@@ -135,6 +152,18 @@ public class CookAgent extends Agent {
 		
 		int getCookingTime() {
 			return cookingTime;
+		}
+	}
+	
+	private class CookingTimerTask extends TimerTask {
+		Order order;
+		
+		CookingTimerTask(Order o) {
+			order = o;
+		}
+		
+		public void run() {
+			order = order;
 		}
 	}
 }

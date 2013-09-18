@@ -22,6 +22,7 @@ public class WaiterAgent extends Agent {
 	private String name;
 	private Semaphore atTable = new Semaphore(0,true);
 	private boolean readyToSeat = true;
+	private Menu menu;
 	
 	public enum CustomerState
 	{DoingNothing, Waiting, Seated, AskedToOrder, Asked, Ordered, WaitingForFood, ReadyToEat, Eating, Leaving};
@@ -30,8 +31,13 @@ public class WaiterAgent extends Agent {
 
 	public WaiterAgent(String name) {
 		super();
-
 		this.name = name;
+		
+		menu = new Menu();
+		menu.addItem("steak");
+		menu.addItem("chicken");
+		menu.addItem("salad");
+		menu.addItem("pizza");
 	}
 	
 	/**
@@ -57,12 +63,14 @@ public class WaiterAgent extends Agent {
 	
 	public void msgPleaseSeatCustomer(CustomerAgent cust, int tableNumber) {
 		customers.add(new MyCustomer(cust, tableNumber, CustomerState.Waiting));
+		stateChanged();
 	}
 	
-	/*public void msgReadyToOrder(CustomerAgent cust) {
+	public void msgReadyToOrder(CustomerAgent cust) {
 		for (MyCustomer mc : customers) {
 			if (mc.getCust() == cust) {
 				mc.setState(CustomerState.AskedToOrder);
+				stateChanged();
 			}
 		}
 	}
@@ -72,6 +80,7 @@ public class WaiterAgent extends Agent {
 			if (mc.getCust() == cust) {
 				mc.setState(CustomerState.Ordered);
 				mc.setChoice(choice);
+				stateChanged();
 			}
 		}
 	}
@@ -80,9 +89,10 @@ public class WaiterAgent extends Agent {
 		for (MyCustomer mc : customers) {
 			if (mc.getTable() == tableNum && mc.getChoice() == choice) {
 				mc.setState(CustomerState.ReadyToEat);
+				stateChanged();
 			}
 		}
-	}*/
+	}
 
 	public void msgDoneEating(CustomerAgent cust) {
 		for (MyCustomer mc : customers) {
@@ -112,9 +122,21 @@ public class WaiterAgent extends Agent {
 		if (readyToSeat) {
 			for (MyCustomer mc : customers) {
 				if (mc.getState() == CustomerState.Waiting) {
-					seatCustomer(mc);//the action
+					seatCustomer(mc);
 					readyToSeat = false;
-					return true;//return true to the abstract agent to reinvoke the scheduler.
+					return true;
+				}
+				if (mc.getState() == CustomerState.AskedToOrder) {
+					takeOrder(mc);
+					return true;
+				}
+				if (mc.getState() == CustomerState.Ordered) {
+					giveOrderToCook(mc);
+					return true;
+				}
+				if (mc.getState() == CustomerState.ReadyToEat) {
+					deliverFood(mc);
+					return true;
 				}
 				if (mc.getState() == CustomerState.Leaving){
 					notifyHost(mc);
@@ -132,7 +154,7 @@ public class WaiterAgent extends Agent {
 	// Actions
 
 	private void seatCustomer(MyCustomer mc) {
-		mc.getCust().msgFollowMe(this, mc.getTable());
+		mc.getCust().msgFollowMe(this, menu, mc.getTable());
 		DoSeatCustomer(mc);
 		try {
 			atTable.acquire();
@@ -144,23 +166,23 @@ public class WaiterAgent extends Agent {
 		waiterGui.DoLeaveCustomer();
 	}
 	
-	/*private void takeOrder(MyCustomer mc) {
+	private void takeOrder(MyCustomer mc) {
 		waiterGui.DoGoToTable(mc.getTable());
-		mc.getCust().WhatWouldYouLike();
+		mc.getCust().msgWhatWouldYouLike();
 		mc.setState(CustomerState.Asked);
 	}
 	
 	private void giveOrderToCook(MyCustomer mc) {
 		mc.setState(CustomerState.WaitingForFood);
 		waiterGui.DoGoToCook();
-		cook.HereIsOrder(this, mc.getChoice(), mc.getTable());
+		cook.msgHereIsOrder(this, mc.getChoice(), mc.getTable());
 	}
 	
 	private void deliverFood(MyCustomer mc) {
 		waiterGui.DoGoToTable(mc.getTable());
-		mc.getCust().HereIsFood(mc.getChoice());
+		mc.getCust().msgHereIsFood(mc.getChoice());
 		mc.setState(CustomerState.Eating);
-	}*/
+	}
 	
 	private void notifyHost(MyCustomer mc) {
 		host.msgTableAvailable(mc.getTable());
