@@ -1,7 +1,6 @@
 package restaurant;
 
 import agent.Agent;
-import restaurant.gui.HostGui;
 
 import java.util.*;
 import java.util.concurrent.Semaphore;
@@ -17,17 +16,14 @@ public class HostAgent extends Agent {
 	static final int NTABLES = 3;//a global for the number of tables.
 	//Notice that we implement waitingCustomers using ArrayList, but type it
 	//with List semantics.
-	public List<CustomerAgent> waitingCustomers
+	public List<CustomerAgent> customers
 	= new ArrayList<CustomerAgent>();
+	public List<WaiterAgent> waiters = new ArrayList<WaiterAgent>();
 	public Collection<Table> tables;
 	//note that tables is typed with Collection semantics.
 	//Later we will see how it is implemented
 
 	private String name;
-	private Semaphore atTable = new Semaphore(0,true);
-	private boolean readyToSeat = true;
-
-	public HostGui hostGui = null;
 
 	public HostAgent(String name) {
 		super();
@@ -39,6 +35,10 @@ public class HostAgent extends Agent {
 			tables.add(new Table(ix));//how you add to a collections
 		}
 	}
+	
+	public void addWaiter(WaiterAgent waiter) {
+		waiters.add(waiter);
+	}
 
 	public String getMaitreDName() {
 		return name;
@@ -48,8 +48,8 @@ public class HostAgent extends Agent {
 		return name;
 	}
 
-	public List getWaitingCustomers() {
-		return waitingCustomers;
+	public List getCustomers() {
+		return customers;
 	}
 
 	public Collection getTables() {
@@ -58,29 +58,17 @@ public class HostAgent extends Agent {
 	// Messages
 
 	public void msgIWantFood(CustomerAgent cust) {
-		waitingCustomers.add(cust);
+		customers.add(cust);
 		stateChanged();
 	}
 
-	public void msgLeavingTable(CustomerAgent cust) {
+	public void msgTableAvailable(int tableNum) {
 		for (Table table : tables) {
-			if (table.getOccupant() == cust) {
-				print(cust + " leaving " + table);
-				table.setUnoccupied();
+			if (table.getTableNumber() == tableNum) {
+				table.setOccupied(false);
 				stateChanged();
 			}
 		}
-	}
-	
-	public void msgReadyToSeat() {
-		readyToSeat = true;
-		stateChanged();
-	}
-
-	public void msgAtTable() {//from animation
-		//print("msgAtTable() called");
-		atTable.release();// = true;
-		stateChanged();
 	}
 
 	/**
@@ -92,14 +80,11 @@ public class HostAgent extends Agent {
             so that table is unoccupied and customer is waiting.
             If so seat him at the table.
 		 */
-		if (readyToSeat) {
-			for (Table table : tables) {
-				if (!table.isOccupied()) {
-					if (!waitingCustomers.isEmpty()) {
-						seatCustomer(waitingCustomers.get(0), table);//the action
-						readyToSeat = false;
-						return true;//return true to the abstract agent to reinvoke the scheduler.
-					}
+		for (Table table : tables) {
+			if (!table.isOccupied()) {
+				if (!customers.isEmpty()) {
+					callWaiter(waiters.get(0), customers.get(0), table);//the action
+					return true;//return true to the abstract agent to reinvoke the scheduler.
 				}
 			}
 		}
@@ -112,61 +97,32 @@ public class HostAgent extends Agent {
 
 	// Actions
 
-	private void seatCustomer(CustomerAgent customer, Table table) {
-		customer.msgSitAtTable(table.getTableNumber());
-		DoSeatCustomer(customer, table);
-		try {
-			atTable.acquire();
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+	private void callWaiter(WaiterAgent waiter, CustomerAgent customer, Table table) {
+		waiter.msgPleaseSeatCustomer(customer, table.getTableNumber());
+		for (Table t : tables) {
+			if (t == table) {
+				t.setOccupied(true);
+			}
 		}
-		table.setOccupant(customer);
-		waitingCustomers.remove(customer);
-		hostGui.DoLeaveCustomer();
-	}
-
-	// The animation DoXYZ() routines
-	private void DoSeatCustomer(CustomerAgent customer, Table table) {
-		//Notice how we print "customer" directly. It's toString method will do it.
-		//Same with "table"
-		print("Seating " + customer + " at " + table);
-		hostGui.DoBringToTable(customer, table.getTableNumber()); 
-
+		customers.remove(customer);
 	}
 
 	//utilities
 
-	public void setGui(HostGui gui) {
-		hostGui = gui;
-	}
-
-	public HostGui getGui() {
-		return hostGui;
-	}
-
 	private class Table {
-		CustomerAgent occupiedBy;
+		boolean occupied;
 		int tableNumber;
 
 		Table(int tableNumber) {
 			this.tableNumber = tableNumber;
 		}
 
-		void setOccupant(CustomerAgent cust) {
-			occupiedBy = cust;
-		}
-
-		void setUnoccupied() {
-			occupiedBy = null;
-		}
-
-		CustomerAgent getOccupant() {
-			return occupiedBy;
+		void setOccupied(boolean occupied) {
+			this.occupied = occupied;
 		}
 
 		boolean isOccupied() {
-			return occupiedBy != null;
+			return occupied;
 		}
 
 		public String toString() {

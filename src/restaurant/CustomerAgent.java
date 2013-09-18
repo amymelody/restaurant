@@ -12,22 +12,26 @@ import java.util.TimerTask;
  */
 public class CustomerAgent extends Agent {
 	private String name;
-	private int hungerLevel = 5;        // determines length of meal
-	Timer timer = new Timer();
+	private int hungerLevel = 10;        // determines length of meal
+	Timer eatingTimer = new Timer();
 	private CustomerGui customerGui;
+	//private Menu menu;
+	//private String choice;
+	//Timer choiceTimer = new Timer();
 	
 	public int tableNumber; //Number of the table at which the customer is being seated
 
 	// agent correspondents
 	private HostAgent host;
+	private WaiterAgent waiter;
 
 	//    private boolean isHungry = false; //hack for gui
 	public enum AgentState
-	{DoingNothing, WaitingInRestaurant, BeingSeated, Seated, Eating, DoneEating, Leaving};
+	{DoingNothing, WaitingInRestaurant, BeingSeated, Seated, ReadyToOrder, Ordered, Eating, Leaving};
 	private AgentState state = AgentState.DoingNothing;//The start state
 
 	public enum AgentEvent 
-	{none, gotHungry, followHost, seated, doneEating, doneLeaving};
+	{none, gotHungry, followWaiter, seated, madeChoice, order, receivedFood, doneEating, doneLeaving};
 	AgentEvent event = AgentEvent.none;
 
 	/**
@@ -59,10 +63,12 @@ public class CustomerAgent extends Agent {
 		stateChanged();
 	}
 
-	public void msgSitAtTable(int tableNumber) {
+	public void msgFollowMe(WaiterAgent w, int tableNumber) { //Menu will be added later
+		waiter = w;
+		//menu = m;
 		this.tableNumber = tableNumber;
 		print("Received msgSitAtTable");
-		event = AgentEvent.followHost;
+		event = AgentEvent.followWaiter;
 		stateChanged();
 	}
 
@@ -71,6 +77,30 @@ public class CustomerAgent extends Agent {
 		event = AgentEvent.seated;
 		stateChanged();
 	}
+	
+	/*public void msgMadeChoice() {
+		event = AgentEvent.madeChoice;
+		stateChanged();
+	}
+	
+	public void msgWhatWouldYouLike() {
+		event = AgentEvent.order;
+		stateChanged();
+	}
+	
+	public void msgHereIsFood(String choice) {
+		if (this.choice == choice) {
+			event = AgentEvent.receivedFood;
+			stateChanged();
+		}
+	}
+	
+	public void msgFinishedEating() {
+		System.out.println("Done eating " + choice);
+		event = AgentEvent.doneEating;
+		stateChanged();
+	}*/
+	
 	public void msgAnimationFinishedLeaveRestaurant() {
 		//from animation
 		event = AgentEvent.doneLeaving;
@@ -88,7 +118,7 @@ public class CustomerAgent extends Agent {
 			goToRestaurant();
 			return true;
 		}
-		if (state == AgentState.WaitingInRestaurant && event == AgentEvent.followHost ){
+		if (state == AgentState.WaitingInRestaurant && event == AgentEvent.followWaiter ){
 			state = AgentState.BeingSeated;
 			SitDown();
 			return true;
@@ -123,6 +153,15 @@ public class CustomerAgent extends Agent {
 		Do("Being seated. Going to table");
 		customerGui.DoGoToSeat(tableNumber);//hack; only one table
 	}
+	
+	/*private void callWaiter() {
+		waiter.ReadyToOrder();
+	}
+	
+	private void giveOrder() {
+		choice = MakeChoice(); //stub; randomly makes choice
+		waiter.HereIsChoice(choice);
+	}*/
 
 	private void EatFood() {
 		Do("Eating Food");
@@ -134,7 +173,7 @@ public class CustomerAgent extends Agent {
 		//Since Java does not all us to pass functions, only objects.
 		//So, we use Java syntactic mechanism to create an
 		//anonymous inner class that has the public method run() in it.
-		timer.schedule(new TimerTask() {
+		eatingTimer.schedule(new TimerTask() {
 			Object cookie = 1;
 			public void run() {
 				print("Done eating, cookie=" + cookie);
@@ -143,12 +182,12 @@ public class CustomerAgent extends Agent {
 				stateChanged();
 			}
 		},
-		5000);//getHungerLevel() * 1000);//how long to wait before running task
+		getHungerLevel() * 1000);//how long to wait before running task
 	}
 
 	private void leaveTable() {
 		Do("Leaving.");
-		host.msgLeavingTable(this);
+		waiter.msgDoneEating(this);
 		customerGui.DoExitRestaurant();
 	}
 

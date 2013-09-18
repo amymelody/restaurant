@@ -2,27 +2,27 @@ package restaurant.gui;
 
 
 import restaurant.CustomerAgent;
-import restaurant.HostAgent;
+import restaurant.WaiterAgent;
 
 import java.awt.*;
 
-public class HostGui implements Gui {
+public class WaiterGui implements Gui {
 
-    private HostAgent agent = null;
+    private WaiterAgent agent = null;
 
     private int xPos = -20, yPos = -20;//default waiter position
     private int xDestination = -20, yDestination = -20;//default start position
 
     //Get rid of the "magic numbers"
-    static final int HOSTWIDTH = 20;
-	static final int HOSTHEIGHT = 20;
+    static final int WAITERWIDTH = 20;
+	static final int WAITERHEIGHT = 20;
 	
     public static final int xTable = 150;
     public static final int yTable = 250;
     public static final int tableWidth = 50;
     public static final int tableHeight = 50;
 
-    public HostGui(HostAgent agent) {
+    public WaiterGui(WaiterAgent agent) {
         this.agent = agent;
     }
 
@@ -49,7 +49,7 @@ public class HostGui implements Gui {
 
     public void draw(Graphics2D g) {
         g.setColor(Color.MAGENTA);
-        g.fillRect(xPos, yPos, HOSTWIDTH, HOSTHEIGHT);
+        g.fillRect(xPos, yPos, WAITERWIDTH, WAITERHEIGHT);
     }
 
     public boolean isPresent() {
