@@ -12,7 +12,7 @@ import java.util.TimerTask;
  */
 public class CustomerAgent extends Agent {
 	private String name;
-	private int hungerLevel = 5;        // determines length of meal
+	private int hungerLevel = 3;        // determines length of meal
 	Timer eatingTimer = new Timer();
 	private CustomerGui customerGui;
 	private Menu menu;
@@ -90,12 +90,6 @@ public class CustomerAgent extends Agent {
 		}
 	}
 	
-	public void msgFinishedEating() {
-		System.out.println("Done eating " + choice);
-		event = AgentEvent.doneEating;
-		stateChanged();
-	}
-	
 	public void msgAnimationFinishedLeaveRestaurant() {
 		//from animation
 		event = AgentEvent.doneLeaving;
@@ -170,11 +164,13 @@ public class CustomerAgent extends Agent {
 	}
 	
 	private void callWaiter() {
+		Do("I'm ready to order.");
 		waiter.msgReadyToOrder(this);
 	}
 	
 	private void giveOrder() {
 		choice = menu.randomItem();
+		print("I would like to order " + choice);
 		waiter.msgHereIsChoice(this, choice);
 	}
 
@@ -189,9 +185,9 @@ public class CustomerAgent extends Agent {
 		//So, we use Java syntactic mechanism to create an
 		//anonymous inner class that has the public method run() in it.
 		eatingTimer.schedule(new TimerTask() {
-			Object cookie = 1;
+			//Object cookie = 1;
 			public void run() {
-				print("Done eating, cookie=" + cookie);
+				print("Done eating " + choice);
 				event = AgentEvent.doneEating;
 				//isHungry = false;
 				stateChanged();

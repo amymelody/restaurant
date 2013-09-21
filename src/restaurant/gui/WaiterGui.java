@@ -16,6 +16,8 @@ public class WaiterGui implements Gui {
     //Get rid of the "magic numbers"
     static final int WAITERWIDTH = 20;
 	static final int WAITERHEIGHT = 20;
+	static final int COOKX = 300;
+	static final int COOKY = 10;
 	
     public static final int xTable = 150;
     public static final int yTable = 250;
@@ -42,7 +44,10 @@ public class WaiterGui implements Gui {
         		agent.msgAtTable();
         	}
         	if (xDestination == -20 && yDestination == -20) {
-        		agent.msgReadyToSeat();
+        		agent.msgAtHome();
+        	}
+        	if (xDestination == COOKX && yDestination == COOKY) {
+        		agent.msgAtCook();
         	}
         }
     }
@@ -56,12 +61,17 @@ public class WaiterGui implements Gui {
         return true;
     }
 
-    public void DoBringToTable(CustomerAgent customer, int tableNumber) {
+    public void DoGoToTable(int tableNumber) {
         xDestination = xTable + (tableNumber-1)*2*tableWidth + 20;
         yDestination = yTable - 20;
     }
+    
+    public void DoGoToCook() {
+        xDestination = COOKX;
+        yDestination = COOKY;
+    }
 
-    public void DoLeaveCustomer() {
+    public void DoReturnHome() {
         xDestination = -20;
         yDestination = -20;
     }

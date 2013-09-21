@@ -14,14 +14,14 @@ public class CookAgent extends Agent {
 	= new ArrayList<Order>();
 
 	private String name;
-	private Timer timer;
+	private Timer timer = new Timer();
 	
-	Food steak = new Food("steak", 50);
-	Food chicken = new Food("chicken", 30);
+	Food steak = new Food("steak", 30);
+	Food chicken = new Food("chicken", 20);
 	Food salad = new Food("salad", 10);
-	Food pizza = new Food("pizza", 40);
+	Food pizza = new Food("pizza", 20);
 	
-	Map<String, Food> foods;
+	Map<String, Food> foods = new HashMap<String, Food>();
 	
 	public enum OrderState
 	{Pending, Cooking, Done, Finished};
@@ -65,6 +65,8 @@ public class CookAgent extends Agent {
 				plateIt(order);
 				return true;//return true to the abstract agent to reinvoke the scheduler.
 			}
+		}
+		for (Order order : orders) {
 			if (order.getState() == OrderState.Pending) {
 				cookIt(order);
 				return true;//return true to the abstract agent to reinvoke the scheduler.

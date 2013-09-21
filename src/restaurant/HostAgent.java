@@ -98,6 +98,7 @@ public class HostAgent extends Agent {
 	// Actions
 
 	private void callWaiter(WaiterAgent waiter, CustomerAgent customer, Table table) {
+		print(waiter + ", please bring " + customer + " to " + table);
 		waiter.msgPleaseSeatCustomer(customer, table.getTableNumber());
 		for (Table t : tables) {
 			if (t == table) {
