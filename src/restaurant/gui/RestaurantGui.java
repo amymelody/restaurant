@@ -14,8 +14,10 @@ public class RestaurantGui extends JFrame implements ActionListener {
     /* The GUI has two frames, the control frame (in variable gui) 
      * and the animation frame, (in variable animationFrame within gui)
      */
-	JFrame animationFrame = new JFrame("Restaurant Animation");
+	//JFrame animationFrame = new JFrame("Restaurant Animation");
 	AnimationPanel animationPanel = new AnimationPanel();
+	
+	private JPanel controlPanel = new JPanel();
 	
     /* restPanel holds 2 panels
      * 1) the staff listing, menu, and lists of current customers all constructed
@@ -26,7 +28,7 @@ public class RestaurantGui extends JFrame implements ActionListener {
     
     /* infoPanel holds information about the clicked customer, if there is one*/
     private JPanel infoPanel;
-    //private JButton pause;
+    private JButton pause;
     private JTextField infoLabel; //part of infoPanel
     private JCheckBox stateCB;//part of infoLabel
     
@@ -44,22 +46,24 @@ public class RestaurantGui extends JFrame implements ActionListener {
      */
     public RestaurantGui() {
         int WINDOWX = 450;
-        int WINDOWY = 350;
+        int WINDOWY = 400;
 
-        animationFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        /*animationFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         animationFrame.setBounds(100+WINDOWX, 50 , WINDOWX+100, WINDOWY+100);
         animationFrame.setVisible(true);
-    	animationFrame.add(animationPanel); 
+    	animationFrame.add(animationPanel);*/
     	
-    	setBounds(50, 50, WINDOWX, WINDOWY);
+    	setBounds(50, 50, WINDOWX*2, WINDOWY);
 
-        setLayout(new BorderLayout());
+    	setLayout(new GridLayout(1, 2, 10, 0));
+        controlPanel.setLayout(new BorderLayout());
+        controlPanel.setSize(WINDOWX,WINDOWY);
 
         Dimension restDim = new Dimension(WINDOWX, (int) (WINDOWY * .6));
         restPanel.setPreferredSize(restDim);
         restPanel.setMinimumSize(restDim);
         restPanel.setMaximumSize(restDim);
-        add(restPanel, BorderLayout.CENTER);
+        controlPanel.add(restPanel, BorderLayout.CENTER);
         
         // Now, setup the info panel
         Dimension infoDim = new Dimension(WINDOWX, (int) (WINDOWY * .15));
@@ -75,24 +79,27 @@ public class RestaurantGui extends JFrame implements ActionListener {
         stateCB.addActionListener(this);
         stateCB.setEnabled(false);
 
-        infoPanel.setLayout(new GridLayout(1, 2, 30, 0));
+        infoPanel.setLayout(new GridLayout(1, 3, 30, 0));
         
         infoLabel = new JTextField(); 
-        /*pause = new JButton("Pause");
-        pause.addActionListener(new ActionListener() {
+        pause = new JButton("Pause");
+        /*pause.addActionListener(new ActionListener() {
         	@Override
         	public void actionPerformed(ActionEvent e) {
         		if (pause.getText().equals("Pause")) {
-        			pause.setText("Restart");
+        			pause.setText("Resume");
+        			animationPanel.pauseAnimation();
         		} else {
         			pause.setText("Pause");
+        			animationPanel.resumeAnimation();
         		}
         	}
         });*/
 
+        infoPanel.add(pause);
         infoPanel.add(infoLabel);
         infoPanel.add(stateCB);
-        add(infoPanel, BorderLayout.NORTH);
+        controlPanel.add(infoPanel, BorderLayout.NORTH);
         
         //Set up the ID panel
         idPanel = new JPanel();
@@ -107,7 +114,10 @@ public class RestaurantGui extends JFrame implements ActionListener {
         //iconLabel = new JLabel(icon);
         //idPanel.add(iconLabel);
         
-        add(idPanel, BorderLayout.SOUTH);
+        controlPanel.add(idPanel, BorderLayout.SOUTH);
+        
+        add(controlPanel);
+        add(animationPanel);
     }
     
     /**
