@@ -25,6 +25,7 @@ public class WaiterAgent extends Agent {
 	private Semaphore atCook = new Semaphore(0,true);
 	private boolean returningHome = false;
 	private Menu menu;
+	private int customerCount = 0;
 	
 	public enum CustomerState
 	{DoingNothing, Waiting, Seated, AskedToOrder, Asked, Ordered, WaitingForFood, OrderDone, ReadyToEat, Eating, Leaving};
@@ -63,6 +64,14 @@ public class WaiterAgent extends Agent {
 	
 	public String toString() {
 		return getName();
+	}
+	
+	public int getCustomerCount() {
+		return customerCount;
+	}
+	
+	public void addCustomer() {
+		customerCount++;
 	}
 	
 	// Messages

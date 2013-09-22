@@ -83,7 +83,16 @@ public class HostAgent extends Agent {
 		for (Table table : tables) {
 			if (!table.isOccupied()) {
 				if (!customers.isEmpty()) {
-					callWaiter(waiters.get(0), customers.get(0), table);//the action
+					int index = 0;
+					if (waiters.size() > 1) {
+						for (int i = waiters.size()-2; i>=0; i--) {
+							if (waiters.get(i).getCustomerCount() > waiters.get(i+1).getCustomerCount()) {
+								index = i+1;
+							}
+						}
+					}
+					callWaiter(waiters.get(index), customers.get(0), table);//the action
+					waiters.get(index).addCustomer();
 					return true;//return true to the abstract agent to reinvoke the scheduler.
 				}
 			}

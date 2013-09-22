@@ -31,16 +31,40 @@ public class RestaurantPanel extends JPanel {
     public RestaurantPanel(RestaurantGui gui) {
         this.gui = gui;
 
-        WaiterAgent w = new WaiterAgent("Josh");	
-		WaiterGui g = new WaiterGui(w);
+        //for (int i=0; i<3; i++) {
+        	WaiterAgent w = new WaiterAgent("Josh");
+     		WaiterGui g = new WaiterGui(w);
 
-		gui.animationPanel.addGui(g);
-		w.setHost(host);
-		w.setCook(cook);
-		w.setGui(g);
-		waiters.add(w);
-		w.startThread();
-		host.addWaiter(w);
+     		gui.animationPanel.addGui(g);
+     		w.setHost(host);
+     		w.setCook(cook);
+     		w.setGui(g);
+     		waiters.add(w);
+     		w.startThread();
+     		host.addWaiter(w);
+        //}
+     		
+ 		WaiterAgent w2 = new WaiterAgent("JD");
+ 		WaiterGui g2 = new WaiterGui(w2);
+
+ 		gui.animationPanel.addGui(g2);
+ 		w2.setHost(host);
+ 		w2.setCook(cook);
+ 		w2.setGui(g2);
+ 		waiters.add(w2);
+ 		w2.startThread();
+ 		host.addWaiter(w2);
+ 		
+ 		WaiterAgent w3 = new WaiterAgent("AJ");
+ 		WaiterGui g3 = new WaiterGui(w3);
+
+ 		gui.animationPanel.addGui(g3);
+ 		w3.setHost(host);
+ 		w3.setCook(cook);
+ 		w3.setGui(g3);
+ 		waiters.add(w3);
+ 		w3.startThread();
+ 		host.addWaiter(w3);
         
         host.startThread();
         cook.startThread();
