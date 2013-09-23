@@ -85,6 +85,28 @@ public class RestaurantPanel extends JPanel {
     public String getInfoText() {
     	return gui.getInfoLabelText();
     }
+    
+    public void pauseAgents() {
+    	host.pause();
+    	cook.pause();
+    	for (WaiterAgent w : waiters) {
+    		w.pause();
+    	}
+    	for (CustomerAgent c : customers) {
+    		c.pause();
+    	}
+    }
+    
+    public void resumeAgents() {
+    	host.resume();
+    	cook.resume();
+    	for (WaiterAgent w : waiters) {
+    		w.resume();
+    	}
+    	for (CustomerAgent c : customers) {
+    		c.resume();
+    	}
+    }
 
     /**
      * Sets up the restaurant label that includes the menu,

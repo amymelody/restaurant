@@ -83,18 +83,20 @@ public class RestaurantGui extends JFrame implements ActionListener {
         
         infoLabel = new JTextField(); 
         pause = new JButton("Pause");
-        /*pause.addActionListener(new ActionListener() {
+        pause.addActionListener(new ActionListener() {
         	@Override
         	public void actionPerformed(ActionEvent e) {
         		if (pause.getText().equals("Pause")) {
         			pause.setText("Resume");
+        			restPanel.pauseAgents();
         			animationPanel.pauseAnimation();
         		} else {
         			pause.setText("Pause");
+        			restPanel.resumeAgents();
         			animationPanel.resumeAnimation();
         		}
         	}
-        });*/
+        });
 
         infoPanel.add(pause);
         infoPanel.add(infoLabel);

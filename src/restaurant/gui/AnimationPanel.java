@@ -20,6 +20,7 @@ public class AnimationPanel extends JPanel implements ActionListener {
     private final int WINDOWY = 350;
     private Image bufferImage;
     private Dimension bufferSize;
+    private Timer timer;
 
     private List<Gui> guis = new ArrayList<Gui>();
 
@@ -29,12 +30,20 @@ public class AnimationPanel extends JPanel implements ActionListener {
         
         bufferSize = this.getSize();
  
-    	Timer timer = new Timer(20, this );
+    	timer = new Timer(20, this );
     	timer.start();
     }
 
 	public void actionPerformed(ActionEvent e) {
 		repaint();  //Will have paintComponent called
+	}
+	
+	public void pauseAnimation() {
+		timer.stop();
+	}
+	
+	public void resumeAnimation() {
+		timer.start();
 	}
 
     public void paintComponent(Graphics g) {
