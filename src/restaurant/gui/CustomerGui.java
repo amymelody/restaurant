@@ -4,6 +4,8 @@ import restaurant.CustomerAgent;
 import restaurant.HostAgent;
 
 import java.awt.*;
+import java.util.HashMap;
+import java.util.Map;
 
 public class CustomerGui implements Gui{
 
@@ -11,7 +13,6 @@ public class CustomerGui implements Gui{
 	private boolean isPresent = false;
 	private boolean isHungry = false;
 
-	//private HostAgent host;
 	RestaurantGui gui;
 
 	private int xPos, yPos;
@@ -27,15 +28,20 @@ public class CustomerGui implements Gui{
 	public static final int yTable = 250;
 	public static final int tableWidth = 50;
 	public static final int tableHeight = 50;
+	
+	Map<Integer, Point> tablePositions = new HashMap<Integer, Point>();
 
-	public CustomerGui(CustomerAgent c, RestaurantGui gui){ //HostAgent m) {
+	public CustomerGui(CustomerAgent c, RestaurantGui gui){
 		agent = c;
 		xPos = -40;
 		yPos = -40;
 		xDestination = -40;
 		yDestination = -40;
-		//maitreD = m;
 		this.gui = gui;
+		
+		tablePositions.put(1, new Point(xTable, yTable));
+		tablePositions.put(2, new Point(xTable + 2*tableWidth, yTable));
+		tablePositions.put(3, new Point(xTable + 4*tableWidth, yTable));
 	}
 
 	public void updatePosition() {
@@ -82,9 +88,9 @@ public class CustomerGui implements Gui{
 		isPresent = p;
 	}
 
-	public void DoGoToSeat(int seatnumber) {//later you will map seatnumber to table coordinates.
-		xDestination = xTable + (seatnumber-1)*2*tableWidth;
-		yDestination = yTable;
+	public void DoGoToSeat(int seatnumber) {
+		xDestination = (int)tablePositions.get(seatnumber).getX();
+		yDestination = (int)tablePositions.get(seatnumber).getY();
 		command = Command.GoToSeat;
 	}
 

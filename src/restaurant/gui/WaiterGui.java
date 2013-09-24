@@ -5,6 +5,8 @@ import restaurant.CustomerAgent;
 import restaurant.WaiterAgent;
 
 import java.awt.*;
+import java.util.HashMap;
+import java.util.Map;
 
 public class WaiterGui implements Gui {
 
@@ -23,9 +25,15 @@ public class WaiterGui implements Gui {
     public static final int yTable = 250;
     public static final int tableWidth = 50;
     public static final int tableHeight = 50;
+    
+    Map<Integer, Point> tablePositions = new HashMap<Integer, Point>();
 
     public WaiterGui(WaiterAgent agent) {
         this.agent = agent;
+        
+        tablePositions.put(1, new Point(xTable + 20, yTable - 20));
+		tablePositions.put(2, new Point(xTable + 2*tableWidth + 20, yTable - 20));
+		tablePositions.put(3, new Point(xTable + 4*tableWidth + 20, yTable - 20));
     }
 
     public void updatePosition() {
@@ -62,8 +70,8 @@ public class WaiterGui implements Gui {
     }
 
     public void DoGoToTable(int tableNumber) {
-        xDestination = xTable + (tableNumber-1)*2*tableWidth + 20;
-        yDestination = yTable - 20;
+        xDestination = (int)tablePositions.get(tableNumber).getX();
+		yDestination = (int)tablePositions.get(tableNumber).getY();
     }
     
     public void DoGoToCook() {
