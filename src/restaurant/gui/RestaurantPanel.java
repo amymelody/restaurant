@@ -24,6 +24,7 @@ public class RestaurantPanel extends JPanel {
 
     private JPanel restLabel = new JPanel();
     private ListPanel customerPanel = new ListPanel(this, "Customers");
+    private ListPanel waiterPanel = new ListPanel(this, "Waiters");
     private JPanel group = new JPanel();
 
     private RestaurantGui gui; //reference to main gui
@@ -31,22 +32,18 @@ public class RestaurantPanel extends JPanel {
     public RestaurantPanel(RestaurantGui gui) {
         this.gui = gui;
 
-        //for (int i=0; i<3; i++) {
-        	WaiterAgent w = new WaiterAgent("Josh");
-     		WaiterGui g = new WaiterGui(w);
-
-     		gui.animationPanel.addGui(g);
-     		w.setHost(host);
-     		w.setCook(cook);
-     		w.setGui(g);
-     		waiters.add(w);
-     		w.startThread();
-     		host.addWaiter(w);
-        //}
+        /*WaiterAgent w = new WaiterAgent("Josh");
+ 		WaiterGui g = new WaiterGui(w);
+ 		gui.animationPanel.addGui(g);
+ 		w.setHost(host);
+ 		w.setCook(cook);
+ 		w.setGui(g);
+ 		waiters.add(w);
+ 		w.startThread();
+ 		host.addWaiter(w);
      		
  		WaiterAgent w2 = new WaiterAgent("JD");
  		WaiterGui g2 = new WaiterGui(w2);
-
  		gui.animationPanel.addGui(g2);
  		w2.setHost(host);
  		w2.setCook(cook);
@@ -57,22 +54,22 @@ public class RestaurantPanel extends JPanel {
  		
  		WaiterAgent w3 = new WaiterAgent("AJ");
  		WaiterGui g3 = new WaiterGui(w3);
-
  		gui.animationPanel.addGui(g3);
  		w3.setHost(host);
  		w3.setCook(cook);
  		w3.setGui(g3);
  		waiters.add(w3);
  		w3.startThread();
- 		host.addWaiter(w3);
+ 		host.addWaiter(w3);*/
         
         host.startThread();
         cook.startThread();
 
         setLayout(new GridLayout(1, 2, 20, 20));
-        group.setLayout(new GridLayout(1, 2, 10, 10));
+        group.setLayout(new GridLayout(1, 3, 10, 10));
 
         group.add(customerPanel);
+        group.add(waiterPanel);
 
         initRestLabel();
         add(restLabel);
@@ -143,6 +140,14 @@ public class RestaurantPanel extends JPanel {
                     gui.updateInfoPanel(temp);
             }
         }
+        if (type.equals("Waiters")) {
+
+            for (int i = 0; i < waiters.size(); i++) {
+                WaiterAgent temp = waiters.get(i);
+                if (temp.getName() == name)
+                    gui.updateInfoPanel(temp);
+            }
+        }
     }
 
     /**
@@ -162,6 +167,18 @@ public class RestaurantPanel extends JPanel {
     		c.setGui(g);
     		customers.add(c);
     		c.startThread();
+    	}
+    	if (type.equals("Waiters")) {
+    		WaiterAgent w = new WaiterAgent(name);	
+    		WaiterGui g = new WaiterGui(w);
+
+    		gui.animationPanel.addGui(g);
+     		w.setHost(host);
+     		w.setCook(cook);
+     		w.setGui(g);
+     		waiters.add(w);
+     		w.startThread();
+     		host.addWaiter(w);
     	}
     }
 

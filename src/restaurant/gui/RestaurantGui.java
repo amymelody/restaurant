@@ -11,12 +11,8 @@ import java.awt.event.*;
  * Contains the main frame and subsequent panels
  */
 public class RestaurantGui extends JFrame implements ActionListener {
-    /* The GUI has two frames, the control frame (in variable gui) 
-     * and the animation frame, (in variable animationFrame within gui)
-     */
-	//JFrame animationFrame = new JFrame("Restaurant Animation");
-	AnimationPanel animationPanel = new AnimationPanel();
 	
+	AnimationPanel animationPanel = new AnimationPanel();
 	private JPanel controlPanel = new JPanel();
 	
     /* restPanel holds 2 panels
@@ -34,8 +30,8 @@ public class RestaurantGui extends JFrame implements ActionListener {
     
     private JPanel idPanel;
     private JLabel idLabel;
-    //private ImageIcon icon;
-    //private JLabel iconLabel;
+    private ImageIcon icon;
+    private JLabel iconLabel;
 
     private Object currentPerson;/* Holds the agent that the info is about.
     								Seems like a hack */
@@ -47,11 +43,6 @@ public class RestaurantGui extends JFrame implements ActionListener {
     public RestaurantGui() {
         int WINDOWX = 450;
         int WINDOWY = 400;
-
-        /*animationFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        animationFrame.setBounds(100+WINDOWX, 50 , WINDOWX+100, WINDOWY+100);
-        animationFrame.setVisible(true);
-    	animationFrame.add(animationPanel);*/
     	
     	setBounds(50, 50, WINDOWX*2, WINDOWY);
 
@@ -74,7 +65,6 @@ public class RestaurantGui extends JFrame implements ActionListener {
         infoPanel.setBorder(BorderFactory.createTitledBorder("Information"));
 
         stateCB = new JCheckBox();
-        //stateCB.setVisible(false);
         stateCB.setText("Hungry?");
         stateCB.addActionListener(this);
         stateCB.setEnabled(false);
@@ -106,15 +96,15 @@ public class RestaurantGui extends JFrame implements ActionListener {
         //Set up the ID panel
         idPanel = new JPanel();
         idPanel.setBorder(BorderFactory.createTitledBorder("ID"));
-        idPanel.setLayout(new GridLayout(2,2));
+        idPanel.setLayout(new FlowLayout());
         
         idLabel = new JLabel();
         idLabel.setText("Josh DiGiovanni");
         idPanel.add(idLabel);
         
-        //icon = new ImageIcon("C:/Users/Josh/CS201/restaurant_jmdigiov/src/restaurant/gui/icon.png");
-        //iconLabel = new JLabel(icon);
-        //idPanel.add(iconLabel);
+        icon = new ImageIcon("C:/Users/Josh/CS201/restaurant_jmdigiov/src/restaurant/gui/icon.png");
+        iconLabel = new JLabel(icon);
+        idPanel.add(iconLabel);
         
         controlPanel.add(idPanel, BorderLayout.SOUTH);
         
