@@ -35,10 +35,6 @@ public class HostAgent extends Agent {
 			tables.add(new Table(ix));//how you add to a collections
 		}
 	}
-	
-	public void addWaiter(WaiterAgent waiter) {
-		waiters.add(waiter);
-	}
 
 	public String getMaitreDName() {
 		return name;
@@ -56,6 +52,11 @@ public class HostAgent extends Agent {
 		return tables;
 	}
 	// Messages
+	
+	public void addWaiter(WaiterAgent waiter) {
+		waiters.add(waiter);
+		stateChanged();
+	}
 
 	public void msgIWantFood(CustomerAgent cust) {
 		customers.add(cust);
@@ -82,7 +83,7 @@ public class HostAgent extends Agent {
 		 */
 		for (Table table : tables) {
 			if (!table.isOccupied()) {
-				if (!customers.isEmpty()) {
+				if (!customers.isEmpty() && !waiters.isEmpty()) {
 					int index = 0;
 					if (waiters.size() > 1) {
 						for (int i = waiters.size()-2; i>=0; i--) {
