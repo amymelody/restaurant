@@ -119,11 +119,6 @@ public class WaiterAgent extends Agent {
 		}
 	}
 	
-	/*public void msgReadyToSeat() {
-		readyToSeat = true;
-		stateChanged();
-	}*/
-	
 	public void msgAtHome() {//from animation
 		if (returningHome) {
 			atHome.release();// = true;
@@ -240,6 +235,7 @@ public class WaiterAgent extends Agent {
 	}
 	
 	private void retrieveOrder(MyCustomer mc) {
+		print("Retrieving order for table " + mc.getTable());
 		waiterGui.DoGoToCook();
 		try {
 			atCook.acquire();
