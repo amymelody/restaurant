@@ -16,8 +16,8 @@ public class CookAgent extends Agent {
 	private String name;
 	private Timer timer = new Timer();
 	
-	Food steak = new Food("steak", 30);
-	Food chicken = new Food("chicken", 20);
+	Food steak = new Food("steak", 25);
+	Food chicken = new Food("chicken", 30);
 	Food salad = new Food("salad", 10);
 	Food pizza = new Food("pizza", 20);
 	
