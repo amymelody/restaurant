@@ -6,6 +6,7 @@ import agent.Agent;
 
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.Semaphore;
 
 /**
  * Restaurant customer agent.
@@ -13,11 +14,11 @@ import java.util.TimerTask;
 public class CustomerAgent extends Agent {
 	private String name;
 	private int hungerLevel = 3;        // determines length of meal
-	Timer eatingTimer = new Timer();
+	Timer timer = new Timer();
 	private CustomerGui customerGui;
 	private Menu menu;
 	private String choice;
-	Timer choiceTimer = new Timer();
+	private Semaphore doneOrdering = new Semaphore(0,true);
 	
 	public int tableNumber; //Number of the table at which the customer is being seated
 
@@ -55,6 +56,18 @@ public class CustomerAgent extends Agent {
 	public String getCustomerName() {
 		return name;
 	}
+	
+	public String getChoice() {
+		return choice;
+	}
+	
+	public boolean isEating() {
+		if (state == AgentState.Eating) {
+			return true;
+		}
+		return false;
+	}
+	
 	// Messages
 
 	public void gotHungry() {//from animation
@@ -95,6 +108,11 @@ public class CustomerAgent extends Agent {
 		event = AgentEvent.doneLeaving;
 		stateChanged();
 	}
+	
+	public void msgDoneOrdering() {//from animation
+		doneOrdering.release();// = true;
+		stateChanged();
+	}
 
 	/**
 	 * Scheduler.  Determine what action is called for, and do it.
@@ -114,7 +132,7 @@ public class CustomerAgent extends Agent {
 		}
 		if (state == AgentState.BeingSeated && event == AgentEvent.seated){
 			state = AgentState.Seated;
-			choiceTimer.schedule(new TimerTask() {
+			timer.schedule(new TimerTask() {
 				public void run() {
 					event = AgentEvent.madeChoice;
 					stateChanged();
@@ -171,6 +189,13 @@ public class CustomerAgent extends Agent {
 	private void giveOrder() {
 		choice = menu.randomItem();
 		print("I would like to order " + choice);
+		customerGui.order();
+		try {
+			doneOrdering.acquire();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		waiter.msgHereIsChoice(this, choice);
 	}
 
@@ -184,7 +209,7 @@ public class CustomerAgent extends Agent {
 		//Since Java does not all us to pass functions, only objects.
 		//So, we use Java syntactic mechanism to create an
 		//anonymous inner class that has the public method run() in it.
-		eatingTimer.schedule(new TimerTask() {
+		timer.schedule(new TimerTask() {
 			//Object cookie = 1;
 			public void run() {
 				print("Done eating " + choice);

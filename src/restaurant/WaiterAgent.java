@@ -77,6 +77,14 @@ public class WaiterAgent extends Agent {
 	// Messages
 	
 	public void msgPleaseSeatCustomer(CustomerAgent cust, int tableNumber) {
+		for (MyCustomer mc : customers) {
+			if (mc.getCust() == cust) {
+				mc.setState(CustomerState.Waiting);
+				mc.setTable(tableNumber);
+				stateChanged();
+				return;
+			}
+		}
 		customers.add(new MyCustomer(cust, tableNumber, CustomerState.Waiting));
 		stateChanged();
 	}
@@ -244,6 +252,7 @@ public class WaiterAgent extends Agent {
 			e.printStackTrace();
 		}
 		print("Delivering " + mc.getChoice() + " to table " + mc.getTable());
+		waiterGui.DoDeliverFood(mc.getChoice());
 		mc.setState(CustomerState.ReadyToEat);
 	}
 	
@@ -312,6 +321,10 @@ public class WaiterAgent extends Agent {
 		
 		void setState(CustomerState s) {
 			state = s;
+		}
+		
+		void setTable(int t) {
+			table = t;
 		}
 		
 		String getChoice() {

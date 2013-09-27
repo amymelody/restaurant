@@ -5,8 +5,7 @@ import restaurant.CustomerAgent;
 import restaurant.WaiterAgent;
 
 import java.awt.*;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class WaiterGui implements Gui {
 
@@ -14,6 +13,7 @@ public class WaiterGui implements Gui {
 
     private int xPos = -20, yPos = -20;//default waiter position
     private int xDestination = -20, yDestination = -20;//default start position
+    private boolean atTable = false;
 
     //Get rid of the "magic numbers"
     static final int WAITERWIDTH = 20;
@@ -27,6 +27,8 @@ public class WaiterGui implements Gui {
     public static final int tableHeight = 50;
     
     Map<Integer, Point> tablePositions = new HashMap<Integer, Point>();
+    Map<String, String> foodSymbols = new HashMap<String, String>();
+    ArrayList<String> orders = new ArrayList<String>();
 
     public WaiterGui(WaiterAgent agent) {
         this.agent = agent;
@@ -34,6 +36,11 @@ public class WaiterGui implements Gui {
         tablePositions.put(1, new Point(xTable + 20, yTable - 20));
 		tablePositions.put(2, new Point(xTable + 2*tableWidth + 20, yTable - 20));
 		tablePositions.put(3, new Point(xTable + 4*tableWidth + 20, yTable - 20));
+		
+		foodSymbols.put("steak", "St");
+		foodSymbols.put("chicken", "C");
+		foodSymbols.put("pizza", "P");
+		foodSymbols.put("salad", "Sa");
     }
 
     public void updatePosition() {
@@ -49,7 +56,13 @@ public class WaiterGui implements Gui {
 
         if (xPos == xDestination && yPos == yDestination) {
         	if ((xDestination >= xTable + 20) && (yDestination == yTable - 20)) {
-        		agent.msgAtTable();
+        		if (!atTable) {
+        			agent.msgAtTable();
+        			atTable = true;
+	        		if (!orders.isEmpty()) {
+	        			orders.remove(0);
+	        		}
+        		}
         	}
         	if (xDestination == -20 && yDestination == -20) {
         		agent.msgAtHome();
@@ -63,6 +76,13 @@ public class WaiterGui implements Gui {
     public void draw(Graphics2D g) {
         g.setColor(Color.MAGENTA);
         g.fillRect(xPos, yPos, WAITERWIDTH, WAITERHEIGHT);
+        
+        if (!orders.isEmpty()) { 
+			g.setColor(Color.WHITE);
+			g.fillRect(xPos+WAITERWIDTH, yPos, WAITERWIDTH, WAITERHEIGHT);
+			g.setColor(Color.BLACK);
+			g.drawString(orders.get(0), xPos+WAITERWIDTH+5, yPos+WAITERHEIGHT/2);
+		}
     }
 
     public boolean isPresent() {
@@ -72,6 +92,7 @@ public class WaiterGui implements Gui {
     public void DoGoToTable(int tableNumber) {
         xDestination = (int)tablePositions.get(tableNumber).getX();
 		yDestination = (int)tablePositions.get(tableNumber).getY();
+		atTable = false;
     }
     
     public void DoGoToCook() {
@@ -82,6 +103,10 @@ public class WaiterGui implements Gui {
     public void DoReturnHome() {
         xDestination = -20;
         yDestination = -20;
+    }
+    
+    public void DoDeliverFood(String choice) {
+    	orders.add(foodSymbols.get(choice));
     }
 
     public int getXPos() {

@@ -2,10 +2,10 @@ package restaurant.gui;
 
 import restaurant.CustomerAgent;
 import restaurant.HostAgent;
+import restaurant.CustomerAgent.AgentEvent;
 
 import java.awt.*;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class CustomerGui implements Gui{
 
@@ -19,6 +19,8 @@ public class CustomerGui implements Gui{
 	private int xDestination, yDestination;
 	private enum Command {noCommand, GoToSeat, LeaveRestaurant};
 	private Command command=Command.noCommand;
+	private boolean ordering;
+	private Timer timer = new Timer();
 
 	//Get rid of the "magic numbers"
 	static final int CUSTWIDTH = 20;
@@ -30,6 +32,7 @@ public class CustomerGui implements Gui{
 	public static final int tableHeight = 50;
 	
 	Map<Integer, Point> tablePositions = new HashMap<Integer, Point>();
+	Map<String, String> foodSymbols = new HashMap<String, String>();
 
 	public CustomerGui(CustomerAgent c, RestaurantGui gui){
 		agent = c;
@@ -42,6 +45,11 @@ public class CustomerGui implements Gui{
 		tablePositions.put(1, new Point(xTable, yTable));
 		tablePositions.put(2, new Point(xTable + 2*tableWidth, yTable));
 		tablePositions.put(3, new Point(xTable + 4*tableWidth, yTable));
+		
+		foodSymbols.put("steak", "St");
+		foodSymbols.put("chicken", "C");
+		foodSymbols.put("pizza", "P");
+		foodSymbols.put("salad", "Sa");
 	}
 
 	public void updatePosition() {
@@ -70,6 +78,20 @@ public class CustomerGui implements Gui{
 	public void draw(Graphics2D g) {
 		g.setColor(Color.GREEN);
 		g.fillRect(xPos, yPos, CUSTWIDTH, CUSTHEIGHT);
+		
+		if (ordering) {
+			g.setColor(Color.WHITE);
+			g.fillRect(xPos-CUSTWIDTH, yPos-CUSTHEIGHT, CUSTWIDTH, CUSTHEIGHT);
+			g.setColor(Color.BLACK);
+			g.drawString(foodSymbols.get(agent.getChoice()) + "?", xPos-CUSTWIDTH, yPos-CUSTHEIGHT/2);
+		}
+		
+		if (agent.isEating()) { 
+			g.setColor(Color.WHITE);
+			g.fillRect(xPos+CUSTWIDTH, yPos, CUSTWIDTH, CUSTHEIGHT);
+			g.setColor(Color.BLACK);
+			g.drawString(foodSymbols.get(agent.getChoice()), xPos+CUSTWIDTH+5, yPos+CUSTHEIGHT/2);
+		}
 	}
 
 	public boolean isPresent() {
@@ -86,6 +108,17 @@ public class CustomerGui implements Gui{
 
 	public void setPresent(boolean p) {
 		isPresent = p;
+	}
+	
+	public void order() {
+		ordering = true;
+		timer.schedule(new TimerTask() {
+			public void run() {
+				ordering = false;
+				agent.msgDoneOrdering();
+			}
+		},
+		1000);
 	}
 
 	public void DoGoToSeat(int seatnumber) {
