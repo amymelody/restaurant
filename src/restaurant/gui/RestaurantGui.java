@@ -1,6 +1,7 @@
 package restaurant.gui;
 
 import restaurant.CustomerAgent;
+import restaurant.WaiterAgent;
 
 import javax.swing.*;
 
@@ -68,6 +69,7 @@ public class RestaurantGui extends JFrame implements ActionListener {
         stateCB.setText("Hungry?");
         stateCB.addActionListener(this);
         stateCB.setEnabled(false);
+        stateCB.setVisible(false);
 
         infoPanel.setLayout(new GridLayout(1, 3, 30, 0));
         
@@ -130,12 +132,17 @@ public class RestaurantGui extends JFrame implements ActionListener {
 
         if (person instanceof CustomerAgent) {
             CustomerAgent customer = (CustomerAgent) person;
+            stateCB.setVisible(true);
           //Should checkmark be there? 
             stateCB.setSelected(customer.getGui().isHungry());
           //Is customer hungry? Hack. Should ask customerGui
             stateCB.setEnabled(!customer.getGui().isHungry());
           // Hack. Should ask customerGui
             infoLabel.setText(customer.getName());
+        } else {
+        	stateCB.setVisible(false);
+        	WaiterAgent waiter = (WaiterAgent) person;
+        	infoLabel.setText(waiter.getName());
         }
         infoPanel.validate();
     }
