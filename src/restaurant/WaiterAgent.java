@@ -150,6 +150,18 @@ public class WaiterAgent extends Agent {
 	 */
 	protected boolean pickAndExecuteAnAction() {
 		for (MyCustomer mc : customers) {
+			if (mc.getState() == CustomerState.ReadyToEat) {
+				deliverFood(mc);
+				return true;
+			}
+		}
+		for (MyCustomer mc : customers) {
+			if (mc.getState() == CustomerState.OrderDone) {
+				retrieveOrder(mc);
+				return true;
+			}
+		}
+		for (MyCustomer mc : customers) {
 			if (mc.getState() == CustomerState.Waiting) {
 				seatCustomer(mc);
 				return true;
@@ -164,18 +176,6 @@ public class WaiterAgent extends Agent {
 		for (MyCustomer mc : customers) {
 			if (mc.getState() == CustomerState.Ordered) {
 				giveOrderToCook(mc);
-				return true;
-			}
-		}
-		for (MyCustomer mc : customers) {
-			if (mc.getState() == CustomerState.ReadyToEat) {
-				deliverFood(mc);
-				return true;
-			}
-		}
-		for (MyCustomer mc : customers) {
-			if (mc.getState() == CustomerState.OrderDone) {
-				retrieveOrder(mc);
 				return true;
 			}
 		}
