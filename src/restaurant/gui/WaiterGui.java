@@ -33,9 +33,9 @@ public class WaiterGui implements Gui {
     public WaiterGui(WaiterAgent agent) {
         this.agent = agent;
         
-        tablePositions.put(1, new Point(xTable + 20, yTable - 20));
-		tablePositions.put(2, new Point(xTable + 2*tableWidth + 20, yTable - 20));
-		tablePositions.put(3, new Point(xTable + 4*tableWidth + 20, yTable - 20));
+        tablePositions.put(1, new Point(xTable + WAITERWIDTH, yTable - WAITERWIDTH));
+		tablePositions.put(2, new Point(xTable + 2*tableWidth + WAITERWIDTH, yTable - WAITERWIDTH));
+		tablePositions.put(3, new Point(xTable + 4*tableWidth + WAITERWIDTH, yTable - WAITERWIDTH));
 		
 		foodSymbols.put("steak", "St");
 		foodSymbols.put("chicken", "C");
@@ -55,7 +55,7 @@ public class WaiterGui implements Gui {
             yPos--;
 
         if (xPos == xDestination && yPos == yDestination) {
-        	if ((xDestination >= xTable + 20) && (yDestination == yTable - 20)) {
+        	if ((xDestination >= xTable + WAITERWIDTH) && (yDestination == yTable - WAITERWIDTH)) {
         		if (!atTable) {
         			agent.msgAtTable();
         			atTable = true;
@@ -64,7 +64,7 @@ public class WaiterGui implements Gui {
 	        		}
         		}
         	}
-        	if (xDestination == -20 && yDestination == -20) {
+        	if (xDestination == -WAITERWIDTH && yDestination == -WAITERWIDTH) {
         		agent.msgAtHome();
         	}
         	if (xDestination == COOKX && yDestination == COOKY) {
@@ -81,7 +81,7 @@ public class WaiterGui implements Gui {
 			g.setColor(Color.WHITE);
 			g.fillRect(xPos+WAITERWIDTH, yPos, WAITERWIDTH, WAITERHEIGHT);
 			g.setColor(Color.BLACK);
-			g.drawString(orders.get(0), xPos+WAITERWIDTH+5, yPos+WAITERHEIGHT/2);
+			g.drawString(orders.get(0), xPos+WAITERWIDTH+WAITERWIDTH/4, yPos+WAITERHEIGHT/2);
 		}
     }
 
@@ -101,8 +101,8 @@ public class WaiterGui implements Gui {
     }
 
     public void DoReturnHome() {
-        xDestination = -20;
-        yDestination = -20;
+        xDestination = -WAITERWIDTH;
+        yDestination = -WAITERWIDTH;
     }
     
     public void DoDeliverFood(String choice) {

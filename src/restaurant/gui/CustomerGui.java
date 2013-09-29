@@ -36,10 +36,10 @@ public class CustomerGui implements Gui{
 
 	public CustomerGui(CustomerAgent c, RestaurantGui gui){
 		agent = c;
-		xPos = -40;
-		yPos = -40;
-		xDestination = -40;
-		yDestination = -40;
+		xPos = -2*CUSTWIDTH;
+		yPos = -2*CUSTWIDTH;
+		xDestination = -2*CUSTWIDTH;
+		yDestination = -2*CUSTWIDTH;
 		this.gui = gui;
 		
 		tablePositions.put(1, new Point(xTable, yTable));
@@ -90,7 +90,7 @@ public class CustomerGui implements Gui{
 			g.setColor(Color.WHITE);
 			g.fillRect(xPos+CUSTWIDTH, yPos, CUSTWIDTH, CUSTHEIGHT);
 			g.setColor(Color.BLACK);
-			g.drawString(foodSymbols.get(agent.getChoice()), xPos+CUSTWIDTH+5, yPos+CUSTHEIGHT/2);
+			g.drawString(foodSymbols.get(agent.getChoice()), xPos+CUSTWIDTH+CUSTWIDTH/4, yPos+CUSTHEIGHT/2);
 		}
 	}
 
@@ -128,8 +128,8 @@ public class CustomerGui implements Gui{
 	}
 
 	public void DoExitRestaurant() {
-		xDestination = -40;
-		yDestination = -40;
+		xDestination = -2*CUSTWIDTH;
+		yDestination = -2*CUSTWIDTH;
 		command = Command.LeaveRestaurant;
 	}
 }
