@@ -10,6 +10,8 @@ import java.util.*;
 public class WaiterGui implements Gui {
 
     private WaiterAgent agent = null;
+    
+    RestaurantGui gui;
 
     private int xPos = -20, yPos = -20;//default waiter position
     private int xDestination = -20, yDestination = -20;//default start position
@@ -30,8 +32,9 @@ public class WaiterGui implements Gui {
     Map<String, String> foodSymbols = new HashMap<String, String>();
     ArrayList<String> orders = new ArrayList<String>();
 
-    public WaiterGui(WaiterAgent agent) {
+    public WaiterGui(WaiterAgent agent, RestaurantGui gui) {
         this.agent = agent;
+        this.gui = gui;
         
         tablePositions.put(1, new Point(xTable + WAITERWIDTH, yTable - WAITERWIDTH));
 		tablePositions.put(2, new Point(xTable + 2*tableWidth + WAITERWIDTH, yTable - WAITERWIDTH));
@@ -87,6 +90,10 @@ public class WaiterGui implements Gui {
 
     public boolean isPresent() {
         return true;
+    }
+    
+    public void setCBEnabled() {
+    	gui.setWaiterEnabled(agent);
     }
 
     public void DoGoToTable(int tableNumber) {

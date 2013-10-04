@@ -104,7 +104,7 @@ public class RestaurantGui extends JFrame implements ActionListener {
         idLabel.setText("Josh DiGiovanni");
         idPanel.add(idLabel);
         
-        icon = new ImageIcon("C:/Users/Josh/CS201/restaurant_jmdigiov/src/restaurant/gui/icon.png");
+        icon = new ImageIcon("C:/Users/Jo/CS201/restaurant_jmdigiov/src/restaurant/gui/icon.png");
         iconLabel = new JLabel(icon);
         idPanel.add(iconLabel);
         
@@ -133,16 +133,23 @@ public class RestaurantGui extends JFrame implements ActionListener {
         if (person instanceof CustomerAgent) {
             CustomerAgent customer = (CustomerAgent) person;
             stateCB.setVisible(true);
+            stateCB.setText("Hungry?");
           //Should checkmark be there? 
             stateCB.setSelected(customer.getGui().isHungry());
           //Is customer hungry? Hack. Should ask customerGui
             stateCB.setEnabled(!customer.getGui().isHungry());
           // Hack. Should ask customerGui
             infoLabel.setText(customer.getName());
+        } else if (person instanceof WaiterAgent) {
+        	WaiterAgent waiter = (WaiterAgent) person;
+        	stateCB.setVisible(true);
+            stateCB.setText("Break?");
+            //Should checkmark be there? 
+            stateCB.setSelected(waiter.isOnBreak());
+            stateCB.setEnabled(!waiter.isAboutToGoOnBreak());
+        	infoLabel.setText(waiter.getName());
         } else {
         	stateCB.setVisible(false);
-        	WaiterAgent waiter = (WaiterAgent) person;
-        	infoLabel.setText(waiter.getName());
         }
         infoPanel.validate();
     }
@@ -153,11 +160,24 @@ public class RestaurantGui extends JFrame implements ActionListener {
      */
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == stateCB) {
-            if (currentPerson instanceof CustomerAgent) {
-                CustomerAgent c = (CustomerAgent) currentPerson;
-                c.getGui().setHungry();
-                stateCB.setEnabled(false);
-            }
+        	if (stateCB.getText().equals("Hungry?")) {
+	            if (currentPerson instanceof CustomerAgent) {
+	                CustomerAgent c = (CustomerAgent) currentPerson;
+	                c.getGui().setHungry();
+	                stateCB.setEnabled(false);
+	            }
+        	}
+        	if (stateCB.getText().equals("Break?")) {
+	            if (currentPerson instanceof WaiterAgent) {
+	                WaiterAgent w = (WaiterAgent) currentPerson;
+	                if (stateCB.isSelected()) {
+		                w.msgWantToGoOnBreak();
+		                stateCB.setEnabled(false);
+	                } else {
+	                	w.msgGoOffBreak();
+	                }
+	            }
+        	}
         }
     }
     /**
@@ -172,6 +192,20 @@ public class RestaurantGui extends JFrame implements ActionListener {
             if (c.equals(cust)) {
                 stateCB.setEnabled(true);
                 stateCB.setSelected(false);
+            }
+        }
+    }
+    
+    public void setWaiterEnabled(WaiterAgent w) {
+        if (currentPerson instanceof WaiterAgent) {
+            WaiterAgent waiter = (WaiterAgent) currentPerson;
+            if (w.equals(waiter)) {
+                stateCB.setEnabled(true);
+                if (w.isOnBreak()) {
+                	stateCB.setSelected(true);
+                } else {
+                	stateCB.setSelected(false);
+                }
             }
         }
     }
