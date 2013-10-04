@@ -2,7 +2,26 @@
 
 ## Host Agent
 ### Data
+List<Customer> customers;
+List<MyWaiter> waiters;
+List<Table> tables;
+enum WaiterState {OnTheJob, WantToGoOnBreak, AboutToGoOnBreak, OnBreak};
+class Table {
+	boolean occupied;
+	int tableNumber;
+}
+class MyWaiter {
+	Waiter w;
+	WaiterState s;
+}
+
 ### Messages
+WantToGoOnBreak(Waiter w) {
+	if there exists mw in waiters such that mw.w = w
+		then w.s = WantToGoOnBreak
+}
+
+
 ### Scheduler
 ### Actions
 
