@@ -12,26 +12,26 @@ enum WaiterState {OnTheJob, WantToGoOnBreak, AboutToGoOnBreak, OnBreak};
 
 class Table {
 
-	boolean occupied;
+  boolean occupied;
 
-	int tableNumber;
+  int tableNumber;
 
 }
 
 class MyWaiter {
 
-	Waiter w;
+  Waiter w;
 
-	WaiterState s;
+  WaiterState s;
 
 }
 
 #### Messages
 WantToGoOnBreak(Waiter w) {
 
-	if there exists mw in waiters such that mw.w = w
+  if there exists mw in waiters such that mw.w = w
 		
-		then w.s = WantToGoOnBreak
+    then w.s = WantToGoOnBreak
 
 }
 
