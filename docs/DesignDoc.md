@@ -2,38 +2,38 @@
 
 ### Host Agent
 #### Data
-List(Customer) customers;
+	List(Customer) customers;
 
-List(MyWaiter) waiters;
+	List(MyWaiter) waiters;
 
-List(Table) tables;
+	List(Table) tables;
 
-enum WaiterState {OnTheJob, WantToGoOnBreak, AboutToGoOnBreak, OnBreak};
+	enum WaiterState {OnTheJob, WantToGoOnBreak, AboutToGoOnBreak, OnBreak};
 
-class Table {
+	class Table {
 
-  boolean occupied;
+		boolean occupied;
 
-  int tableNumber;
+		int tableNumber;
 
-}
+	}
 
-class MyWaiter {
+	class MyWaiter {
 
-  Waiter w;
+		Waiter w;
 
-  WaiterState s;
+		WaiterState s;
 
-}
+	}
 
 #### Messages
-WantToGoOnBreak(Waiter w) {
+	WantToGoOnBreak(Waiter w) {
 
-  if there exists mw in waiters such that mw.w = w
+		if there exists mw in waiters such that mw.w = w
 		
-    then w.s = WantToGoOnBreak
+			then w.s = WantToGoOnBreak
 
-}
+	}
 
 
 #### Scheduler
