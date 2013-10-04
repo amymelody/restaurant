@@ -1,6 +1,7 @@
 package restaurant;
 
 import agent.Agent;
+import restaurant.CustomerAgent.AgentEvent;
 import restaurant.gui.WaiterGui;
 
 import java.util.*;
@@ -26,10 +27,15 @@ public class WaiterAgent extends Agent {
 	private boolean returningHome = false;
 	private Menu menu;
 	private int customerCount = 0;
+	Timer timer = new Timer();
 	
 	public enum CustomerState
-	{DoingNothing, Waiting, Seated, AskedToOrder, Asked, Ordered, WaitingForFood, OrderDone, ReadyToEat, Eating, Leaving};
+	{DoingNothing, Waiting, Seated, AskedToOrder, Asked, Ordered, MustReorder, WaitingForFood, OrderDone, ReadyToEat, Eating, Leaving};
 
+	public enum WaiterState
+	{OnTheJob, WantToGoOnBreak, AboutToGoOnBreak, OnBreak, GoingOffBreak};
+	private WaiterState state = WaiterState.OnTheJob;
+	
 	public WaiterGui waiterGui = null;
 
 	public WaiterAgent(String name) {
@@ -74,9 +80,56 @@ public class WaiterAgent extends Agent {
 		customerCount++;
 	}
 	
+	public boolean doneServingCustomers() {
+		for (MyCustomer mc : customers) {
+			if (mc.getState() != CustomerState.DoingNothing) {
+				return false;
+			}
+		}
+		return true;
+	}
+	
+	public boolean isOnBreak() {
+		if (state == WaiterState.AboutToGoOnBreak || state == WaiterState.OnBreak) {
+			return true;
+		}
+		return false;
+	}
+	
+	public boolean isAboutToGoOnBreak() {
+		if (state == WaiterState.AboutToGoOnBreak) {
+			return true;
+		}
+		return false;
+	}
+	
 	// Messages
 	
+	public void msgWantToGoOnBreak() {
+		state = WaiterState.WantToGoOnBreak;
+		stateChanged();
+	}
+	
+	public void msgCanGoOnBreak() {
+		state = WaiterState.AboutToGoOnBreak;
+		stateChanged();
+	}
+	
+	public void msgCantGoOnBreak() {
+		state = WaiterState.OnTheJob;
+		waiterGui.setCBEnabled();
+		stateChanged();
+	}
+	
+	public void msgGoOffBreak() {
+		state = WaiterState.GoingOffBreak;
+		stateChanged();
+	}
+	
 	public void msgPleaseSeatCustomer(CustomerAgent cust, int tableNumber) {
+		if (name.equals("break")) {
+			state = WaiterState.WantToGoOnBreak;
+		}
 		for (MyCustomer mc : customers) {
 			if (mc.getCust() == cust) {
 				mc.setState(CustomerState.Waiting);
@@ -103,6 +156,16 @@ public class WaiterAgent extends Agent {
 			if (mc.getCust() == cust) {
 				mc.setState(CustomerState.Ordered);
 				mc.setChoice(choice);
+				stateChanged();
+			}
+		}
+	}
+	
+	public void msgOutOfFood(String choice, int table) {
+		menu.removeItem(choice);
+		for (MyCustomer mc : customers) {
+			if (mc.getTable() == table) {
+				mc.setState(CustomerState.MustReorder);
 				stateChanged();
 			}
 		}
@@ -149,6 +212,21 @@ public class WaiterAgent extends Agent {
 	 * Scheduler.  Determine what action is called for, and do it.
 	 */
 	protected boolean pickAndExecuteAnAction() {
+		if (state == WaiterState.WantToGoOnBreak) {
+			wantToGoOnBreak();
+			return true;
+		}
+		if (state == WaiterState.AboutToGoOnBreak){
+			if (doneServingCustomers()) {
+				print("blah");
+				goOnBreak();
+				return true;
+			}
+		}
+		if (state == WaiterState.GoingOffBreak){
+			goOffBreak();
+			return true;
+		}
 		for (MyCustomer mc : customers) {
 			if (mc.getState() == CustomerState.ReadyToEat) {
 				deliverFood(mc);
@@ -180,6 +258,12 @@ public class WaiterAgent extends Agent {
 			}
 		}
 		for (MyCustomer mc : customers) {
+			if (mc.getState() == CustomerState.MustReorder){
+				askToReorder(mc);
+				return true;
+			}
+		}
+		for (MyCustomer mc : customers) {
 			if (mc.getState() == CustomerState.Leaving){
 				notifyHost(mc);
 				return true;
@@ -193,6 +277,40 @@ public class WaiterAgent extends Agent {
 	}
 
 	// Actions
+	
+	private void wantToGoOnBreak() {
+		print(host + ", I want to go on break.");
+		host.msgWantToGoOnBreak(this);
+		state = WaiterState.OnTheJob;
+	}
+	
+	private void goOnBreak() {
+		print(host + ", I'm going on break.");
+		host.msgGoingOnBreak(this);
+		state = WaiterState.OnBreak;
+		returningHome = true;
+		waiterGui.DoReturnHome();
+		try {
+			atHome.acquire();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		waiterGui.setCBEnabled();
+		/*timer.schedule(new TimerTask() {
+			public void run() {
+				goOffBreak();
+				stateChanged();
+			}
+		},
+		10000);//how long to wait before running task*/
+	}
+	
+	private void goOffBreak() {
+		print(host + ", I'm going off break.");
+		host.msgGoingOffBreak(this);
+		state = WaiterState.OnTheJob;
+	}
 
 	private void seatCustomer(MyCustomer mc) {
 		returningHome = true;
@@ -225,6 +343,19 @@ public class WaiterAgent extends Agent {
 		}
 		Do("What would you like to order?");
 		mc.getCust().msgWhatWouldYouLike();
+		mc.setState(CustomerState.Asked);
+	}
+	
+	private void askToReorder(MyCustomer mc) {
+		waiterGui.DoGoToTable(mc.getTable());
+		try {
+			atTable.acquire();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		Do("I'm sorry, we're out of that menu item. Would you like to order something else?");
+		mc.getCust().msgWantSomethingElse(menu);
 		mc.setState(CustomerState.Asked);
 	}
 	

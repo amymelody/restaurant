@@ -5,6 +5,8 @@ import agent.Agent;
 import java.util.*;
 import java.util.concurrent.Semaphore;
 
+import restaurant.WaiterAgent.CustomerState;
+
 /**
  * Restaurant Host Agent
  */
@@ -18,12 +20,15 @@ public class HostAgent extends Agent {
 	//with List semantics.
 	public List<CustomerAgent> customers
 	= new ArrayList<CustomerAgent>();
-	public List<WaiterAgent> waiters = new ArrayList<WaiterAgent>();
+	public List<MyWaiter> waiters = new ArrayList<MyWaiter>();
 	public Collection<Table> tables;
 	//note that tables is typed with Collection semantics.
 	//Later we will see how it is implemented
 
 	private String name;
+	
+	public enum WaiterState
+	{OnTheJob, WantToGoOnBreak, AboutToGoOnBreak, OnBreak};
 
 	public HostAgent(String name) {
 		super();
@@ -51,13 +56,54 @@ public class HostAgent extends Agent {
 	public Collection getTables() {
 		return tables;
 	}
+	
+	public String toString() {
+		return getName();
+	}
+	
+	public boolean noWaitersOnBreak() {
+		for (MyWaiter waiter : waiters) {
+			if (waiter.getState() == WaiterState.OnBreak || waiter.getState() == WaiterState.AboutToGoOnBreak) {
+				return false;
+			}
+		}
+		return true;
+	}
+	
 	// Messages
 	
 	public void addWaiter(WaiterAgent waiter) {
-		waiters.add(waiter);
+		waiters.add(new MyWaiter(waiter));
 		stateChanged();
 	}
 
+	public void msgWantToGoOnBreak(WaiterAgent waiter) {
+		for (MyWaiter mw : waiters) {
+			if (mw.getWaiter() == waiter) {
+				mw.setState(WaiterState.WantToGoOnBreak);
+				stateChanged();
+			}
+		}
+	}
+	
+	public void msgGoingOnBreak(WaiterAgent waiter) {
+		for (MyWaiter mw : waiters) {
+			if (mw.getWaiter() == waiter) {
+				mw.setState(WaiterState.OnBreak);
+				stateChanged();
+			}
+		}
+	}
+	
+	public void msgGoingOffBreak(WaiterAgent waiter) {
+		for (MyWaiter mw : waiters) {
+			if (mw.getWaiter() == waiter) {
+				mw.setState(WaiterState.OnTheJob);
+				stateChanged();
+			}
+		}
+	}
+	
 	public void msgIWantFood(CustomerAgent cust) {
 		customers.add(cust);
 		stateChanged();
@@ -87,15 +133,31 @@ public class HostAgent extends Agent {
 					int index = 0;
 					if (waiters.size() > 1) {
 						for (int i = waiters.size()-2; i>=0; i--) {
-							if (waiters.get(i).getCustomerCount() > waiters.get(i+1).getCustomerCount()) {
-								index = i+1;
+							if (waiters.get(i+1).getState() == WaiterState.OnTheJob || waiters.get(i+1).getState() == WaiterState.WantToGoOnBreak) {
+								if (waiters.get(i).getWaiter().getCustomerCount() > waiters.get(i+1).getWaiter().getCustomerCount()) {
+									index = i+1;
+								}
 							}
 						}
 					}
-					callWaiter(waiters.get(index), customers.get(0), table);//the action
-					waiters.get(index).addCustomer();
+					if (index == 0 && (waiters.get(index).getState() == WaiterState.AboutToGoOnBreak || waiters.get(index).getState() == WaiterState.OnBreak)) {
+						index = 1;
+					}
+					callWaiter(waiters.get(index).getWaiter(), customers.get(0), table);//the action
+					waiters.get(index).getWaiter().addCustomer();
 					return true;//return true to the abstract agent to reinvoke the scheduler.
 				}
+			}
+		}
+		
+		for (MyWaiter mw : waiters) {
+			if (mw.getState() == WaiterState.WantToGoOnBreak) {
+				if (waiters.size() > 1 && noWaitersOnBreak()) {
+					canGoOnBreak(mw);
+					return true;
+				}
+				cantGoOnBreak(mw);
+				return true;
 			}
 		}
 
@@ -116,6 +178,18 @@ public class HostAgent extends Agent {
 			}
 		}
 		customers.remove(customer);
+	}
+	
+	private void canGoOnBreak(MyWaiter mw) {
+		print(mw.getWaiter() + ", you can go on break.");
+		mw.getWaiter().msgCanGoOnBreak();
+		mw.setState(WaiterState.AboutToGoOnBreak);
+	}
+	
+	private void cantGoOnBreak(MyWaiter mw) {
+		print(mw.getWaiter() + ", you can't go on break.");
+		mw.getWaiter().msgCantGoOnBreak();
+		mw.setState(WaiterState.OnTheJob);
 	}
 
 	//utilities
@@ -142,6 +216,28 @@ public class HostAgent extends Agent {
 		
 		public int getTableNumber() {
 			return tableNumber;
+		}
+	}
+	
+	private class MyWaiter {
+		WaiterAgent waiter;
+		WaiterState state;
+
+		MyWaiter(WaiterAgent w) {
+			waiter = w;
+			state = WaiterState.OnTheJob;
+		}
+
+		WaiterAgent getWaiter() {
+			return waiter;
+		}
+		
+		WaiterState getState() {
+			return state;
+		}
+		
+		void setState(WaiterState w) {
+			state = w;
 		}
 	}
 }
