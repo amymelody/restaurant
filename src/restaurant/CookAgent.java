@@ -16,10 +16,10 @@ public class CookAgent extends Agent {
 	private String name;
 	private Timer timer = new Timer();
 	
-	Food steak = new Food("steak", 15);
-	Food chicken = new Food("chicken", 20);
-	Food salad = new Food("salad", 5);
-	Food pizza = new Food("pizza", 10);
+	Food steak = new Food("steak", 15, 2, 1);
+	Food chicken = new Food("chicken", 20, 2, 1);
+	Food salad = new Food("salad", 5, 3, 1);
+	Food pizza = new Food("pizza", 10, 3, 1);
 	
 	Map<String, Food> foods = new HashMap<String, Food>();
 	
@@ -78,6 +78,12 @@ public class CookAgent extends Agent {
 	// Actions
 
 	private void cookIt(Order o) {
+		if (foods.get(o.choice).getAmount() == 0) {
+			print("We're out of " + o.choice);
+			o.waiter.msgOutOfFood(o.choice, o.table);
+			o.setState(OrderState.Finished);
+			return;
+		}
 		o.setState(OrderState.Cooking);
 		timer.schedule(new CookingTimerTask(o) {
 			@Override
@@ -87,6 +93,7 @@ public class CookAgent extends Agent {
 			}
 		},
 		foods.get(o.choice).getCookingTime() * 1000);
+		foods.get(o.choice).setAmount(foods.get(o.choice).getAmount()-1);
 	}
 	
 	private void plateIt(Order o) {
@@ -138,10 +145,18 @@ public class CookAgent extends Agent {
 	private class Food {
 		String type;
 		int cookingTime;
+		int amount;
+		int low;
+		int capacity;
+		boolean orderingState;
 		
-		Food(String t, int c) {
+		Food(String t, int c, int a, int l) {
 			type = t;
 			cookingTime = c;
+			amount = a;
+			capacity = a;
+			low = l;
+			orderingState = false;
 		}
 		
 		String getType() {
@@ -150,6 +165,14 @@ public class CookAgent extends Agent {
 		
 		int getCookingTime() {
 			return cookingTime;
+		}
+		
+		void setAmount(int a) {
+			amount = a;
+		}
+		
+		int getAmount() {
+			return amount;
 		}
 	}
 	

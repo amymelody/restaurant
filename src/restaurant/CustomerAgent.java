@@ -13,7 +13,7 @@ import java.util.concurrent.Semaphore;
  */
 public class CustomerAgent extends Agent {
 	private String name;
-	private int hungerLevel = 3;        // determines length of meal
+	private int hungerLevel = 1;        // determines length of meal
 	Timer timer = new Timer();
 	private CustomerGui customerGui;
 	private Menu menu;
@@ -92,6 +92,13 @@ public class CustomerAgent extends Agent {
 	}
 	
 	public void msgWhatWouldYouLike() {
+		event = AgentEvent.order;
+		stateChanged();
+	}
+	
+	public void msgWantSomethingElse(Menu menu) {
+		this.menu = menu;
+		state = AgentState.ReadyToOrder;
 		event = AgentEvent.order;
 		stateChanged();
 	}
@@ -187,7 +194,12 @@ public class CustomerAgent extends Agent {
 	}
 	
 	private void giveOrder() {
-		choice = menu.randomItem();
+		//choice = menu.randomItem();
+		if (menu.checkItem(name)) {
+			choice = name;
+		} else {
+			choice = menu.randomItem();
+		}
 		print("I would like to order " + choice);
 		customerGui.order();
 		try {
