@@ -127,9 +127,6 @@ public class WaiterAgent extends Agent {
 	}
 	
 	public void msgPleaseSeatCustomer(CustomerAgent cust, int tableNumber) {
-		if (name.equals("break")) {
-			state = WaiterState.WantToGoOnBreak;
-		}
 		for (MyCustomer mc : customers) {
 			if (mc.getCust() == cust) {
 				mc.setState(CustomerState.Waiting);
@@ -218,7 +215,6 @@ public class WaiterAgent extends Agent {
 		}
 		if (state == WaiterState.AboutToGoOnBreak){
 			if (doneServingCustomers()) {
-				print("blah");
 				goOnBreak();
 				return true;
 			}
@@ -297,13 +293,6 @@ public class WaiterAgent extends Agent {
 			e.printStackTrace();
 		}
 		waiterGui.setCBEnabled();
-		/*timer.schedule(new TimerTask() {
-			public void run() {
-				goOffBreak();
-				stateChanged();
-			}
-		},
-		10000);//how long to wait before running task*/
 	}
 	
 	private void goOffBreak() {
