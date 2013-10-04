@@ -2,11 +2,11 @@
 
 ### Host Agent
 #### Data
-	List(Customer) customers;
+	List<Customer> customers;
 
-	List(MyWaiter) waiters;
+	List<MyWaiter> waiters;
 
-	List(Table) tables;
+	List<Table> tables;
 
 	enum WaiterState {OnTheJob, WantToGoOnBreak, AboutToGoOnBreak, OnBreak};
 
