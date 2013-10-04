@@ -213,134 +213,71 @@
 	if there exists mc in customers such that mc.s = ReadyToEat
 
 		deliverFood(mc);
-
 	if there exists mc in customers such that mc.s = OrderDone
-
 		retrieveOrder(mc);
-
 	if there exists mc in customers such that mc.s = Waiting
-
 		seatCustomer(mc);
-
 	if there exists mc in customers such that mc.s = AskedToOrder
-
 		takeOrder(mc);
-
 	if there exists mc in customers such that mc.s = Ordered
-
 		giveOrderToCook(mc);
-
 	if there exists mc in customers such that mc.s = MustReorder
-
 		askToReorder(mc);
-
 	if there exists mc in customers such that mc.s = Leaving
-
 		notifyHost(mc);
 
 #### Actions
 	wantToGoOnBreak() {
-
 		host.WantToGoOnBreak(this);
-
 		state = OnTheJob;
-
 	}
-
 	goOnBreak() {
-
 		host.GoingOnBreak(this);
-
 		state = OnBreak;
-
 		DoReturnHome();
-
 	}
-
 	goOffBreak() {
-
 		host.GoingOffBreak(this);
-
 		state = OnTheJob;
-
 	}
-
 	seatCustomer(MyCustomer mc) {
-
 		DoReturnHome();
-
 		mc.c.FollowMe(this, menu, mc.table);
-
 		DoSeatCustomer();
-
 		mc.s = Seated;
-
 		DoReturnHome();
-
 	}
-
 	takeOrder(MyCustomer mc) {
-
 		DoGoToTable(mc.table);
-
 		mc.c.WhatWouldYouLike();
-
 		mc.s = Asked;
-
 	}
-
 	askToReorder(MyCustomer mc) {
-
 		DoGoToTable(mc.table);
-
 		mc.c.WantSomethingElse(menu);
-
 		mc.s = Asked;
-
 	}
-
 	giveOrderToCook(MyCustomer mc) {
-
 		mc.s = WaitingForFood;
-
 		DoGoToCook();
-
 		cook.HereIsOrder(this, mc.choice, mc.table);
-
 		DoReturnHome();
-
 	}
-
 	retrieveOrder(MyCustomer mc) {
-
 		DoGoToCook();
-
 		DoDeliverFood(mc.choice);
-
 		mc.state = ReadyToEat;
-
 	}
-
 	deliverFood(MyCustomer mc) {
-
 		DoGoToTable(mc.table);
-
 		mc.c.HereIsFood(mc.choice);
-
 		mc.s = Eating;
-
 		DoReturnHome();
-
 	}
-
 	notifyHost(MyCustomer mc) {
-
 		host.TableAvailable(mc.table);
-
 		DoReturnHome();
-
 		mc.s = DoingNothing;
-
 	}
 
 ### Customer Agent
