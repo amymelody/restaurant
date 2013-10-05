@@ -3,215 +3,119 @@
 ### Host Agent
 #### Data
 	List<Customer> customers;
-
 	List<MyWaiter> waiters;
-
 	List<Table> tables;
-
 	enum WaiterState {OnTheJob, WantToGoOnBreak, AboutToGoOnBreak, OnBreak};
-
 	class Table {
-
 		boolean occupied;
-
 		int tableNumber;
-
 	}
-
 	class MyWaiter {
-
 		Waiter w;
-
 		WaiterState s;
-
 	}
 
 #### Messages
 	WantToGoOnBreak(Waiter w) {
-
 		if there exists mw in waiters such that mw.w = w
-		
 			then mw.s = WantToGoOnBreak;
-
 	}
-
 	GoingOnBreak(Waiter w) {
-
 		if there exists mw in waiters such that mw.w = w
-
 			then mw.s = OnBreak;
-
 	}
-
 	GoingOffBreak(Waiter w) {
-
 		if there exists mw in waiters such that mw.w = w
-
 			then mw.s = OnTheJob;
-
 	}
-
 	IWantFood(Customer c) {
-
 		customers.add(c);
-
 	}
-
 	TableAvailable(int tableNum) {
-
 		if there exists t in tables such that t.tableNumber = tableNum
-
 			then t.setUnoccupied();
-
 	}
 
 #### Scheduler
 	if there exists t in tables such that t.isUnoccupied() & if !customers.isEmpty() & !waiters.isEmpty()
-
 		then callWaiter(waiters.selectWaiter() //stub, customers.get(0), table);
-
 	if there exists mw in waiters such that mw.s = WantToGoOnBreak
-
 		if waiters.size > 1 && noWaitersOnBreak() //stub
-
 			then canGoOnBreak(mw);
-
 		else cantGoOnBreak(mw);
 		
 #### Actions
 	callWaiter(Waiter w, Customer c, Table t) {
-
 		w.PleaseSeatCustomer(c, t.tableNumber);
-		
 		if there exists table in tables such that table = t
-
 			t.setOccupied();
-
 		customers.remove(c);
-
 	canGoOnBreak(MyWaiter mw) {
-
 		mw.w.CanGoOnBreak();
-
 		mw.s = AboutToGoOnBreak;
-
 	cantGoOnBreak(MyWaiter mw) {
-
 		mw.w.CantGoOnBreak();
-
 		mw.s = OnTheJob;
-
 
 ### Waiter Agent
 #### Data
 	List<MyCustomer> customers;
-	
 	Host host;
-
 	Cook cook;
-
 	Menu menu;
-
 	enum CustomerState {DoingNothing, Waiting, Seated, AskedToOrder, Asked, Ordered, MustReorder, WaitingForFood, OrderDone, ReadyToEat, Eating, Leaving};
-
 	enum WaiterState {OnTheJob, WantToGoOnBreak, AboutToGoOnBreak, OnBreak, GoingOffBreak};
-
 	WaiterState state = OnTheJob;
-
 	class MyCustomer {
-
 		Customer c;
-
 		int table;
-
 		CustomerState s;
-
 		String choice;
-
 	}
 
 #### Messages
 	WantToGoOnBreak() {
-
 		state = WantToGoOnBreak;
-
 	}
-
 	CanGoOnBreak() {
-
 		state = AboutToGoOnBreak;
-
 	}
-
 	CantGoOnBreak() {
-
 		state = OnTheJob;
-
 	}
-
 	GoOffBreak() {
-
 		state = GoingOffBreak;
-
 	}
-
 	PleaseSeatCustomer(Customer c, int tableNumber) {
-
 		if there exists mc in customers such that mc.c = c
-
 			mc.s = Waiting;
-
 			mc.table = tableNumber;
-
 	ReadyToOrder(Customer c) {
-
 		if there exists mc in customers such that mc.c = c
-
 			mc.s = AskedToOrder;
-
 	HereIsChoice(Customer c, String choice) {
-
 		if there exists mc in customers such that mc.c = c
-
 			mc.s = Ordered;
-
 			mc.choice = choice;
-
 	OutOfFood(String choice, int table) {
-
 		menu.removeItem(choice);
-
 		if there exists mc in customers such that mc.table = table
-
 			mc.s = MustReorder;
-
 	OrderDone(String choice, int tableNum) {
-
 		if there exists mc in customers such that mc.table = tableNum & mc.choice = choice
-
 			mc.s = OrderDone;
-
 	DoneEating(Customer c) {
-
 		if there exists mc in customer such that mc.c = c
-
 			mc.s = Leaving;
 
 #### Scheduler
 	if state = WantToGoOnBreak
-
 		wantToGoOnBreak();
-
 	if state = AboutToGoOnBreak & doneServingCustomers() //stub
-
 		goOnBreak();
-
 	if state = GoingOffBreak
-
 		goOffBreak();
-
 	if there exists mc in customers such that mc.s = ReadyToEat
-
 		deliverFood(mc);
 	if there exists mc in customers such that mc.s = OrderDone
 		retrieveOrder(mc);
@@ -282,21 +186,251 @@
 
 ### Customer Agent
 #### Data
+	Menu menu;
+	String choice;
+	int tableNumber;
+	Host host;
+	Waiter waiter;
+	enum AgentState {DoingNothing, WaitingInRestaurant, BeingSeated, Seated, ReadyToOrder, Ordered,	Eating, Leaving};
+	enum AgentEvent {none, gotHungry, followWaiter, seated, madeChoice, order, receivedFood, doneEating, doneLeaving};
+	AgentState state = DoingNothing;
+	AgentEvent event = none;
+	Timer timer;
+
 #### Messages
+	GotHungry() {
+		event = gotHungry;
+	}
+	FollowMe(Waiter w, Menu m, int tableNum) {
+		waiter = w;
+		menu = m;
+		tableNumber = tableNum;
+		event = followWaiter;
+	}
+	AnimationFinishedGoToSeat() {
+		event = seated;
+	}
+	WhatWouldYouLike() {
+		event = order;
+	}
+	WantSomethingElse(Menu m) {
+		menu = m;
+		state = ReadyToOrder;
+		event = order;
+	}
+	HereIsFood(String c) {
+		if choice = c
+			event = receivedFood;
+	}
+	AnimationFinishedLeaveRestaurant() {
+		event = doneLeaving;
+	}
+	MadeChoice() {
+		event = madeChoice;
+	}
+	DoneEating() {
+		event = doneEating;
+	}
+
 #### Scheduler
+	if state = DoingNothing & event = gotHungry
+		state = WaitingInRestaurant;
+		goToRestaurant();
+	if state = WaitingInRestaurant & event = followWaiter
+		state = BeingSeated;
+		SitDown();
+	if state = BeingSeated & event = seated
+		state = Seated;
+		timer.schedule(MadeChoice(), choiceTime() //stub);
+	if state = Seated & event = madeChoice
+		state = ReadyToOrder;
+		callWaiter();
+	if state = ReadyToOrder & event = order
+		state = Ordered;
+		giveOrder();
+	if state = Ordered & event = receivedFood
+		state = Eating;
+		EatFood();
+	if state = Eating & event = doneEating
+		state = Leaving;
+		leaveTable();
+	if state = Leaving && event = doneLeaving
+		state = DoingNothing;
+
 #### Actions
+	goToRestaurant() {
+		host.IWantFood(this);
+	}
+	SitDown() {
+		DoGoToSeat(tableNumber);
+	}
+	callWaiter() {
+		waiter.ReadyToOrder(this);
+	}
+	giveOrder() {
+		choice = menu.randomItem(); //stub
+		waiter.HereIsChoice(this, choice);
+	}
+	EatFood() {
+		timer.schedule(DoneEating(), eatingTime() //stub);
+	}
+	leaveTable() {
+		waiter.DoneEating(this);
+		DoExitRestaurant();
+	}
 
 ### Cook Agent
 #### Data
+	List<MyMarket> markets;
+	List<Order> orders;
+	Timer timer;
+	Map<String, Food> foods;
+	enum OrderState {Pending, Cooking, Done, Finished};
+	enum FoodState {Good, MustBeOrdered, Inquired, Ordered, WaitingForOrder};
+	class Order {
+		Waiter w;
+		int table;
+		OrderState s;
+		String choice;
+	}
+	class Food {
+		String type;
+		int cookingTime;
+		int amount;
+		int low;
+		int capacity;
+		FoodState s = Good;
+		Market orderedFrom;
+	}
+
 #### Messages
+	HereIsOrder(Waiter w, String choice, int table) {
+		orders.add(new Order(w, choice, table, Pending));
+	}
+	OrderDone(Order o) {
+		o.s = Done;
+	}
+	CanFulfillOrder(String food, Market m) {
+		if there exists market in markets such that market = m
+			if foods.get(food).s = Inquired
+				foods.get(food).s = Ordered;
+				foods.get(food).orderedFrom = m;
+	}
+	CantFulfillOrder(String food, Market m) {
+		if there exists market in markets such that market = m
+			if foods.get(food).s = Inquired & market.lastMarket() //stub; if no one can fulfill the order then take order anyway
+				foods.get(food).s = Ordered;
+				foods.get(food).orderedFrom = m;
+	}
+	HereIsItemOrder(Market m, string food, int amount) {
+		if there exists market in markets such that market = m
+			foods.get(food).amount += amount;
+			foods.get(food).s = Good;	
+	}
+
 #### Scheduler
+	if there exists f in foods such that f.s = Ordered
+		respondToMarkets(f);
+	if there exists f in foods such that f.s = MustBeOrdered
+		orderFoodFromMarket();
+	if there exists o in orders such that o.s = Done
+		plateIt(o);
+	if there exists o in orders such that o.s = Pending
+		cookIt(o);
+
 #### Actions
+	cookIt(Order o) {
+		if foods.get(o.choice).amount = 0
+			o.w.OutOfFood(o.choice, o.table);
+			o.s = Finished;
+		else
+			o.s = Cooking;
+			timer.schedule(OrderDone(o), foods.get(o.choice).cookingTime));
+			foods.get(o.choice).amount--;
+			if foods.get(o.choice).amount <= foods.get(o.choice).low && foods.get(o.choice).s = Good
+				foods.get(o.choice).s = MustBeOrdered;
+	}
+	plateIt(Order o) {
+		o.w.OrderDone(o.choice, o.table);
+		o.s = Finished;
+	}
+	orderFoodFromMarket() {
+		for each f in foods such that f.s = MustBeOrdered
+			for each m in markets
+				m.HereIsOrder(f.type, f.capacity - f.amount);
+			f.s = Inquired;
+	}
+	respondToMarkets(Food f) {
+		f.orderedFrom.IWouldLikeToOrder(f.type);
+		f.s = WaitingForOrder;
+		for each m in markets such that m != f.orderedFrom
+			m.IWouldNotLikeToOrder(f.type);
+	}
 
 ### Market Agent
 #### Data
+	Cook cook;
+	Timer timer;
+	List<Order> orders;
+	Map<String, Food> foods;
+	enum OrderState {Received, Waiting, Pending, ProducingOrder, Ready, Finished};
+	class Order {
+		String food;
+		int amount;
+		boolean canFulfillOrder;
+		OrderState s;
+	}
+	class Food {
+		String type;
+		int amount;
+		int timeToProduce;
+	}
+
 #### Messages
+	HereIsOrder(String food, int amount) {
+		if foods.get(food).amount >= amount
+			canFulfillOrder = true;
+		else canFulfillOrder = false;
+		orders.add(new Order(food, amount, canFulfillOrder, Received));
+	}
+	IWouldLikeToOrder(String food) {
+		if there exists o in orders such that o.s = Waiting and o.food = food
+			o.s = Pending;
+	}
+	IWouldNotLikeToOrder(String food) {
+		if there exists o in orders such that o.s = Waiting and o.food = food
+			orders.remove(o);
+	}
+	OrderReady(Order o) {
+		o.s = Ready;
+	}
+
 #### Scheduler
+	if there exists o in orders such that o.s = Ready
+		deliverOrder(o);
+	if there exists o in orders such that o.s = Received
+		respondToCook(o);
+	if there exists o in orders such that o.s = Pending
+		produceOrder(o);
+
 #### Actions
+	respondToCook(Order o) {
+		if o.canFulfillOrder = true
+			cook.CanFulfillOrder(o.food, this);
+		else cook.CantFulfillOrder(o.food, this);
+		o.s = Waiting;
+	}
+	produceOrder(Order o) {
+		o.s = ProducingOrder;
+		if o.amount > foods.get(o.food).amount
+			o.amount = foods.get(o.food).amount;
+		timer.schedule(OrderReady(o), foods.get(o.food).timeToProduce*o.amount));
+		foods.get(o.food).amount -= o.amount;
+	}
+	deliverOrder(Order o) {
+		cook.HereIsItemOrder(this, o.food, o.amount);
+		o.s = Finished;
+	}
 
 ### Cashier Agent
 #### Data
