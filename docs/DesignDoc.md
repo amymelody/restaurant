@@ -281,7 +281,7 @@
 
 ### Cook Agent
 #### Data
-	List<MyMarket> markets;
+	List<Market> markets;
 	List<Order> orders;
 	Timer timer;
 	Map<String, Food> foods;
@@ -322,10 +322,11 @@
 				foods.get(food).s = Ordered;
 				foods.get(food).orderedFrom = m;
 	}
-	HereIsItemOrder(Market m, string food, int amount) {
+	HereIsItemOrder(Market m, String food, int amount) {
 		if there exists market in markets such that market = m
-			foods.get(food).amount += amount;
-			foods.get(food).s = Good;	
+			if foods.get(food).s = WaitingForOrder
+				foods.get(food).amount += amount;
+				foods.get(food).s = Good;	
 	}
 
 #### Scheduler
@@ -355,7 +356,7 @@
 		o.s = Finished;
 	}
 	orderFoodFromMarket() {
-		for each f in foods such that f.s = MustBeOrdered
+		for each f in foods
 			for each m in markets
 				m.HereIsOrder(f.type, f.capacity - f.amount);
 			f.s = Inquired;
@@ -388,13 +389,14 @@
 
 #### Messages
 	HereIsOrder(String food, int amount) {
+		boolean canFulfillOrder;
 		if foods.get(food).amount >= amount
 			canFulfillOrder = true;
 		else canFulfillOrder = false;
 		orders.add(new Order(food, amount, canFulfillOrder, Received));
 	}
 	IWouldLikeToOrder(String food) {
-		if there exists o in orders such that o.s = Waiting and o.food = food
+		if there exists o in orders such that o.s = Waiting & o.food = food
 			o.s = Pending;
 	}
 	IWouldNotLikeToOrder(String food) {
