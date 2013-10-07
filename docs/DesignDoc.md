@@ -5,6 +5,7 @@
 	List<Customer> customers;
 	List<MyWaiter> waiters;
 	List<Table> tables;
+	List<String> foods;
 	enum WaiterState {OnTheJob, WantToGoOnBreak, AboutToGoOnBreak, OnBreak};
 	class Table {
 		boolean occupied;
@@ -35,6 +36,9 @@
 		if there exists t in tables such that t.tableNumber = tableNum
 			then t.setUnoccupied();
 	}
+	ReceivedOrder(String food) {
+		foods.add(food);
+	}
 
 #### Scheduler
 	if there exists t in tables such that t.isUnoccupied() & if !customers.isEmpty() & !waiters.isEmpty()
@@ -43,6 +47,9 @@
 		if waiters.size > 1 && noWaitersOnBreak() //stub
 			then canGoOnBreak(mw);
 		else cantGoOnBreak(mw);
+	if there exists f in foods
+		notifyWaiters(f);
+		foods.remove(f);
 		
 #### Actions
 	callWaiter(Waiter w, Customer c, Table t) {
@@ -56,12 +63,18 @@
 	cantGoOnBreak(MyWaiter mw) {
 		mw.w.CantGoOnBreak();
 		mw.s = OnTheJob;
+	notifyWaiters(String food) {
+		for each w in waiters
+			w.FoodArrived(food);
+	}
 
 ### Waiter Agent
 #### Data
 	List<MyCustomer> customers;
+	List<Check> checks;
 	Host host;
 	Cook cook;
+	Cashier cashier;
 	Menu menu;
 	enum CustomerState {DoingNothing, Waiting, Seated, AskedToOrder, Asked, Ordered, MustReorder, WaitingForFood, OrderDone, ReadyToEat, Eating, Leaving};
 	enum WaiterState {OnTheJob, WantToGoOnBreak, AboutToGoOnBreak, OnBreak, GoingOffBreak};
@@ -107,6 +120,13 @@
 	DoneEating(Customer c) {
 		if there exists mc in customer such that mc.c = c
 			mc.s = Leaving;
+	FoodArrived(String food) {
+		if !menu.checkItem(food)
+			menu.addItem(food);
+	}
+	HereIsCheck(Check c) {
+		checks.add(c);
+	}
 
 #### Scheduler
 	if state = WantToGoOnBreak
@@ -129,6 +149,10 @@
 		askToReorder(mc);
 	if there exists mc in customers such that mc.s = Leaving
 		notifyHost(mc);
+	if there exists c in checks
+		if there exists mc in customers such that mc.c = c.cust & mc.s = Leaving
+			giveCheckToCustomer(c);
+			checks.remove(c);
 
 #### Actions
 	wantToGoOnBreak() {
@@ -175,6 +199,7 @@
 	deliverFood(MyCustomer mc) {
 		DoGoToTable(mc.table);
 		mc.c.HereIsFood(mc.choice);
+		cashier.ProduceCheck(mc.c, mc.choice);
 		mc.s = Eating;
 		DoReturnHome();
 	}
@@ -183,16 +208,22 @@
 		DoReturnHome();
 		mc.s = DoingNothing;
 	}
+	giveCheckToCustomer(Check c) {
+		c.cust.HereIsCheck(c);
+	}
 
 ### Customer Agent
 #### Data
 	Menu menu;
 	String choice;
 	int tableNumber;
+	int cash;
+	Check check;
+	Cashier cashier;
 	Host host;
 	Waiter waiter;
-	enum AgentState {DoingNothing, WaitingInRestaurant, BeingSeated, Seated, ReadyToOrder, Ordered,	Eating, Leaving};
-	enum AgentEvent {none, gotHungry, followWaiter, seated, madeChoice, order, receivedFood, doneEating, doneLeaving};
+	enum AgentState {DoingNothing, WaitingInRestaurant, BeingSeated, Seated, ReadyToOrder, Ordered,	Eating, WaitingForCheck, Paying, Leaving};
+	enum AgentEvent {none, gotHungry, followWaiter, seated, madeChoice, order, receivedFood, doneEating, receivedCheck, receivedChange, doneLeaving};
 	AgentState state = DoingNothing;
 	AgentEvent event = none;
 	Timer timer;
@@ -231,6 +262,14 @@
 	DoneEating() {
 		event = doneEating;
 	}
+	HereIsCheck(Check c) {
+		event = receivedCheck;
+	}
+	Change(double cash) {
+		this.cash += cash;
+		check = null;
+		event = receivedChange;
+	}
 
 #### Scheduler
 	if state = DoingNothing & event = gotHungry
@@ -252,8 +291,13 @@
 		state = Eating;
 		EatFood();
 	if state = Eating & event = doneEating
-		state = Leaving;
+		state = WaitingForCheck;
+		askForCheck();
+	if state = WaitingForCheck & event = receivedCheck
+		state = Paying;
 		leaveTable();
+	if state = Paying & event = receivedChange
+		state = Leaving;
 	if state = Leaving && event = doneLeaving
 		state = DoingNothing;
 
@@ -274,8 +318,11 @@
 	EatFood() {
 		timer.schedule(DoneEating(), eatingTime() //stub);
 	}
-	leaveTable() {
+	askForCheck() {
 		waiter.DoneEating(this);
+	}
+	leaveTable() {
+		cashier.Payment(check, cash);
 		DoExitRestaurant();
 	}
 
@@ -284,9 +331,10 @@
 	List<Market> markets;
 	List<Order> orders;
 	Timer timer;
+	Host host;
 	Map<String, Food> foods;
 	enum OrderState {Pending, Cooking, Done, Finished};
-	enum FoodState {Good, MustBeOrdered, Inquired, Ordered, WaitingForOrder};
+	enum FoodState {Good, MustBeOrdered, Inquired, Ordered, WaitingForOrder, ReceivedOrderS};
 	class Order {
 		Waiter w;
 		int table;
@@ -326,10 +374,12 @@
 		if there exists market in markets such that market = m
 			if foods.get(food).s = WaitingForOrder
 				foods.get(food).amount += amount;
-				foods.get(food).s = Good;	
+				foods.get(food).s = ReceivedOrder;
 	}
 
 #### Scheduler
+	if there exists f in foods such that f.s = ReceievedOrder
+		addFood(f);
 	if there exists f in foods such that f.s = Ordered
 		respondToMarkets(f);
 	if there exists f in foods such that f.s = MustBeOrdered
@@ -366,6 +416,10 @@
 		f.s = WaitingForOrder;
 		for each m in markets such that m != f.orderedFrom
 			m.IWouldNotLikeToOrder(f.type);
+	}
+	addFood(Food f) {
+		f.s = Good;
+		host.ReceivedOrder(f.type);
 	}
 
 ### Market Agent
@@ -436,6 +490,31 @@
 
 ### Cashier Agent
 #### Data
+	Map<String, double> prices;
+	List<Check> checks;
+
 #### Messages
+	ProduceCheck(Customer c, String choice) {
+		checks.add(new Check(c, choice, prices.get(choice), Created);
+	}
+	Payment(Check check, double cash) {
+		if there exists c in checks such that c = check
+			c.payment = cash;
+			c.s = Paid;
+	}
+
 #### Scheduler
+	if there exists c in checks such that c.s = Created
+		giveToWaiter(c);
+	if there exists c in checks such that c.s = Paid
+		giveCustomerChange(c);
+
 #### Actions
+	giveToWaiter(Check c) {
+		c.s = GivenToWaiter;
+		c.cust.waiter.HereIsCheck(c);
+	}
+	giveCustomerChange(Check c) {
+		c.s = Done;
+		c.cust.Change(c.payment - c.charge);
+	}
