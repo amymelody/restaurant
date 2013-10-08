@@ -103,23 +103,33 @@
 		if there exists mc in customers such that mc.c = c
 			mc.s = Waiting;
 			mc.table = tableNumber;
+	}
+	IWantToLeave(Customer c) {
+		if there exists mc in customers such that mc.c = c
+			mc.s = Leaving;
+	}
 	ReadyToOrder(Customer c) {
 		if there exists mc in customers such that mc.c = c
 			mc.s = AskedToOrder;
+	}
 	HereIsChoice(Customer c, String choice) {
 		if there exists mc in customers such that mc.c = c
 			mc.s = Ordered;
 			mc.choice = choice;
+	}
 	OutOfFood(String choice, int table) {
 		menu.removeItem(choice);
 		if there exists mc in customers such that mc.table = table
 			mc.s = MustReorder;
+	}
 	OrderDone(String choice, int tableNum) {
 		if there exists mc in customers such that mc.table = tableNum & mc.choice = choice
 			mc.s = OrderDone;
+	}
 	DoneEating(Customer c) {
 		if there exists mc in customers such that mc.c = c
 			mc.s = WaitingForCheck;
+	}
 	FoodArrived(String food) {
 		if !menu.checkItem(food)
 			menu.addItem(food);
@@ -224,8 +234,8 @@
 	Cashier cashier;
 	Host host;
 	Waiter waiter;
-	enum AgentState {DoingNothing, WaitingInRestaurant, BeingSeated, Seated, ReadyToOrder, Ordered,	Eating, WaitingForCheck, Paying, Leaving};
-	enum AgentEvent {none, gotHungry, followWaiter, seated, madeChoice, order, receivedFood, doneEating, receivedCheck, receivedChange, doneLeaving};
+	enum AgentState {DoingNothing, WaitingInRestaurant, BeingSeated, Seated, WantToLeave, ReadyToOrder, Ordered, Eating, WaitingForCheck, Paying, Leaving};
+	enum AgentEvent {none, gotHungry, followWaiter, seated, looksAtMenuAndCries, toldWaiter, madeChoice, order, receivedFood, doneEating, receivedCheck, receivedChange, doneLeaving};
 	AgentState state = DoingNothing;
 	AgentEvent event = none;
 	Timer timer;
@@ -241,7 +251,10 @@
 		event = followWaiter;
 	}
 	AnimationFinishedGoToSeat() {
-		event = seated;
+		if (cash < 6)
+			event = looksAtMenuAndCries;
+		else 
+			event = seated;
 	}
 	WhatWouldYouLike() {
 		event = order;
@@ -265,12 +278,15 @@
 		event = doneEating;
 	}
 	HereIsCheck(int c) {
-		charge = c;
+		charge += c;
 		event = receivedCheck;
 	}
 	Change(int change) {
-		cash += change;
-		charge = 0;
+		if change < 0
+			charge = -change;
+		else
+			cash += change;
+			charge = 0;
 		event = receivedChange;
 	}
 
@@ -281,6 +297,12 @@
 	if state = WaitingInRestaurant & event = followWaiter
 		state = BeingSeated;
 		SitDown();
+	if state = BeingSeated & event = looksAtMenuAndCries
+		state = WantToLeave;
+		tellWaiter();
+	if state = WantToLeave & event = toldWaiter
+		state = Leaving;
+		leaveRestaurant();
 	if state = BeingSeated & event = seated
 		state = Seated;
 		timer.schedule(MadeChoice(), choiceTime() //stub);
@@ -310,6 +332,13 @@
 	}
 	SitDown() {
 		DoGoToSeat(tableNumber);
+	}
+	tellWaiter() {
+		waiter.IWantToLeave(this);
+		event = toldWaiter;
+	}
+	leaveRestaurant() {
+		DoExitRestaurant();
 	}
 	callWaiter() {
 		waiter.ReadyToOrder(this);
@@ -377,7 +406,7 @@
 				foods.get(food).s = Ordered;
 				foods.get(food).orderedFrom = m;
 	}
-	HereIsItemOrder(Market m, String food, int amount) {
+	OrderDelivered(Market m, String food, int amount) {
 		if there exists market in markets such that market = m
 			if foods.get(food).s = WaitingForOrder
 				foods.get(food).amount += amount;
@@ -491,7 +520,7 @@
 		foods.get(o.food).amount -= o.amount;
 	}
 	deliverOrder(Order o) {
-		cook.HereIsItemOrder(this, o.food, o.amount);
+		cook.OrderDelivered(this, o.food, o.amount);
 		o.s = Finished;
 	}
 
