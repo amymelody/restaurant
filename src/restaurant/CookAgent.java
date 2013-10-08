@@ -37,14 +37,6 @@ public class CookAgent extends Agent {
 		foods.put("chicken", chicken);
 		foods.put("salad", salad);
 		foods.put("pizza", pizza);
-		
-		markets.add(new MarketAgent("Market 1", this, 10, 10, 10, 10));
-		markets.add(new MarketAgent("Market 2", this, 0, 0, 0, 0));
-		markets.add(new MarketAgent("Market 3", this, 1, 1, 1, 1));
-		
-		for (MarketAgent market : markets) {
-			market.startThread();
-		}
 	}
 	
 
@@ -57,6 +49,10 @@ public class CookAgent extends Agent {
 	}
 	
 	// Messages
+	
+	public void addMarket(MarketAgent m) {
+		markets.add(m);
+	}
 	
 	public void msgHereIsOrder(WaiterAgent waiter, String choice, int table) {
 		orders.add(new Order(waiter, choice, table, OrderState.Pending));
