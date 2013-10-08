@@ -20,7 +20,7 @@ public class WaiterGui implements Gui {
     //Get rid of the "magic numbers"
     static final int WAITERWIDTH = 20;
 	static final int WAITERHEIGHT = 20;
-	static final int COOKX = 300;
+	static final int COOKX = 200;
 	static final int COOKY = 10;
 	
     public static final int xTable = 150;
