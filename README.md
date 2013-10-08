@@ -12,6 +12,8 @@
   + Press the Add button under "Cusomters" or "Waiters" to add that name to respective list.
   + Select a customer's name in the list to display their name at the top along with a "Hungry" checkbox.
 
+###Running the Different Scenarios
+
 ###Known Problems
   + In some cases the waiter may have to deliver food to a customer twice before the customer gets the food (this scenario is hard to reproduce)
 
