@@ -19,6 +19,7 @@ public class WaiterAgent extends Agent {
 	= new ArrayList<MyCustomer>();
 	HostAgent host;
 	CookAgent cook;
+	CashierAgent cashier;
 
 	private String name;
 	private Semaphore atHome = new Semaphore(0,true);
@@ -26,11 +27,10 @@ public class WaiterAgent extends Agent {
 	private Semaphore atCook = new Semaphore(0,true);
 	private boolean returningHome = false;
 	private Menu menu;
-	private int customerCount = 0;
 	Timer timer = new Timer();
 	
 	public enum CustomerState
-	{DoingNothing, Waiting, Seated, AskedToOrder, Asked, Ordered, MustReorder, WaitingForFood, OrderDone, ReadyToEat, Eating, Leaving};
+	{DoingNothing, Waiting, Seated, AskedToOrder, Asked, Ordered, MustReorder, WaitingForFood, OrderDone, ReadyToEat, Eating, WaitingForCheck, Leaving};
 
 	public enum WaiterState
 	{OnTheJob, WantToGoOnBreak, AboutToGoOnBreak, OnBreak, GoingOffBreak};
@@ -59,6 +59,10 @@ public class WaiterAgent extends Agent {
 	public void setCook(CookAgent cook) {
 		this.cook = cook;
 	}
+	
+	public void setCashier(CashierAgent cashier) {
+		this.cashier = cashier;
+	}
 
 	public String getName() {
 		return name;
@@ -70,14 +74,6 @@ public class WaiterAgent extends Agent {
 	
 	public String toString() {
 		return getName();
-	}
-	
-	public int getCustomerCount() {
-		return customerCount;
-	}
-	
-	public void addCustomer() {
-		customerCount++;
 	}
 	
 	public boolean doneServingCustomers() {
@@ -180,8 +176,23 @@ public class WaiterAgent extends Agent {
 	public void msgDoneEating(CustomerAgent cust) {
 		for (MyCustomer mc : customers) {
 			if (mc.getCust() == cust) {
-				print(mc.getCust() + " leaving table " + mc.getTable());
-				mc.setState(CustomerState.Leaving);
+				mc.setState(CustomerState.WaitingForCheck);
+				stateChanged();
+			}
+		}
+	}
+	
+	public void msgFoodArrived(String food) {
+		if (!menu.checkItem(food)) {
+			menu.addItem(food);
+			stateChanged();
+		}
+	}
+	
+	public void msgHereIsCheck(CustomerAgent c, int charge) {
+		for (MyCustomer mc : customers) {
+			if (mc.getCust() == c) {
+				mc.setCharge(charge);
 				stateChanged();
 			}
 		}
@@ -256,6 +267,12 @@ public class WaiterAgent extends Agent {
 		for (MyCustomer mc : customers) {
 			if (mc.getState() == CustomerState.MustReorder){
 				askToReorder(mc);
+				return true;
+			}
+		}
+		for (MyCustomer mc : customers) {
+			if (mc.getState() == CustomerState.WaitingForCheck){
+				giveCheckToCustomer(mc);
 				return true;
 			}
 		}
@@ -386,6 +403,7 @@ public class WaiterAgent extends Agent {
 		}
 		Do("Here is your order.");
 		mc.getCust().msgHereIsFood(mc.getChoice());
+		cashier.msgProduceCheck(mc.getCust(), mc.choice);
 		mc.setState(CustomerState.Eating);
 		waiterGui.DoReturnHome();
 	}
@@ -394,6 +412,21 @@ public class WaiterAgent extends Agent {
 		host.msgTableAvailable(mc.getTable());
 		waiterGui.DoReturnHome();
 		mc.setState(CustomerState.DoingNothing);
+	}
+	
+	private void giveCheckToCustomer(MyCustomer mc) {
+		waiterGui.DoGoToTable(mc.getTable());
+		try {
+			atTable.acquire();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		Do("Here is your check. The charge is $" + mc.charge);
+		print(mc.getCust() + " leaving table " + mc.getTable());
+		mc.getCust().msgHereIsCheck(mc.charge);
+		mc.setState(CustomerState.Leaving);
+		waiterGui.DoReturnHome();
 	}
 
 	// The animation DoXYZ() routines
@@ -420,11 +453,13 @@ public class WaiterAgent extends Agent {
 		int table;
 		private CustomerState state = CustomerState.DoingNothing;//The start state
 		String choice;
+		int charge;
 
 		MyCustomer(CustomerAgent c, int tableNumber, CustomerState s) {
 			cust = c;
 			table = tableNumber;
 			state = s;
+			charge = 0;
 		}
 
 		CustomerAgent getCust() {
@@ -441,6 +476,10 @@ public class WaiterAgent extends Agent {
 		
 		void setState(CustomerState s) {
 			state = s;
+		}
+		
+		void setCharge(int c) {
+			charge = c;
 		}
 		
 		void setTable(int t) {

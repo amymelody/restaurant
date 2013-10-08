@@ -21,18 +21,21 @@ public class CustomerAgent extends Agent {
 	private Semaphore doneOrdering = new Semaphore(0,true);
 	
 	public int tableNumber; //Number of the table at which the customer is being seated
-
+	private int cash;
+	private int charge;
+	
 	// agent correspondents
 	private HostAgent host;
 	private WaiterAgent waiter;
+	private CashierAgent cashier;
 
 	//    private boolean isHungry = false; //hack for gui
 	public enum AgentState
-	{DoingNothing, WaitingInRestaurant, BeingSeated, Seated, ReadyToOrder, Ordered, Eating, Leaving};
+	{DoingNothing, WaitingInRestaurant, BeingSeated, Seated, ReadyToOrder, Ordered, Eating, WaitingForCheck, Paying, Leaving};
 	private AgentState state = AgentState.DoingNothing;//The start state
 
 	public enum AgentEvent 
-	{none, gotHungry, followWaiter, seated, madeChoice, order, receivedFood, doneEating, doneLeaving};
+	{none, gotHungry, followWaiter, seated, madeChoice, order, receivedFood, doneEating, receivedCheck, receivedChange, doneLeaving};
 	AgentEvent event = AgentEvent.none;
 
 	/**
@@ -44,6 +47,9 @@ public class CustomerAgent extends Agent {
 	public CustomerAgent(String name){
 		super();
 		this.name = name;
+		
+		cash = 30;
+		charge = 0;
 	}
 
 	/**
@@ -51,6 +57,10 @@ public class CustomerAgent extends Agent {
 	 */
 	public void setHost(HostAgent host) {
 		this.host = host;
+	}
+	
+	public void setCashier(CashierAgent cashier) {
+		this.cashier = cashier;
 	}
 
 	public String getCustomerName() {
@@ -66,6 +76,10 @@ public class CustomerAgent extends Agent {
 			return true;
 		}
 		return false;
+	}
+	
+	public WaiterAgent getWaiter() {
+		return waiter;
 	}
 	
 	// Messages
@@ -113,6 +127,19 @@ public class CustomerAgent extends Agent {
 	public void msgAnimationFinishedLeaveRestaurant() {
 		//from animation
 		event = AgentEvent.doneLeaving;
+		stateChanged();
+	}
+	
+	public void  msgHereIsCheck(int c) {
+		charge = c;
+		event = AgentEvent.receivedCheck;
+		stateChanged();
+	}
+	
+	public void msgChange(int change) {
+		cash += change;
+		charge = 0;
+		event = AgentEvent.receivedChange;
 		stateChanged();
 	}
 	
@@ -164,8 +191,17 @@ public class CustomerAgent extends Agent {
 			return true;
 		}
 		if (state == AgentState.Eating && event == AgentEvent.doneEating){
-			state = AgentState.Leaving;
+			state = AgentState.WaitingForCheck;
+			askForCheck();
+			return true;
+		}
+		if (state == AgentState.WaitingForCheck && event == AgentEvent.receivedCheck){
+			state = AgentState.Paying;
 			leaveTable();
+			return true;
+		}
+		if (state == AgentState.Paying && event == AgentEvent.receivedChange){
+			state = AgentState.Leaving;
 			return true;
 		}
 		if (state == AgentState.Leaving && event == AgentEvent.doneLeaving){
@@ -232,10 +268,20 @@ public class CustomerAgent extends Agent {
 		},
 		getHungerLevel() * 1000);//how long to wait before running task
 	}
+	
+	private void askForCheck() {
+		Do("Check please.");
+		waiter.msgDoneEating(this);
+	}
 
 	private void leaveTable() {
-		Do("Leaving.");
-		waiter.msgDoneEating(this);
+		int payment = charge + 10 - charge % 10;
+		if (cash < payment) {
+			payment = cash;
+		}
+		Do("Leaving and paying $" + payment);
+		cashier.msgPayment(this, payment);
+		cash -= payment;
 		customerGui.DoExitRestaurant();
 	}
 
