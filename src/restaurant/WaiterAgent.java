@@ -135,6 +135,16 @@ public class WaiterAgent extends Agent {
 		stateChanged();
 	}
 	
+	public void msgIWantToLeave(CustomerAgent cust) {
+		for (MyCustomer mc : customers) {
+			if (mc.getCust() == cust) {
+				mc.setState(CustomerState.Leaving);
+				stateChanged();
+				return;
+			}
+		}
+	}
+	
 	public void msgReadyToOrder(CustomerAgent cust) {
 		for (MyCustomer mc : customers) {
 			if (mc.getCust() == cust) {

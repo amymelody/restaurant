@@ -36,7 +36,8 @@ public class CashierAgent extends Agent {
 	// Messages
 	
 	public void msgProduceCheck(CustomerAgent c, String choice) {
-		checks.add(new Check(c, choice, prices.get(choice), CheckState.Created));
+		print("$" + c.getCharge());
+		checks.add(new Check(c, choice, prices.get(choice)+c.getCharge(), CheckState.Created));
 		stateChanged();
 	}
 	
@@ -83,7 +84,11 @@ public class CashierAgent extends Agent {
 	
 	private void giveCustomerChange(Check c) {
 		int change = c.payment - c.charge;
-		print(c.cust + ", here is your change of $" + change);
+		if (change >= 0) {
+			print(c.cust + ", here is your change of $" + change);
+		} else {
+			print(c.cust + ", thank you for eating at our restaurant. Please pay $" + -change + " next time you rotten cheapskate.");
+		}
 		c.setState(CheckState.Done);
 		c.cust.msgChange(change);
 	}

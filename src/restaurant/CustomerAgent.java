@@ -31,11 +31,11 @@ public class CustomerAgent extends Agent {
 
 	//    private boolean isHungry = false; //hack for gui
 	public enum AgentState
-	{DoingNothing, WaitingInRestaurant, BeingSeated, Seated, ReadyToOrder, Ordered, Eating, WaitingForCheck, Paying, Leaving};
+	{DoingNothing, WaitingInRestaurant, BeingSeated, Seated, WantToLeave, ReadyToOrder, Ordered, Eating, WaitingForCheck, Paying, Leaving};
 	private AgentState state = AgentState.DoingNothing;//The start state
 
 	public enum AgentEvent 
-	{none, gotHungry, followWaiter, seated, madeChoice, order, receivedFood, doneEating, receivedCheck, receivedChange, doneLeaving};
+	{none, gotHungry, followWaiter, seated, looksAtMenuAndCries, toldWaiter, madeChoice, order, receivedFood, doneEating, receivedCheck, receivedChange, doneLeaving};
 	AgentEvent event = AgentEvent.none;
 
 	/**
@@ -49,6 +49,9 @@ public class CustomerAgent extends Agent {
 		this.name = name;
 		
 		cash = 30;
+		if (name.equals("cheapskate") || name.equals("poor")) {
+			cash = 5;
+		}
 		charge = 0;
 	}
 
@@ -69,6 +72,10 @@ public class CustomerAgent extends Agent {
 	
 	public String getChoice() {
 		return choice;
+	}
+	
+	public int getCharge() {
+		return charge;
 	}
 	
 	public boolean isEating() {
@@ -101,7 +108,12 @@ public class CustomerAgent extends Agent {
 
 	public void msgAnimationFinishedGoToSeat() {
 		//from animation
-		event = AgentEvent.seated;
+		if (name != "cheapskate" && cash < 6) {
+			event = AgentEvent.looksAtMenuAndCries;
+		}
+		else {
+			event = AgentEvent.seated;
+		}
 		stateChanged();
 	}
 	
@@ -131,14 +143,20 @@ public class CustomerAgent extends Agent {
 	}
 	
 	public void  msgHereIsCheck(int c) {
-		charge = c;
+		charge += c;
 		event = AgentEvent.receivedCheck;
 		stateChanged();
 	}
 	
 	public void msgChange(int change) {
-		cash += change;
-		charge = 0;
+		if (change < 0) {
+			charge = -change;
+			cash += 30;
+		}
+		else {
+			cash += change;
+			charge = 0;
+		}
 		event = AgentEvent.receivedChange;
 		stateChanged();
 	}
@@ -162,6 +180,16 @@ public class CustomerAgent extends Agent {
 		if (state == AgentState.WaitingInRestaurant && event == AgentEvent.followWaiter ){
 			state = AgentState.BeingSeated;
 			SitDown();
+			return true;
+		}
+		if (state == AgentState.BeingSeated && event == AgentEvent.looksAtMenuAndCries){
+			state = AgentState.WantToLeave;
+			tellWaiter();
+			return true;
+		}
+		if (state == AgentState.WantToLeave && event == AgentEvent.toldWaiter){
+			state = AgentState.Leaving;
+			leaveRestaurant();
 			return true;
 		}
 		if (state == AgentState.BeingSeated && event == AgentEvent.seated){
@@ -222,6 +250,17 @@ public class CustomerAgent extends Agent {
 	private void SitDown() {
 		Do("Being seated. Going to table");
 		customerGui.DoGoToSeat(tableNumber);//hack; only one table
+	}
+	
+	private void tellWaiter() {
+		Do("This food is too expensive. I'm leaving.");
+		waiter.msgIWantToLeave(this);
+		event = AgentEvent.toldWaiter;
+	}
+	
+	private void leaveRestaurant() {
+		Do("Leaving restaurant");
+		customerGui.DoExitRestaurant();
 	}
 	
 	private void callWaiter() {
