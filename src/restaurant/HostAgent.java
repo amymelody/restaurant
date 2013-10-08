@@ -21,6 +21,7 @@ public class HostAgent extends Agent {
 	public List<CustomerAgent> customers
 	= new ArrayList<CustomerAgent>();
 	public List<MyWaiter> waiters = new ArrayList<MyWaiter>();
+	public List<String> foods = new ArrayList<String>();
 	public Collection<Table> tables;
 	//note that tables is typed with Collection semantics.
 	//Later we will see how it is implemented
@@ -117,6 +118,11 @@ public class HostAgent extends Agent {
 			}
 		}
 	}
+	
+	public void msgReceivedOrder(String food) {
+		foods.add(food);
+		stateChanged();
+	}
 
 	/**
 	 * Scheduler.  Determine what action is called for, and do it.
@@ -134,7 +140,7 @@ public class HostAgent extends Agent {
 					if (waiters.size() > 1) {
 						for (int i = waiters.size()-2; i>=0; i--) {
 							if (waiters.get(i+1).getState() == WaiterState.OnTheJob || waiters.get(i+1).getState() == WaiterState.WantToGoOnBreak) {
-								if (waiters.get(i).getWaiter().getCustomerCount() > waiters.get(i+1).getWaiter().getCustomerCount()) {
+								if (waiters.get(i).customerCount > waiters.get(i+1).customerCount) {
 									index = i+1;
 								}
 							}
@@ -144,7 +150,7 @@ public class HostAgent extends Agent {
 						index = 1;
 					}
 					callWaiter(waiters.get(index).getWaiter(), customers.get(0), table);//the action
-					waiters.get(index).getWaiter().addCustomer();
+					waiters.get(index).addCustomer();
 					return true;//return true to the abstract agent to reinvoke the scheduler.
 				}
 			}
@@ -159,6 +165,12 @@ public class HostAgent extends Agent {
 				cantGoOnBreak(mw);
 				return true;
 			}
+		}
+		
+		for (String f : foods) {
+			notifyWaiters(f);
+			foods.remove(f);
+			return true;
 		}
 
 		return false;
@@ -191,6 +203,12 @@ public class HostAgent extends Agent {
 		mw.getWaiter().msgCantGoOnBreak();
 		mw.setState(WaiterState.OnTheJob);
 	}
+	
+	private void notifyWaiters(String food) {
+		for (MyWaiter mw : waiters) {
+			mw.getWaiter().msgFoodArrived(food);
+		}
+	}
 
 	//utilities
 
@@ -222,10 +240,12 @@ public class HostAgent extends Agent {
 	private class MyWaiter {
 		WaiterAgent waiter;
 		WaiterState state;
+		int customerCount;
 
 		MyWaiter(WaiterAgent w) {
 			waiter = w;
 			state = WaiterState.OnTheJob;
+			customerCount = 0;
 		}
 
 		WaiterAgent getWaiter() {
@@ -238,6 +258,10 @@ public class HostAgent extends Agent {
 		
 		void setState(WaiterState w) {
 			state = w;
+		}
+		
+		void addCustomer() {
+			customerCount++;
 		}
 	}
 }
