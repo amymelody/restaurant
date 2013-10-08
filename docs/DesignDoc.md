@@ -71,17 +71,17 @@
 ### Waiter Agent
 #### Data
 	List<MyCustomer> customers;
-	List<Check> checks;
 	Host host;
 	Cook cook;
 	Cashier cashier;
 	Menu menu;
-	enum CustomerState {DoingNothing, Waiting, Seated, AskedToOrder, Asked, Ordered, MustReorder, WaitingForFood, OrderDone, ReadyToEat, Eating, Leaving};
+	enum CustomerState {DoingNothing, Waiting, Seated, AskedToOrder, Asked, Ordered, MustReorder, WaitingForFood, OrderDone, ReadyToEat, Eating, WaitingForCheck, Leaving};
 	enum WaiterState {OnTheJob, WantToGoOnBreak, AboutToGoOnBreak, OnBreak, GoingOffBreak};
 	WaiterState state = OnTheJob;
 	class MyCustomer {
 		Customer c;
 		int table;
+		int charge;
 		CustomerState s;
 		String choice;
 	}
@@ -118,14 +118,15 @@
 		if there exists mc in customers such that mc.table = tableNum & mc.choice = choice
 			mc.s = OrderDone;
 	DoneEating(Customer c) {
-		if there exists mc in customer such that mc.c = c
-			mc.s = Leaving;
+		if there exists mc in customers such that mc.c = c
+			mc.s = WaitingForCheck;
 	FoodArrived(String food) {
 		if !menu.checkItem(food)
 			menu.addItem(food);
 	}
-	HereIsCheck(Check c) {
-		checks.add(c);
+	HereIsCheck(Customer cust, int charge) {
+		if there exists mc in customers such that mc.c = cust
+			mc.charge = charge;
 	}
 
 #### Scheduler
@@ -147,12 +148,10 @@
 		giveOrderToCook(mc);
 	if there exists mc in customers such that mc.s = MustReorder
 		askToReorder(mc);
+	if there exists mc in customers such that mc.s = WaitingForCheck
+		giveCheckToCustomer(mc);
 	if there exists mc in customers such that mc.s = Leaving
 		notifyHost(mc);
-	if there exists c in checks
-		if there exists mc in customers such that mc.c = c.cust & mc.s = Leaving
-			giveCheckToCustomer(c);
-			checks.remove(c);
 
 #### Actions
 	wantToGoOnBreak() {
@@ -208,8 +207,11 @@
 		DoReturnHome();
 		mc.s = DoingNothing;
 	}
-	giveCheckToCustomer(Check c) {
-		c.cust.HereIsCheck(c);
+	giveCheckToCustomer(MyCustomer mc) {
+		DoGoToTable(mc.table);
+		mc.c.HereIsCheck(mc.charge);
+		mc.s = Leaving;
+		DoReturnHome();
 	}
 
 ### Customer Agent
@@ -218,7 +220,7 @@
 	String choice;
 	int tableNumber;
 	int cash;
-	Check check;
+	int charge;
 	Cashier cashier;
 	Host host;
 	Waiter waiter;
@@ -262,12 +264,13 @@
 	DoneEating() {
 		event = doneEating;
 	}
-	HereIsCheck(Check c) {
+	HereIsCheck(int c) {
+		charge = c;
 		event = receivedCheck;
 	}
-	Change(double cash) {
-		this.cash += cash;
-		check = null;
+	Change(int change) {
+		cash += change;
+		charge = 0;
 		event = receivedChange;
 	}
 
@@ -322,7 +325,11 @@
 		waiter.DoneEating(this);
 	}
 	leaveTable() {
-		cashier.Payment(check, cash);
+		int payment = charge + 10 - charge % 10; //customer pays charge rounded up to next tens place
+		if cash < payment
+			payment = cash; 
+		cashier.Payment(this, payment);
+		cash -= payment;
 		DoExitRestaurant();
 	}
 
@@ -490,15 +497,23 @@
 
 ### Cashier Agent
 #### Data
-	Map<String, double> prices;
+	Map<String, int> prices;
 	List<Check> checks;
+	enum CheckState {Created, GivenToWaiter, Paid, Done};
+	class Check {
+		Customer cust;
+		String choice;
+		int charge;
+		int payment;
+		CheckState s;
+	}
 
 #### Messages
 	ProduceCheck(Customer c, String choice) {
 		checks.add(new Check(c, choice, prices.get(choice), Created);
 	}
-	Payment(Check check, double cash) {
-		if there exists c in checks such that c = check
+	Payment(Customer c, int cash) {
+		if there exists c in checks such that c.cust = c and c.s = GivenToWaiter
 			c.payment = cash;
 			c.s = Paid;
 	}
@@ -512,7 +527,7 @@
 #### Actions
 	giveToWaiter(Check c) {
 		c.s = GivenToWaiter;
-		c.cust.waiter.HereIsCheck(c);
+		c.cust.waiter.HereIsCheck(c.cust, c.charge);
 	}
 	giveCustomerChange(Check c) {
 		c.s = Done;
