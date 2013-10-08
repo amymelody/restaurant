@@ -85,7 +85,7 @@ public class CookAgent extends Agent {
 		}
 	}
 	
-	public void msgHereIsItemOrder(MarketAgent m, String food, int amount) {
+	public void msgOrderDelivered(MarketAgent m, String food, int amount) {
 		for (MarketAgent market : markets) {
 			if (market == m) {
 				if (foods.get(food).getState() == FoodState.WaitingForOrder) {

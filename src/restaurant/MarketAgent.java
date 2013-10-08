@@ -138,7 +138,7 @@ public class MarketAgent extends Agent {
 	
 	private void deliverOrder(Order o) {
 		print("Here is your order of " + o.amount + " " + o.food + "s");
-		cook.msgHereIsItemOrder(this, o.food, o.amount);
+		cook.msgOrderDelivered(this, o.food, o.amount);
 		o.setState(OrderState.Finished);
 	}
 	
