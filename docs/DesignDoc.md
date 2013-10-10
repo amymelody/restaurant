@@ -15,6 +15,10 @@
 		Waiter w;
 		WaiterState s;
 	}
+	class MyCustomer {
+		Customer c;
+		boolean waiting;
+	}
 
 #### Messages
 	WantToGoOnBreak(Waiter w) {
@@ -31,16 +35,24 @@
 	}
 	IWantFood(Customer c) {
 		customers.add(c);
+		if restaurantFull() //stub
+			c.RestaurantIsFull();
 	}
-	TableAvailable(int tableNum) {
+	TableAvailable(Customer c, int tableNum) {
 		if there exists t in tables such that t.tableNumber = tableNum
 			then t.setUnoccupied();
 	}
 	ReceivedOrder(String food) {
 		foods.add(food);
 	}
+	ImLeaving(Customer c) {
+		if there exists cust in customers such that cust = c
+			customers.remove(c);
+	}
 
 #### Scheduler
+	if there exists mc in customers such that mc.waiting = true && restaurantFull() //stub
+		tellCustomer(mc);	
 	if there exists t in tables such that t.isUnoccupied() & if !customers.isEmpty() & !waiters.isEmpty()
 		then callWaiter(waiters.selectWaiter() //stub, customers.get(0), table);
 	if there exists mw in waiters such that mw.s = WantToGoOnBreak
@@ -66,6 +78,10 @@
 	notifyWaiters(String food) {
 		for each w in waiters
 			w.FoodArrived(food);
+	}
+	tellCustomer(MyCustomer mc) {
+		mc.c.RestaurantIsFull();
+		mc.waiting = false;
 	}
 
 ### Waiter Agent
@@ -213,7 +229,7 @@
 		DoReturnHome();
 	}
 	notifyHost(MyCustomer mc) {
-		host.TableAvailable(mc.table);
+		host.TableAvailable(mc.c, mc.table);
 		DoReturnHome();
 		mc.s = DoingNothing;
 	}
@@ -235,7 +251,7 @@
 	Host host;
 	Waiter waiter;
 	enum AgentState {DoingNothing, WaitingInRestaurant, BeingSeated, Seated, WantToLeave, ReadyToOrder, Ordered, Eating, WaitingForCheck, Paying, Leaving};
-	enum AgentEvent {none, gotHungry, followWaiter, seated, looksAtMenuAndCries, toldWaiter, madeChoice, order, receivedFood, doneEating, receivedCheck, receivedChange, doneLeaving};
+	enum AgentEvent {none, gotHungry, gotImpatient, followWaiter, seated, looksAtMenuAndCries, toldWaiter, madeChoice, order, receivedFood, doneEating, receivedCheck, receivedChange, doneLeaving};
 	AgentState state = DoingNothing;
 	AgentEvent event = none;
 	Timer timer;
@@ -243,6 +259,10 @@
 #### Messages
 	GotHungry() {
 		event = gotHungry;
+	}
+	RestaurantIsFull() {
+		if name = "impatient"
+			event = gotImpatient;
 	}
 	FollowMe(Waiter w, Menu m, int tableNum) {
 		waiter = w;
@@ -301,6 +321,9 @@
 	if state = WaitingInRestaurant & event = followWaiter
 		state = BeingSeated;
 		SitDown();
+	if state = WaitingInRestaurant & event = gotImpatient
+		state = Leaving;
+		leaveAndNotifyHost();
 	if state = BeingSeated & event = looksAtMenuAndCries
 		state = WantToLeave;
 		tellWaiter();
@@ -333,6 +356,10 @@
 #### Actions
 	goToRestaurant() {
 		host.IWantFood(this);
+	}
+	leaveAndNotifyHost() {
+		DoExitRestaurant();
+		host.ImLeaving(this);
 	}
 	SitDown() {
 		DoGoToSeat(tableNumber);
