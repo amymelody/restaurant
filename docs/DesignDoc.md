@@ -348,7 +348,9 @@
 		waiter.ReadyToOrder(this);
 	}
 	giveOrder() {
-		choice = menu.randomItem(); //stub
+		do
+			choice = menu.randomItem(); //stub
+		while (menu.getPrice(choice) > cash)
 		waiter.HereIsChoice(this, choice);
 	}
 	EatFood() {
