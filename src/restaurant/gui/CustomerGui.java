@@ -17,7 +17,7 @@ public class CustomerGui implements Gui{
 
 	private int xPos, yPos;
 	private int xDestination, yDestination;
-	private enum Command {noCommand, GoToSeat, LeaveRestaurant};
+	private enum Command {noCommand, GoToSeat, GoToCashier, LeaveRestaurant};
 	private Command command=Command.noCommand;
 	private boolean ordering;
 	private Timer timer = new Timer();
@@ -25,6 +25,8 @@ public class CustomerGui implements Gui{
 	//Get rid of the "magic numbers"
 	static final int CUSTWIDTH = 20;
 	static final int CUSTHEIGHT = 20;
+	static final int CASHIERX = -20;
+	static final int CASHIERY = 100;
 	
 	public static final int xTable = 150;
 	public static final int yTable = 250;
@@ -70,6 +72,9 @@ public class CustomerGui implements Gui{
 				System.out.println("about to call gui.setCustomerEnabled(agent);");
 				isHungry = false;
 				gui.setCustomerEnabled(agent);
+			}
+			else if (command==Command.GoToCashier) {
+				agent.msgAtCashier();
 			}
 			command=Command.noCommand;
 		}
@@ -125,6 +130,12 @@ public class CustomerGui implements Gui{
 		xDestination = (int)tablePositions.get(seatnumber).getX();
 		yDestination = (int)tablePositions.get(seatnumber).getY();
 		command = Command.GoToSeat;
+	}
+	
+	public void DoGoToCashier() {
+		xDestination = CASHIERX;
+		yDestination = CASHIERY;
+		command = Command.GoToCashier;
 	}
 
 	public void DoExitRestaurant() {

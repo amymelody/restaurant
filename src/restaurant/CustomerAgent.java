@@ -19,6 +19,7 @@ public class CustomerAgent extends Agent {
 	private Menu menu;
 	private String choice;
 	private Semaphore doneOrdering = new Semaphore(0,true);
+	private Semaphore atCashier = new Semaphore(0,true);
 	
 	public int tableNumber; //Number of the table at which the customer is being seated
 	private int cash;
@@ -182,6 +183,11 @@ public class CustomerAgent extends Agent {
 		doneOrdering.release();// = true;
 		stateChanged();
 	}
+	
+	public void msgAtCashier() {//from animation
+		atCashier.release();// = true;
+		stateChanged();
+	}
 
 	/**
 	 * Scheduler.  Determine what action is called for, and do it.
@@ -252,6 +258,7 @@ public class CustomerAgent extends Agent {
 		}
 		if (state == AgentState.Paying && event == AgentEvent.receivedChange){
 			state = AgentState.Leaving;
+			leaveRestaurant();
 			return true;
 		}
 		if (state == AgentState.Leaving && event == AgentEvent.doneLeaving){
@@ -344,14 +351,21 @@ public class CustomerAgent extends Agent {
 	}
 
 	private void leaveTable() {
+		Do("Going to cashier");
+		customerGui.DoGoToCashier();
+		try {
+			atCashier.acquire();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		int payment = charge + 10 - charge % 10;
 		if (cash < payment) {
 			payment = cash;
 		}
-		Do("Leaving and paying $" + payment);
+		Do("Paying $" + payment);
 		cashier.msgPayment(this, payment);
 		cash -= payment;
-		customerGui.DoExitRestaurant();
 	}
 
 	// Accessors, etc.
