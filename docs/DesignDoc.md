@@ -251,7 +251,7 @@
 		event = followWaiter;
 	}
 	AnimationFinishedGoToSeat() {
-		if (cash < 6)
+		if (cash < menu.lowestPrice() //stub)
 			event = looksAtMenuAndCries;
 		else 
 			event = seated;
@@ -261,8 +261,12 @@
 	}
 	WantSomethingElse(Menu m) {
 		menu = m;
-		state = ReadyToOrder;
-		event = order;
+		if (cash < menu.lowestPrice() //stub)
+			state = BeingSeated;
+			event = looksAtMenuAndCries;
+		else
+			state = ReadyToOrder;
+			event = order;
 	}
 	HereIsFood(String c) {
 		if choice = c
