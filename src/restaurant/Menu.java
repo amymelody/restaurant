@@ -18,6 +18,10 @@ public class Menu {
 		prices.remove(item);
 	}
 	
+	public int getPrice(String item) {
+		return prices.get(item);
+	}
+	
 	public int lowestPrice() {
 		int low = 10000;
 		for (Integer price : prices.values()) {

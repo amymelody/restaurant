@@ -52,7 +52,7 @@ public class CustomerAgent extends Agent {
 		if (name.equals("cheapskate") || name.equals("poor")) {
 			cash = 5;
 		}
-		if (name.equals("salad")) {
+		if (name.equals("enoughforsalad")) {
 			cash = 7;
 		}
 		charge = 0;
@@ -281,7 +281,9 @@ public class CustomerAgent extends Agent {
 		if (menu.checkItem(name)) {
 			choice = name;
 		} else {
-			choice = menu.randomItem();
+			do {
+				choice = menu.randomItem();
+			} while (menu.getPrice(choice) > cash);
 		}
 		print("I would like to order " + choice);
 		customerGui.order();
