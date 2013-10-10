@@ -29,6 +29,8 @@ public class WaiterAgent extends Agent {
 	private Menu menu;
 	Timer timer = new Timer();
 	
+	Map<String, Integer> prices = new HashMap<String, Integer>();
+	
 	public enum CustomerState
 	{DoingNothing, Waiting, Seated, AskedToOrder, Asked, Ordered, MustReorder, WaitingForFood, OrderDone, ReadyToEat, Eating, WaitingForCheck, Leaving};
 
@@ -42,11 +44,16 @@ public class WaiterAgent extends Agent {
 		super();
 		this.name = name;
 		
+		prices.put("steak", 16);
+		prices.put("chicken", 11);
+		prices.put("salad", 6);
+		prices.put("pizza", 9);
+		
 		menu = new Menu();
-		menu.addItem("steak");
-		menu.addItem("chicken");
-		menu.addItem("salad");
-		menu.addItem("pizza");
+		menu.addItem("steak", prices.get("steak"));
+		menu.addItem("chicken", prices.get("chicken"));
+		menu.addItem("salad", prices.get("salad"));
+		menu.addItem("pizza", prices.get("pizza"));
 	}
 	
 	/**
@@ -138,6 +145,7 @@ public class WaiterAgent extends Agent {
 	public void msgIWantToLeave(CustomerAgent cust) {
 		for (MyCustomer mc : customers) {
 			if (mc.getCust() == cust) {
+				print(mc.getCust() + " leaving table " + mc.getTable());
 				mc.setState(CustomerState.Leaving);
 				stateChanged();
 				return;
@@ -194,7 +202,7 @@ public class WaiterAgent extends Agent {
 	
 	public void msgFoodArrived(String food) {
 		if (!menu.checkItem(food)) {
-			menu.addItem(food);
+			menu.addItem(food, prices.get(food));
 			stateChanged();
 		}
 	}

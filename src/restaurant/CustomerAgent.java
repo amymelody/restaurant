@@ -52,6 +52,9 @@ public class CustomerAgent extends Agent {
 		if (name.equals("cheapskate") || name.equals("poor")) {
 			cash = 5;
 		}
+		if (name.equals("salad")) {
+			cash = 7;
+		}
 		charge = 0;
 	}
 
@@ -108,7 +111,7 @@ public class CustomerAgent extends Agent {
 
 	public void msgAnimationFinishedGoToSeat() {
 		//from animation
-		if (name != "cheapskate" && cash < 6) {
+		if (name != "cheapskate" && cash < menu.lowestPrice()) {
 			event = AgentEvent.looksAtMenuAndCries;
 		}
 		else {
@@ -124,8 +127,13 @@ public class CustomerAgent extends Agent {
 	
 	public void msgWantSomethingElse(Menu menu) {
 		this.menu = menu;
-		state = AgentState.ReadyToOrder;
-		event = AgentEvent.order;
+		if (name != "cheapskate" && cash < menu.lowestPrice()) {
+			state = AgentState.BeingSeated;
+			event = AgentEvent.looksAtMenuAndCries;
+		} else {
+			state = AgentState.ReadyToOrder;
+			event = AgentEvent.order;
+		}
 		stateChanged();
 	}
 	
