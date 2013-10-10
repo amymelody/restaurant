@@ -18,8 +18,8 @@ public class HostAgent extends Agent {
 	static final int NTABLES = 3;//a global for the number of tables.
 	//Notice that we implement waitingCustomers using ArrayList, but type it
 	//with List semantics.
-	public List<CustomerAgent> customers
-	= new ArrayList<CustomerAgent>();
+	public List<MyCustomer> customers
+	= new ArrayList<MyCustomer>();
 	public List<MyWaiter> waiters = new ArrayList<MyWaiter>();
 	public List<String> foods = new ArrayList<String>();
 	public Collection<Table> tables;
@@ -60,6 +60,15 @@ public class HostAgent extends Agent {
 	
 	public String toString() {
 		return getName();
+	}
+	
+	public boolean restaurantFull() {
+		for (Table table : tables) {
+			if (!table.isOccupied()) {
+				return false;
+			}
+		}
+		return true;
 	}
 	
 	public boolean noWaitersOnBreak() {
@@ -106,7 +115,7 @@ public class HostAgent extends Agent {
 	}
 	
 	public void msgIWantFood(CustomerAgent cust) {
-		customers.add(cust);
+		customers.add(new MyCustomer(cust));
 		stateChanged();
 	}
 
@@ -123,11 +132,26 @@ public class HostAgent extends Agent {
 		foods.add(food);
 		stateChanged();
 	}
+	
+	public void msgImLeaving(CustomerAgent c) {
+		for (MyCustomer mc : customers) {
+			if (mc.cust == c) {
+				customers.remove(mc);
+				stateChanged();
+				return;
+			}
+		}
+	}
 
 	/**
 	 * Scheduler.  Determine what action is called for, and do it.
 	 */
 	protected boolean pickAndExecuteAnAction() {
+		for (MyCustomer mc : customers) {
+			if (mc.waiting && restaurantFull()) {
+				tellCustomer(mc);
+			}
+		}
 		/* Think of this next rule as:
             Does there exist a table and customer,
             so that table is unoccupied and customer is waiting.
@@ -181,15 +205,15 @@ public class HostAgent extends Agent {
 
 	// Actions
 
-	private void callWaiter(WaiterAgent waiter, CustomerAgent customer, Table table) {
-		print(waiter + ", please bring " + customer + " to " + table);
-		waiter.msgPleaseSeatCustomer(customer, table.getTableNumber());
+	private void callWaiter(WaiterAgent waiter, MyCustomer mc, Table table) {
+		print(waiter + ", please bring " + mc.cust + " to " + table);
+		waiter.msgPleaseSeatCustomer(mc.cust, table.getTableNumber());
 		for (Table t : tables) {
 			if (t == table) {
 				t.setOccupied(true);
 			}
 		}
-		customers.remove(customer);
+		customers.remove(mc);
 	}
 	
 	private void canGoOnBreak(MyWaiter mw) {
@@ -208,6 +232,12 @@ public class HostAgent extends Agent {
 		for (MyWaiter mw : waiters) {
 			mw.getWaiter().msgFoodArrived(food);
 		}
+	}
+	
+	private void tellCustomer(MyCustomer mc) {
+		print(mc.cust + ", the restaurant is full");
+		mc.cust.msgRestaurantIsFull();
+		mc.waiting = false;
 	}
 
 	//utilities
@@ -234,6 +264,16 @@ public class HostAgent extends Agent {
 		
 		public int getTableNumber() {
 			return tableNumber;
+		}
+	}
+	
+	private class MyCustomer {
+		CustomerAgent cust;
+		boolean waiting;
+
+		MyCustomer(CustomerAgent c) {
+			cust = c;
+			waiting = true;
 		}
 	}
 	

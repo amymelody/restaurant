@@ -35,7 +35,7 @@ public class CustomerAgent extends Agent {
 	private AgentState state = AgentState.DoingNothing;//The start state
 
 	public enum AgentEvent 
-	{none, gotHungry, followWaiter, seated, looksAtMenuAndCries, toldWaiter, madeChoice, order, receivedFood, doneEating, receivedCheck, receivedChange, doneLeaving};
+	{none, gotHungry, gotImpatient, followWaiter, seated, looksAtMenuAndCries, toldWaiter, madeChoice, order, receivedFood, doneEating, receivedCheck, receivedChange, doneLeaving};
 	AgentEvent event = AgentEvent.none;
 
 	/**
@@ -97,6 +97,15 @@ public class CustomerAgent extends Agent {
 	public void gotHungry() {//from animation
 		print("I'm hungry");
 		event = AgentEvent.gotHungry;
+		stateChanged();
+	}
+	
+	public void msgRestaurantIsFull() {
+		if (name.equals("impatient")) {
+			event = AgentEvent.gotImpatient;
+		} else {
+			Do("I'll wait for a table to open");
+		}
 		stateChanged();
 	}
 
@@ -180,14 +189,19 @@ public class CustomerAgent extends Agent {
 	protected boolean pickAndExecuteAnAction() {
 		//	CustomerAgent is a finite state machine
 
-		if (state == AgentState.DoingNothing && event == AgentEvent.gotHungry ){
+		if (state == AgentState.DoingNothing && event == AgentEvent.gotHungry){
 			state = AgentState.WaitingInRestaurant;
 			goToRestaurant();
 			return true;
 		}
-		if (state == AgentState.WaitingInRestaurant && event == AgentEvent.followWaiter ){
+		if (state == AgentState.WaitingInRestaurant && event == AgentEvent.followWaiter){
 			state = AgentState.BeingSeated;
 			SitDown();
+			return true;
+		}
+		if (state == AgentState.WaitingInRestaurant && event == AgentEvent.gotImpatient){
+			state = AgentState.Leaving;
+			leaveAndNotifyHost();
 			return true;
 		}
 		if (state == AgentState.BeingSeated && event == AgentEvent.looksAtMenuAndCries){
@@ -253,6 +267,12 @@ public class CustomerAgent extends Agent {
 	private void goToRestaurant() {
 		Do("Going to restaurant");
 		host.msgIWantFood(this);//send our instance, so he can respond to us
+	}
+	
+	private void leaveAndNotifyHost() {
+		Do("I don't want to wait. Leaving restaurant");
+		customerGui.DoExitRestaurant();
+		host.msgImLeaving(this);
 	}
 
 	private void SitDown() {
