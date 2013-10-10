@@ -36,7 +36,6 @@ public class CashierAgent extends Agent {
 	// Messages
 	
 	public void msgProduceCheck(CustomerAgent c, String choice) {
-		print("$" + c.getCharge());
 		checks.add(new Check(c, choice, prices.get(choice)+c.getCharge(), CheckState.Created));
 		stateChanged();
 	}
