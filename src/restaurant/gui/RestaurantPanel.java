@@ -38,12 +38,13 @@ public class RestaurantPanel extends JPanel {
         this.gui = gui;
         
         markets.add(new MarketAgent("Market 1", cook, 10, 10, 10, 10));
-		markets.add(new MarketAgent("Market 2", cook, 0, 0, 0, 0));
-		markets.add(new MarketAgent("Market 3", cook, 1, 1, 1, 1));
+		markets.add(new MarketAgent("Market 2", cook, 1, 1, 1, 1));
+		markets.add(new MarketAgent("Market 3", cook, 2, 2, 2, 2));
 		
 		cook.addMarket(markets.get(0));
 		cook.addMarket(markets.get(1));
 		cook.addMarket(markets.get(2));
+		cook.setHost(host);
         
         host.startThread();
         cook.startThread();

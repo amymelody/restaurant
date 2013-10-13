@@ -4,6 +4,8 @@ import agent.Agent;
 
 import java.util.*;
 
+import restaurant.HostAgent.WaiterState;
+
 
 /**
  * Restaurant Cook Agent
@@ -12,26 +14,30 @@ import java.util.*;
 public class CookAgent extends Agent {
 	public List<Order> orders
 	= new ArrayList<Order>();
-	public List<MarketAgent> markets = new ArrayList<MarketAgent>();
+	public List<MyMarket> markets = new ArrayList<MyMarket>();
+	public List<ItemOrder> itemOrders = new ArrayList<ItemOrder>();
 
+	private HostAgent host;
 	private String name;
 	private Timer timer = new Timer();
+	private boolean orderedItems;
 	
-	Food steak = new Food("steak", 15, 3, 1);
-	Food chicken = new Food("chicken", 20, 3, 1);
-	Food salad = new Food("salad", 5, 3, 1);
-	Food pizza = new Food("pizza", 10, 3, 1);
+	Food steak = new Food("steak", 15, 3, 1, 1);
+	Food chicken = new Food("chicken", 20, 3, 1, 1);
+	Food salad = new Food("salad", 5, 3, 2, 1);
+	Food pizza = new Food("pizza", 10, 3, 3, 1);
 	
 	Map<String, Food> foods = new HashMap<String, Food>();
 	
 	public enum OrderState
 	{Pending, Cooking, Done, Finished};
 	public enum FoodState
-	{Good, MustBeOrdered, Inquired, Ordered, WaitingForOrder};
+	{Enough, MustBeOrdered, Ordered, ReceivedOrder};
 
 	public CookAgent(String name) {
 		super();
 		this.name = name;
+		orderedItems = false;
 		
 		foods.put("steak", steak);
 		foods.put("chicken", chicken);
@@ -48,10 +54,14 @@ public class CookAgent extends Agent {
 		return orders;
 	}
 	
+	public void setHost(HostAgent h) {
+		host = h;
+	}
+	
 	// Messages
 	
 	public void addMarket(MarketAgent m) {
-		markets.add(m);
+		markets.add(new MyMarket(m));
 	}
 	
 	public void msgHereIsOrder(WaiterAgent waiter, String choice, int table) {
@@ -59,40 +69,22 @@ public class CookAgent extends Agent {
 		stateChanged();
 	}
 	
-	public void msgCanFulfillOrder(String food, MarketAgent m) {
-		for (MarketAgent market : markets) {
-			if (market == m) {
-				foods.get(food).setState(FoodState.Ordered);
-				foods.get(food).setOrderedFrom(m);
-				//print("Can, I will order from " + m.getName());
-				//print("Can, " + foods.get(food).getState().toString());
-				stateChanged();
-			}
+	public void msgCantFulfillOrder(List<ItemOrder> orders) {
+		for (ItemOrder o : orders) {
+			foods.get(o.getFood()).setState(FoodState.MustBeOrdered);
 		}
+		stateChanged();
 	}
 	
-	public void msgCantFulfillOrder(String food, MarketAgent m) {
-		for (MarketAgent market : markets) {
-			if (market == m) {
-				if (foods.get(food).getState() == FoodState.Inquired && markets.indexOf(market) == markets.size()-1) {
-					//print("Can't, " + foods.get(food).getState().toString());
-					foods.get(food).setState(FoodState.Ordered);
-					foods.get(food).setOrderedFrom(m);
-					//print("Can't, I will order from " + m.getName());
-					stateChanged();
-				}
-			}
+	public void msgOrderDelivered(List<ItemOrder> orders) {
+		List<ItemOrder> temp = new ArrayList<ItemOrder>();
+		for (ItemOrder o : orders) {
+			temp.add(o);
 		}
-	}
-	
-	public void msgOrderDelivered(MarketAgent m, String food, int amount) {
-		for (MarketAgent market : markets) {
-			if (market == m) {
-				if (foods.get(food).getState() == FoodState.WaitingForOrder) {
-					foods.get(food).setAmount(foods.get(food).getAmount()+amount);
-					foods.get(food).setState(FoodState.Good);
-				}
-			}
+		for (ItemOrder o : temp) {
+			foods.get(o.getFood()).amount += o.getAmount();
+			print(o.getFood() + " inventory: " + foods.get(o.getFood()).amount);
+			foods.get(o.getFood()).state = FoodState.ReceivedOrder;
 		}
 		stateChanged();
 	}
@@ -101,9 +93,14 @@ public class CookAgent extends Agent {
 	 * Scheduler.  Determine what action is called for, and do it.
 	 */
 	protected boolean pickAndExecuteAnAction() {
+		if (orderedItems == false) {
+			orderedItems = true;
+			orderFoodFromMarket();
+			return true;
+		}
 		for (Food food : foods.values()) {
-			if (food.getState() == FoodState.Ordered) {
-				respondToMarkets(food);
+			if (food.getState() == FoodState.ReceivedOrder) {
+				addFood(food);
 				return true;
 			}
 		}
@@ -151,7 +148,8 @@ public class CookAgent extends Agent {
 		},
 		foods.get(o.choice).getCookingTime() * 1000);
 		foods.get(o.choice).setAmount(foods.get(o.choice).getAmount()-1);
-		if (foods.get(o.choice).getAmount() <= foods.get(o.choice).getLow() && foods.get(o.choice).getState() == FoodState.Good) {
+		print(foods.get(o.choice).type + " inventory: " + foods.get(o.choice).amount);
+		if (foods.get(o.choice).amount <= foods.get(o.choice).low && foods.get(o.choice).state == FoodState.Enough) {
 			foods.get(o.choice).setState(FoodState.MustBeOrdered);
 		}
 	}
@@ -163,31 +161,53 @@ public class CookAgent extends Agent {
 	
 	private void orderFoodFromMarket() {
 		for (Food food : foods.values()) {
-			if (food.getState() == FoodState.MustBeOrdered) {
-				food.setState(FoodState.Inquired);
-				for (MarketAgent market : markets) {
-					int amountToOrder = food.getCapacity()-food.getAmount();
-					print(market.getName() + ", I need " + amountToOrder + " " + food.getType() + "s");
-					market.msgHereIsOrder(food.getType(), amountToOrder);
+			if ((food.getState() == FoodState.MustBeOrdered || food.getState() == FoodState.Enough) && food.amount <= food.low) {
+				itemOrders.add(new ItemOrder(food.type, food.capacity - food.amount));
+				food.setState(FoodState.Ordered);
+			}
+		}
+		int index = markets.size()-1;
+		if (markets.size() > 1) {
+			for (int i = markets.size()-2; i>=0; i--) {
+				if (markets.get(i).orderedFrom <= markets.get(index).orderedFrom) {
+						index = i;
 				}
 			}
 		}
+		print("I am ordering from " + markets.get(index).market.getName());
+		for (ItemOrder io : itemOrders) {
+			print("I need " + io.getAmount() + " " + io.getFood() + "s");
+		}
+		markets.get(index).market.msgHereIsOrder(itemOrders);
+		markets.get(index).incrementOrderedFrom();
+		itemOrders.clear();
 	}
 	
-	private void respondToMarkets(Food food) {
-		print(food.getOrderedFrom().getName() + ", I would like to order " + food.getType());
-		food.getOrderedFrom().msgIWouldLikeToOrder(food.getType());
-		food.setState(FoodState.WaitingForOrder);
-		for (MarketAgent market : markets) {
-			if (market != food.getOrderedFrom()) {
-				print(market.getName() + ", I would not like to order " + food.getType());
-				market.msgIWouldNotLikeToOrder(food.getType());
+	private void addFood(Food f) {
+		for (Food food : foods.values()) {
+			if (food == f) {
+				food.setState(FoodState.Enough);
+				host.msgReceivedOrder(food.type);
 			}
 		}
 	}
 	
 
 	//utilities
+	
+	private class MyMarket {
+		MarketAgent market;
+		int orderedFrom;
+		
+		MyMarket(MarketAgent m) {
+			market = m;
+			orderedFrom = 0;
+		}
+		
+		public void incrementOrderedFrom() {
+			orderedFrom++;
+		}
+	}
 
 	private class Order {
 		WaiterAgent waiter;
@@ -234,16 +254,14 @@ public class CookAgent extends Agent {
 		int low;
 		int capacity;
 		FoodState state;
-		MarketAgent orderedFrom;
 		
-		Food(String t, int c, int a, int l) {
+		Food(String t, int c, int cap, int a, int l) {
 			type = t;
 			cookingTime = c;
 			amount = a;
-			capacity = a;
+			capacity = cap;
 			low = l;
-			state = FoodState.Good;
-			orderedFrom = null;
+			state = FoodState.Enough;
 		}
 		
 		String getType() {
@@ -276,14 +294,6 @@ public class CookAgent extends Agent {
 		
 		void setState(FoodState s) {
 			state = s;
-		}
-		
-		MarketAgent getOrderedFrom() {
-			return orderedFrom;
-		}
-		
-		void setOrderedFrom(MarketAgent m) {
-			orderedFrom = m;
 		}
 	}
 	
