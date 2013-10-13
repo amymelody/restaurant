@@ -2,7 +2,7 @@
 
 ### Host Agent
 #### Data
-	List<Customer> customers;
+	List<MyCustomer> customers;
 	List<MyWaiter> waiters;
 	List<Table> tables;
 	List<String> foods;
@@ -34,11 +34,9 @@
 			then mw.s = OnTheJob;
 	}
 	IWantFood(Customer c) {
-		customers.add(c);
-		if restaurantFull() //stub
-			c.RestaurantIsFull();
+		customers.add(new MyCustomer(c));
 	}
-	TableAvailable(Customer c, int tableNum) {
+	TableAvailable(int tableNum) {
 		if there exists t in tables such that t.tableNumber = tableNum
 			then t.setUnoccupied();
 	}
@@ -46,15 +44,15 @@
 		foods.add(food);
 	}
 	ImLeaving(Customer c) {
-		if there exists cust in customers such that cust = c
-			customers.remove(c);
+		if there exists mc in customers such that mc.c = c
+			customers.remove(mc);
 	}
 
 #### Scheduler
 	if there exists mc in customers such that mc.waiting = true && restaurantFull() //stub
 		tellCustomer(mc);	
 	if there exists t in tables such that t.isUnoccupied() & if !customers.isEmpty() & !waiters.isEmpty()
-		then callWaiter(waiters.selectWaiter() //stub, customers.get(0), table);
+		then callWaiter(waiters.selectWaiter() //load-balancing stub, customers.get(0), table);
 	if there exists mw in waiters such that mw.s = WantToGoOnBreak
 		if waiters.size > 1 && noWaitersOnBreak() //stub
 			then canGoOnBreak(mw);
@@ -64,11 +62,11 @@
 		foods.remove(f);
 		
 #### Actions
-	callWaiter(Waiter w, Customer c, Table t) {
-		w.PleaseSeatCustomer(c, t.tableNumber);
+	callWaiter(Waiter w, MyCustomer mc, Table t) {
+		w.PleaseSeatCustomer(mc.c, t.tableNumber);
 		if there exists table in tables such that table = t
 			t.setOccupied();
-		customers.remove(c);
+		customers.remove(mc);
 	canGoOnBreak(MyWaiter mw) {
 		mw.w.CanGoOnBreak();
 		mw.s = AboutToGoOnBreak;
@@ -350,6 +348,7 @@
 		leaveTable();
 	if state = Paying & event = receivedChange
 		state = Leaving;
+		leaveRestaurant();
 	if state = Leaving && event = doneLeaving
 		state = DoingNothing;
 
@@ -387,23 +386,25 @@
 		waiter.DoneEating(this);
 	}
 	leaveTable() {
+		DoGoToCashier();
 		int payment = charge + 10 - charge % 10; //customer pays charge rounded up to next tens place
 		if cash < payment
 			payment = cash; 
 		cashier.Payment(this, payment);
 		cash -= payment;
-		DoExitRestaurant();
 	}
 
 ### Cook Agent
 #### Data
-	List<Market> markets;
+	List<MyMarket> markets;
 	List<Order> orders;
+	List<ItemOrder> itemOrders;
 	Timer timer;
 	Host host;
+	boolean orderedItems = false;
 	Map<String, Food> foods;
 	enum OrderState {Pending, Cooking, Done, Finished};
-	enum FoodState {Good, MustBeOrdered, Inquired, Ordered, WaitingForOrder, ReceivedOrderS};
+	enum FoodState {Enough, MustBeOrdered, Ordered, ReceivedOrder};
 	class Order {
 		Waiter w;
 		int table;
@@ -416,8 +417,11 @@
 		int amount;
 		int low;
 		int capacity;
-		FoodState s = Good;
-		Market orderedFrom;
+		FoodState s;
+	}
+	class MyMarket {
+		Market m;
+		int orderedFrom;
 	}
 
 #### Messages
@@ -427,30 +431,22 @@
 	OrderDone(Order o) {
 		o.s = Done;
 	}
-	CanFulfillOrder(String food, Market m) {
-		if there exists market in markets such that market = m
-			if foods.get(food).s = Inquired
-				foods.get(food).s = Ordered;
-				foods.get(food).orderedFrom = m;
+	CantFulfillOrder(List<ItemOrder> orders) {
+		for every o in orders
+			foods.get(o.food).s = MustBeOrdered;
 	}
-	CantFulfillOrder(String food, Market m) {
-		if there exists market in markets such that market = m
-			if foods.get(food).s = Inquired & market.lastMarket() //stub; if no one can fulfill the order then take order anyway
-				foods.get(food).s = Ordered;
-				foods.get(food).orderedFrom = m;
-	}
-	OrderDelivered(Market m, String food, int amount) {
-		if there exists market in markets such that market = m
-			if foods.get(food).s = WaitingForOrder
-				foods.get(food).amount += amount;
-				foods.get(food).s = ReceivedOrder;
+	OrderDelivered(List<ItemOrder> orders) {
+		for every o in orders
+			foods.get(o.food).amount += io.amount;
+			foods.get(o.food).s = ReceivedOrder;
 	}
 
 #### Scheduler
+	if !orderedItems
+		orderFoodFromMarket();
+		orderedItems = true;
 	if there exists f in foods such that f.s = ReceievedOrder
 		addFood(f);
-	if there exists f in foods such that f.s = Ordered
-		respondToMarkets(f);
 	if there exists f in foods such that f.s = MustBeOrdered
 		orderFoodFromMarket();
 	if there exists o in orders such that o.s = Done
@@ -467,7 +463,7 @@
 			o.s = Cooking;
 			timer.schedule(OrderDone(o), foods.get(o.choice).cookingTime));
 			foods.get(o.choice).amount--;
-			if foods.get(o.choice).amount <= foods.get(o.choice).low && foods.get(o.choice).s = Good
+			if foods.get(o.choice).amount <= foods.get(o.choice).low && foods.get(o.choice).s = Enough
 				foods.get(o.choice).s = MustBeOrdered;
 	}
 	plateIt(Order o) {
@@ -475,19 +471,15 @@
 		o.s = Finished;
 	}
 	orderFoodFromMarket() {
-		for each f in foods
-			for each m in markets
-				m.HereIsOrder(f.type, f.capacity - f.amount);
-			f.s = Inquired;
-	}
-	respondToMarkets(Food f) {
-		f.orderedFrom.IWouldLikeToOrder(f.type);
-		f.s = WaitingForOrder;
-		for each m in markets such that m != f.orderedFrom
-			m.IWouldNotLikeToOrder(f.type);
+		for every f in foods such that (f.s = Enough || f.s = MustBeOrdered) & f.amount <= f.low
+			itemOrders.add(new ItemOrder(f.type, f.capacity - f.amount));
+			f.s = Ordered;
+		markets.selectMarket().m.HereIsOrder(itemOrders); //selectMarket() is a load-balancing stub using MyMarket's orderedFrom
+		markets.selectMarket().orderedFrom++;
+		itemOrders.clear();
 	}
 	addFood(Food f) {
-		f.s = Good;
+		f.s = Enough;
 		host.ReceivedOrder(f.type);
 	}
 
@@ -497,10 +489,9 @@
 	Timer timer;
 	List<Order> orders;
 	Map<String, Food> foods;
-	enum OrderState {Received, Waiting, Pending, ProducingOrder, Ready, Finished};
+	enum OrderState {Received, ProducingOrder, Ready, Finished};
 	class Order {
-		String food;
-		int amount;
+		List<ItemOrder> items;
 		boolean canFulfillOrder;
 		OrderState s;
 	}
@@ -511,20 +502,8 @@
 	}
 
 #### Messages
-	HereIsOrder(String food, int amount) {
-		boolean canFulfillOrder;
-		if foods.get(food).amount >= amount
-			canFulfillOrder = true;
-		else canFulfillOrder = false;
-		orders.add(new Order(food, amount, canFulfillOrder, Received));
-	}
-	IWouldLikeToOrder(String food) {
-		if there exists o in orders such that o.s = Waiting & o.food = food
-			o.s = Pending;
-	}
-	IWouldNotLikeToOrder(String food) {
-		if there exists o in orders such that o.s = Waiting and o.food = food
-			orders.remove(o);
+	HereIsOrder(List<ItemOrder> io) {
+		orders.add(new Order(io, canFulfillOrder(io) //stub, Received));
 	}
 	OrderReady(Order o) {
 		o.s = Ready;
@@ -533,27 +512,24 @@
 #### Scheduler
 	if there exists o in orders such that o.s = Ready
 		deliverOrder(o);
-	if there exists o in orders such that o.s = Received
+	if there exists o in orders such that o.s = Received and !o.canFulfillOrder
 		respondToCook(o);
-	if there exists o in orders such that o.s = Pending
+	if there exists o in orders such that o.s = Received and o.canFulfillOrder
 		produceOrder(o);
 
 #### Actions
 	respondToCook(Order o) {
-		if o.canFulfillOrder = true
-			cook.CanFulfillOrder(o.food, this);
-		else cook.CantFulfillOrder(o.food, this);
-		o.s = Waiting;
+		cook.CantFulfillOrder(o.items);
+		o.s = Finished;
 	}
 	produceOrder(Order o) {
 		o.s = ProducingOrder;
-		if o.amount > foods.get(o.food).amount
-			o.amount = foods.get(o.food).amount;
-		timer.schedule(OrderReady(o), foods.get(o.food).timeToProduce*o.amount));
-		foods.get(o.food).amount -= o.amount;
+		timer.schedule(OrderReady(o), timeToProduceOrder(o) //stub);
+		for every io in o.items	
+			foods.get(io.food).amount -= io.amount;
 	}
 	deliverOrder(Order o) {
-		cook.OrderDelivered(this, o.food, o.amount);
+		cook.OrderDelivered(o.items);
 		o.s = Finished;
 	}
 
