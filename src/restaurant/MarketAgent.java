@@ -34,7 +34,7 @@ public class MarketAgent extends Agent {
 		
 		steak = new Food("steak", 15, stAmt);
 		chicken = new Food("chicken", 20, cAmt);
-		salad = new Food("salad", 5, saAmt);
+		salad = new Food("salad", 20, saAmt);
 		pizza = new Food("pizza", 10, pAmt);
 		
 		foods.put("steak", steak);
