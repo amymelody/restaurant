@@ -68,9 +68,6 @@ public class CashierAgent extends Agent {
 		}
 
 		return false;
-		//we have tried all our rules and found
-		//nothing to do. So return false to main loop of abstract agent
-		//and wait.
 	}
 
 	// Actions

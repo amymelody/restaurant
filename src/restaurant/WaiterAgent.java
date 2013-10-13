@@ -10,10 +10,6 @@ import java.util.concurrent.Semaphore;
 /**
  * Restaurant Waiter Agent
  */
-//We only have 2 types of agents in this prototype. A customer and an agent that
-//does all the rest. Rather than calling the other agent a waiter, we called him
-//the HostAgent. A Host is the manager of a restaurant who sees that all
-//is proceeded as he wishes.
 public class WaiterAgent extends Agent {
 	public List<MyCustomer> customers
 	= new ArrayList<MyCustomer>();
@@ -447,10 +443,7 @@ public class WaiterAgent extends Agent {
 		waiterGui.DoReturnHome();
 	}
 
-	// The animation DoXYZ() routines
 	private void DoSeatCustomer(MyCustomer mc) {
-		//Notice how we print "customer" directly. It's toString method will do it.
-		//Same with "table"
 		print("Seating " + mc.getCust() + " at table " + mc.getTable());
 		waiterGui.DoGoToTable(mc.getTable()); 
 

@@ -13,7 +13,7 @@ import java.util.concurrent.Semaphore;
  */
 public class CustomerAgent extends Agent {
 	private String name;
-	private int hungerLevel = 1;        // determines length of meal
+	private int hungerLevel = 1;
 	Timer timer = new Timer();
 	private CustomerGui customerGui;
 	private Menu menu;
@@ -21,7 +21,7 @@ public class CustomerAgent extends Agent {
 	private Semaphore doneOrdering = new Semaphore(0,true);
 	private Semaphore atCashier = new Semaphore(0,true);
 	
-	public int tableNumber; //Number of the table at which the customer is being seated
+	public int tableNumber;
 	private int cash;
 	private int charge;
 	
@@ -273,7 +273,7 @@ public class CustomerAgent extends Agent {
 
 	private void goToRestaurant() {
 		Do("Going to restaurant");
-		host.msgIWantFood(this);//send our instance, so he can respond to us
+		host.msgIWantFood(this);
 	}
 	
 	private void leaveAndNotifyHost() {
@@ -284,7 +284,7 @@ public class CustomerAgent extends Agent {
 
 	private void SitDown() {
 		Do("Being seated. Going to table");
-		customerGui.DoGoToSeat(tableNumber);//hack; only one table
+		customerGui.DoGoToSeat(tableNumber);
 	}
 	
 	private void tellWaiter() {
@@ -304,7 +304,6 @@ public class CustomerAgent extends Agent {
 	}
 	
 	private void giveOrder() {
-		//choice = menu.randomItem();
 		if (menu.checkItem(name)) {
 			choice = name;
 		} else {
@@ -325,20 +324,10 @@ public class CustomerAgent extends Agent {
 
 	private void EatFood() {
 		Do("Eating Food");
-		//This next complicated line creates and starts a timer thread.
-		//We schedule a deadline of getHungerLevel()*1000 milliseconds.
-		//When that time elapses, it will call back to the run routine
-		//located in the anonymous class created right there inline:
-		//TimerTask is an interface that we implement right there inline.
-		//Since Java does not all us to pass functions, only objects.
-		//So, we use Java syntactic mechanism to create an
-		//anonymous inner class that has the public method run() in it.
 		timer.schedule(new TimerTask() {
-			//Object cookie = 1;
 			public void run() {
 				print("Done eating " + choice);
 				event = AgentEvent.doneEating;
-				//isHungry = false;
 				stateChanged();
 			}
 		},

@@ -10,21 +10,14 @@ import restaurant.WaiterAgent.CustomerState;
 /**
  * Restaurant Host Agent
  */
-//We only have 2 types of agents in this prototype. A customer and an agent that
-//does all the rest. Rather than calling the other agent a waiter, we called him
-//the HostAgent. A Host is the manager of a restaurant who sees that all
-//is proceeded as he wishes.
+
 public class HostAgent extends Agent {
-	static final int NTABLES = 3;//a global for the number of tables.
-	//Notice that we implement waitingCustomers using ArrayList, but type it
-	//with List semantics.
+	static final int NTABLES = 3;
 	public List<MyCustomer> customers
 	= new ArrayList<MyCustomer>();
 	public List<MyWaiter> waiters = new ArrayList<MyWaiter>();
 	public List<String> foods = new ArrayList<String>();
 	public Collection<Table> tables;
-	//note that tables is typed with Collection semantics.
-	//Later we will see how it is implemented
 
 	private String name;
 	
@@ -152,11 +145,6 @@ public class HostAgent extends Agent {
 				tellCustomer(mc);
 			}
 		}
-		/* Think of this next rule as:
-            Does there exist a table and customer,
-            so that table is unoccupied and customer is waiting.
-            If so seat him at the table.
-		 */
 		for (Table table : tables) {
 			if (!table.isOccupied()) {
 				if (!customers.isEmpty() && !waiters.isEmpty()) {
