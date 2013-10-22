@@ -3,16 +3,9 @@ package restaurant.test;
 import restaurant.CashierAgent;
 import restaurant.test.mock.MockCustomer;
 import restaurant.test.mock.MockWaiter;
+import restaurant.test.mock.EventLog;
 import junit.framework.*;
 
-/**
- * 
- * This class is a JUnit test class to unit test the CashierAgent's basic interaction
- * with waiters, customers, and the host.
- * It is provided as an example to students in CS201 for their unit testing lab.
- *
- * @author Monroe Ekilah
- */
 public class CashierTest extends TestCase
 {
 	//these are instantiated for each test separately via the setUp() method.
@@ -41,31 +34,32 @@ public class CashierTest extends TestCase
 		customer.cashier = cashier;//You can do almost anything in a unit test.			
 		
 		//check preconditions
-		assertEquals("Cashier should have 0 bills in it. It doesn't.",cashier.bills.size(), 0);		
-		assertEquals("CashierAgent should have an empty event log before the Cashier's HereIsBill is called. Instead, the Cashier's event log reads: "
+		assertEquals("Cashier should have 0 checks in it. It doesn't.", 0, cashier.checks.size());		
+		assertEquals("Cashier should have an empty event log before the Cashier's msgProducecheck is called. Instead, the Cashier's event log reads: "
 						+ cashier.log.toString(), 0, cashier.log.size());
 		
+		cashier.msgProduceCheck(waiter, customer, "steak");
 		//step 1 of the test
 		//public Bill(Cashier, Customer, int tableNum, double price) {
-		Bill bill = new Bill(cashier, customer, 2, 7.98);
-		cashier.HereIsBill(bill);//send the message from a waiter
+		//Bill bill = new Bill(cashier, customer, 2, 7.98);
+		//cashier.HereIsBill(bill);//send the message from a waiter
 
 		//check postconditions for step 1 and preconditions for step 2
 		assertEquals("MockWaiter should have an empty event log before the Cashier's scheduler is called. Instead, the MockWaiter's event log reads: "
 						+ waiter.log.toString(), 0, waiter.log.size());
 		
-		assertEquals("Cashier should have 1 bill in it. It doesn't.", cashier.bills.size(), 1);
+		assertEquals("Cashier should have 1 check in it. It doesn't.", cashier.checks.size(), 1);
 		
-		assertFalse("Cashier's scheduler should have returned false (no actions to do on a bill from a waiter), but didn't.", cashier.pickAndExecuteAnAction());
+		assertTrue("Cashier's scheduler should have returned true (it should call giveToWaiter), but didn't.", cashier.pickAndExecuteAnAction());
 		
 		assertEquals(
-				"MockWaiter should have an empty event log after the Cashier's scheduler is called for the first time. Instead, the MockWaiter's event log reads: "
-						+ waiter.log.toString(), 0, waiter.log.size());
+				"MockWaiter should have one event in its event log after the Cashier's scheduler is called for the first time. It doesn't.", 1, waiter.log.size());
 		
 		assertEquals(
 				"MockCustomer should have an empty event log after the Cashier's scheduler is called for the first time. Instead, the MockCustomer's event log reads: "
-						+ waiter.log.toString(), 0, waiter.log.size());
+						+ customer.log.toString(), 0, customer.log.size());
 		
+		/*
 		//step 2 of the test
 		cashier.ReadyToPay(customer, bill);
 		
@@ -116,6 +110,7 @@ public class CashierTest extends TestCase
 		
 		assertFalse("Cashier's scheduler should have returned false (no actions left to do), but didn't.", 
 				cashier.pickAndExecuteAnAction());
+		*/
 		
 	
 	}//end one normal customer scenario

@@ -11,7 +11,6 @@ public class MockCustomer extends Mock implements Customer {
 	 */
 	public Cashier cashier;
 	private int charge;
-	private EventLog log;
 
 	public MockCustomer(String name) {
 		super(name);
@@ -21,11 +20,6 @@ public class MockCustomer extends Mock implements Customer {
 	@Override
 	public int getCharge() {
 		return charge;
-	}
-	
-	@Override
-	public void msgHereIsCheck(int c) {
-		log.add(new LoggedEvent("Received msgHereIsCheck from cashier. Check = " + c));
 	}
 	
 	@Override

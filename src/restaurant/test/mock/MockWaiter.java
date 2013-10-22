@@ -11,7 +11,6 @@ public class MockWaiter extends Mock implements Waiter {
 	 * Reference to the Cashier under test that can be set by the unit test.
 	 */
 	public Cashier cashier;
-	private EventLog log;
 
 	public MockWaiter(String name) {
 		super(name);
@@ -20,7 +19,7 @@ public class MockWaiter extends Mock implements Waiter {
 	
 	@Override
 	public void msgHereIsCheck(Customer c, int charge) {
-		
+		log.add(new LoggedEvent("Received msgHereIsCheck from cashier. Customer = " + c.getName() + ". Charge = " + charge));
 	}
 	
 }
