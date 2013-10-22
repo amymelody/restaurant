@@ -15,6 +15,7 @@ public class MarketAgent extends Agent {
 
 	private String name;
 	private CookAgent cook;
+	private CashierAgent cashier;
 	private Timer timer = new Timer();
 	
 	Food steak;
@@ -23,14 +24,16 @@ public class MarketAgent extends Agent {
 	Food pizza;
 	
 	Map<String, Food> foods = new HashMap<String, Food>();
+	Map<String, Integer> foodPrices = new HashMap<String, Integer>();
 	
 	public enum OrderState
 	{Received, ProducingOrder, Ready, Finished};
 	
-	public MarketAgent(String name, CookAgent c, int stAmt, int cAmt, int saAmt, int pAmt) {
+	public MarketAgent(String name, CookAgent c, CashierAgent ca, int stAmt, int cAmt, int saAmt, int pAmt) {
 		super();
 		this.name = name;
 		cook = c;
+		cashier = ca;
 		
 		steak = new Food("steak", 15, stAmt);
 		chicken = new Food("chicken", 20, cAmt);
@@ -41,6 +44,11 @@ public class MarketAgent extends Agent {
 		foods.put("chicken", chicken);
 		foods.put("salad", salad);
 		foods.put("pizza", pizza);
+		
+		foodPrices.put("steak", 12);
+		foodPrices.put("chicken", 9);
+		foodPrices.put("salad", 4);
+		foodPrices.put("pizza", 6);
 	}
 	
 
@@ -128,11 +136,15 @@ public class MarketAgent extends Agent {
 	}
 	
 	private void deliverOrder(Order o) {
+		int bill = 0;
 		print("Here is your order: ");
 		for (ItemOrder io : o.items) {
 			print(io.getAmount() + " " + io.getFood() + "s");
+			bill += foodPrices.get(io.getFood())*io.getAmount();
 		}
 		cook.msgOrderDelivered(o.items);
+		print("Here is the bill: $" + bill);
+		cashier.msgHereIsBill(bill);
 		o.setState(OrderState.Finished);
 	}
 	

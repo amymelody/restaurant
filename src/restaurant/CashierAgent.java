@@ -13,6 +13,7 @@ public class CashierAgent extends Agent {
 	public List<Check> checks = new ArrayList<Check>();
 
 	private String name;
+	private int cash;
 	
 	Map<String, Integer> prices = new HashMap<String, Integer>();
 	
@@ -21,6 +22,7 @@ public class CashierAgent extends Agent {
 	public CashierAgent(String name) {
 		super();
 		this.name = name;
+		cash = 200;
 		
 		prices.put("steak", 16);
 		prices.put("chicken", 11);
@@ -48,6 +50,11 @@ public class CashierAgent extends Agent {
 				stateChanged();
 			}
 		}
+	}
+	
+	public void msgHereIsBill(int bill) {
+		cash -= bill;
+		stateChanged();
 	}
 
 	/**
