@@ -4,6 +4,8 @@ import java.io.*;
 import java.util.*;
 import java.util.concurrent.*;
 
+import restaurant.test.mock.EventLog;
+
 /**
  * Base class for simple agents
  */
@@ -12,8 +14,10 @@ public abstract class Agent {
     Semaphore pause = new Semaphore(0, true);
     private AgentThread agentThread;
     private boolean paused = false;
+    public EventLog log;
 
     protected Agent() {
+    	log = new EventLog();
     }
 
     /**
@@ -32,7 +36,7 @@ public abstract class Agent {
      * @return true iff some action was executed that might have changed the
      *         state.
      */
-    protected abstract boolean pickAndExecuteAnAction();
+    public abstract boolean pickAndExecuteAnAction(); //Changed to public for unit testing
 
     /**
      * Return agent name for messages.  Default is to return java instance

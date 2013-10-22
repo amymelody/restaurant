@@ -235,7 +235,7 @@ public class WaiterAgent extends Agent implements Waiter {
 	/**
 	 * Scheduler.  Determine what action is called for, and do it.
 	 */
-	protected boolean pickAndExecuteAnAction() {
+	public boolean pickAndExecuteAnAction() {
 		if (state == WaiterState.WantToGoOnBreak) {
 			wantToGoOnBreak();
 			return true;

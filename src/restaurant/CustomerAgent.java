@@ -122,7 +122,7 @@ public class CustomerAgent extends Agent implements Customer {
 
 	public void msgAnimationFinishedGoToSeat() {
 		//from animation
-		if (name != "cheapskate" && cash < menu.lowestPrice()) {
+		if (!name.equals("cheapskate") && cash < menu.lowestPrice()) {
 			event = AgentEvent.looksAtMenuAndCries;
 		}
 		else {
@@ -193,7 +193,7 @@ public class CustomerAgent extends Agent implements Customer {
 	/**
 	 * Scheduler.  Determine what action is called for, and do it.
 	 */
-	protected boolean pickAndExecuteAnAction() {
+	public boolean pickAndExecuteAnAction() {
 		//	CustomerAgent is a finite state machine
 
 		if (state == AgentState.DoingNothing && event == AgentEvent.gotHungry){

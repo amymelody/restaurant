@@ -92,7 +92,7 @@ public class CookAgent extends Agent {
 	/**
 	 * Scheduler.  Determine what action is called for, and do it.
 	 */
-	protected boolean pickAndExecuteAnAction() {
+	public boolean pickAndExecuteAnAction() {
 		if (orderedItems == false) {
 			orderedItems = true;
 			orderFoodFromMarket();

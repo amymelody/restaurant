@@ -139,7 +139,7 @@ public class HostAgent extends Agent {
 	/**
 	 * Scheduler.  Determine what action is called for, and do it.
 	 */
-	protected boolean pickAndExecuteAnAction() {
+	public boolean pickAndExecuteAnAction() {
 		for (MyCustomer mc : customers) {
 			if (mc.waiting && restaurantFull()) {
 				tellCustomer(mc);

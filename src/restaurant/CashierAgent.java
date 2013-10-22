@@ -5,6 +5,7 @@ import restaurant.interfaces.Customer;
 import restaurant.interfaces.Waiter;
 import restaurant.interfaces.Cashier;
 import restaurant.interfaces.Cashier;
+import restaurant.test.mock.EventLog;
 
 import java.util.*;
 
@@ -64,7 +65,7 @@ public class CashierAgent extends Agent implements Cashier {
 	/**
 	 * Scheduler.  Determine what action is called for, and do it.
 	 */
-	protected boolean pickAndExecuteAnAction() {
+	public boolean pickAndExecuteAnAction() { //Changed to public for unit testing
 		for (Check check : checks) {
 			if (check.state == CheckState.Created) {
 				giveToWaiter(check);

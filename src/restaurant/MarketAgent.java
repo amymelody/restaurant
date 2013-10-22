@@ -92,7 +92,7 @@ public class MarketAgent extends Agent {
 	/**
 	 * Scheduler.  Determine what action is called for, and do it.
 	 */
-	protected boolean pickAndExecuteAnAction() {
+	public boolean pickAndExecuteAnAction() {
 		for (Order order : orders) {
 			if (order.getState() == OrderState.Ready) {
 				deliverOrder(order);
