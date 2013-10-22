@@ -2,6 +2,7 @@ package restaurant;
 
 import restaurant.gui.CustomerGui;
 import restaurant.gui.RestaurantGui;
+import restaurant.interfaces.Customer;
 import agent.Agent;
 
 import java.util.Timer;
@@ -11,7 +12,7 @@ import java.util.concurrent.Semaphore;
 /**
  * Restaurant customer agent.
  */
-public class CustomerAgent extends Agent {
+public class CustomerAgent extends Agent implements Customer {
 	private String name;
 	private int hungerLevel = 1;
 	Timer timer = new Timer();

@@ -3,6 +3,8 @@ package restaurant;
 import agent.Agent;
 import restaurant.CustomerAgent.AgentEvent;
 import restaurant.gui.WaiterGui;
+import restaurant.interfaces.Waiter;
+import restaurant.interfaces.Customer;
 
 import java.util.*;
 import java.util.concurrent.Semaphore;
@@ -10,7 +12,7 @@ import java.util.concurrent.Semaphore;
 /**
  * Restaurant Waiter Agent
  */
-public class WaiterAgent extends Agent {
+public class WaiterAgent extends Agent implements Waiter {
 	public List<MyCustomer> customers
 	= new ArrayList<MyCustomer>();
 	HostAgent host;
@@ -203,7 +205,7 @@ public class WaiterAgent extends Agent {
 		}
 	}
 	
-	public void msgHereIsCheck(CustomerAgent c, int charge) {
+	public void msgHereIsCheck(Customer c, int charge) {
 		for (MyCustomer mc : customers) {
 			if (mc.getCust() == c) {
 				mc.setCharge(charge);
@@ -417,7 +419,7 @@ public class WaiterAgent extends Agent {
 		}
 		Do("Here is your order.");
 		mc.getCust().msgHereIsFood(mc.getChoice());
-		cashier.msgProduceCheck(mc.getCust(), mc.choice);
+		cashier.msgProduceCheck(this, mc.getCust(), mc.choice);
 		mc.setState(CustomerState.Eating);
 		waiterGui.DoReturnHome();
 	}

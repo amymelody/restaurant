@@ -1,11 +1,8 @@
 package restaurant.test;
 
 import restaurant.CashierAgent;
-import restaurant.CashierAgent.cashierBillState;
-import restaurant.WaiterAgent.Bill;
 import restaurant.test.mock.MockCustomer;
 import restaurant.test.mock.MockWaiter;
-
 import junit.framework.*;
 
 /**

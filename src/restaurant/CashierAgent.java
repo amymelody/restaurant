@@ -1,6 +1,10 @@
 package restaurant;
 
 import agent.Agent;
+import restaurant.interfaces.Customer;
+import restaurant.interfaces.Waiter;
+import restaurant.interfaces.Cashier;
+import restaurant.interfaces.Cashier;
 
 import java.util.*;
 
@@ -9,7 +13,7 @@ import java.util.*;
  * Restaurant Cashier Agent
  */
 
-public class CashierAgent extends Agent {
+public class CashierAgent extends Agent implements Cashier {
 	public List<Check> checks = new ArrayList<Check>();
 
 	private String name;
@@ -37,12 +41,12 @@ public class CashierAgent extends Agent {
 	
 	// Messages
 	
-	public void msgProduceCheck(CustomerAgent c, String choice) {
-		checks.add(new Check(c, choice, prices.get(choice)+c.getCharge(), CheckState.Created));
+	public void msgProduceCheck(Waiter w, Customer c, String choice) {
+		checks.add(new Check(c, w, choice, prices.get(choice)+c.getCharge(), CheckState.Created));
 		stateChanged();
 	}
 	
-	public void msgPayment(CustomerAgent c, int cash) {
+	public void msgPayment(Customer c, int cash) {
 		for (Check check : checks) {
 			if (check.cust == c & check.state == CheckState.GivenToWaiter) {
 				check.setPayment(cash);
@@ -80,9 +84,9 @@ public class CashierAgent extends Agent {
 	// Actions
 
 	private void giveToWaiter(Check c) {
-		print(c.cust.getWaiter() + ", here is the check for " + c.cust);
+		print(c.waiter + ", here is the check for " + c.cust);
 		c.setState(CheckState.GivenToWaiter);
-		c.cust.getWaiter().msgHereIsCheck(c.cust, c.charge);
+		c.waiter.msgHereIsCheck(c.cust, c.charge);
 	}
 	
 	private void giveCustomerChange(Check c) {
@@ -99,14 +103,16 @@ public class CashierAgent extends Agent {
 	//utilities
 
 	public class Check {
-		CustomerAgent cust;
+		Customer cust;
+		Waiter waiter;
 		String choice;
 		int charge;
 		int payment;
 		CheckState state;
 		
-		Check(CustomerAgent c, String choice, int charge, CheckState s) {
+		Check(Customer c, Waiter w, String choice, int charge, CheckState s) {
 			cust = c;
+			waiter = w;
 			this.choice = choice;
 			this.charge = charge;
 			payment = 0;
