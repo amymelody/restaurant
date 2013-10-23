@@ -236,67 +236,71 @@ public class WaiterAgent extends Agent implements Waiter {
 	 * Scheduler.  Determine what action is called for, and do it.
 	 */
 	public boolean pickAndExecuteAnAction() {
-		if (state == WaiterState.WantToGoOnBreak) {
-			wantToGoOnBreak();
-			return true;
-		}
-		if (state == WaiterState.AboutToGoOnBreak){
-			if (doneServingCustomers()) {
-				goOnBreak();
+		try {
+			if (state == WaiterState.WantToGoOnBreak) {
+				wantToGoOnBreak();
 				return true;
 			}
-		}
-		if (state == WaiterState.GoingOffBreak){
-			goOffBreak();
-			return true;
-		}
-		for (MyCustomer mc : customers) {
-			if (mc.getState() == CustomerState.ReadyToEat) {
-				deliverFood(mc);
+			if (state == WaiterState.AboutToGoOnBreak){
+				if (doneServingCustomers()) {
+					goOnBreak();
+					return true;
+				}
+			}
+			if (state == WaiterState.GoingOffBreak){
+				goOffBreak();
 				return true;
 			}
-		}
-		for (MyCustomer mc : customers) {
-			if (mc.getState() == CustomerState.OrderDone) {
-				retrieveOrder(mc);
-				return true;
+			for (MyCustomer mc : customers) {
+				if (mc.getState() == CustomerState.ReadyToEat) {
+					deliverFood(mc);
+					return true;
+				}
 			}
-		}
-		for (MyCustomer mc : customers) {
-			if (mc.getState() == CustomerState.Waiting) {
-				seatCustomer(mc);
-				return true;
+			for (MyCustomer mc : customers) {
+				if (mc.getState() == CustomerState.OrderDone) {
+					retrieveOrder(mc);
+					return true;
+				}
 			}
-		}
-		for (MyCustomer mc : customers) {
-			if (mc.getState() == CustomerState.AskedToOrder) {
-				takeOrder(mc);
-				return true;
+			for (MyCustomer mc : customers) {
+				if (mc.getState() == CustomerState.Waiting) {
+					seatCustomer(mc);
+					return true;
+				}
 			}
-		}
-		for (MyCustomer mc : customers) {
-			if (mc.getState() == CustomerState.Ordered) {
-				giveOrderToCook(mc);
-				return true;
+			for (MyCustomer mc : customers) {
+				if (mc.getState() == CustomerState.AskedToOrder) {
+					takeOrder(mc);
+					return true;
+				}
 			}
-		}
-		for (MyCustomer mc : customers) {
-			if (mc.getState() == CustomerState.MustReorder){
-				askToReorder(mc);
-				return true;
+			for (MyCustomer mc : customers) {
+				if (mc.getState() == CustomerState.Ordered) {
+					giveOrderToCook(mc);
+					return true;
+				}
 			}
-		}
-		for (MyCustomer mc : customers) {
-			if (mc.getState() == CustomerState.WaitingForCheck){
-				giveCheckToCustomer(mc);
-				return true;
+			for (MyCustomer mc : customers) {
+				if (mc.getState() == CustomerState.MustReorder){
+					askToReorder(mc);
+					return true;
+				}
 			}
-		}
-		for (MyCustomer mc : customers) {
-			if (mc.getState() == CustomerState.Leaving){
-				notifyHost(mc);
-				return true;
+			for (MyCustomer mc : customers) {
+				if (mc.getState() == CustomerState.WaitingForCheck){
+					giveCheckToCustomer(mc);
+					return true;
+				}
 			}
+			for (MyCustomer mc : customers) {
+				if (mc.getState() == CustomerState.Leaving){
+					notifyHost(mc);
+					return true;
+				}
+			}
+		} catch (ConcurrentModificationException e) {
+			return false;
 		}
 
 		return false;

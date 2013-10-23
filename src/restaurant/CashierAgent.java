@@ -58,6 +58,7 @@ public class CashierAgent extends Agent implements Cashier {
 	}
 	
 	public void msgHereIsBill(int bill) {
+		print("Paying bill");
 		cash -= bill;
 		stateChanged();
 	}
@@ -94,8 +95,10 @@ public class CashierAgent extends Agent implements Cashier {
 		int change = c.payment - c.charge;
 		if (change >= 0) {
 			print(c.cust + ", here is your change of $" + change);
+			cash += c.charge;
 		} else {
 			print(c.cust + ", thank you for eating at our restaurant. Please pay $" + -change + " next time you rotten cheapskate.");
+			cash += c.payment;
 		}
 		c.setState(CheckState.Done);
 		c.cust.msgChange(change);

@@ -310,7 +310,7 @@ public class CustomerAgent extends Agent implements Customer {
 		} else {
 			do {
 				choice = menu.randomItem();
-			} while (menu.getPrice(choice) > cash);
+			} while (menu.getPrice(choice) > cash && !name.equals("cheapskate"));
 		}
 		print("I would like to order " + choice);
 		customerGui.order();

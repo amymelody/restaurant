@@ -93,34 +93,38 @@ public class CookAgent extends Agent {
 	 * Scheduler.  Determine what action is called for, and do it.
 	 */
 	public boolean pickAndExecuteAnAction() {
-		if (orderedItems == false) {
-			orderedItems = true;
-			orderFoodFromMarket();
-			return true;
-		}
-		for (Food food : foods.values()) {
-			if (food.getState() == FoodState.ReceivedOrder) {
-				addFood(food);
-				return true;
-			}
-		}
-		for (Food food : foods.values()) {
-			if (food.getState() == FoodState.MustBeOrdered) {
+		try {
+			if (orderedItems == false) {
+				orderedItems = true;
 				orderFoodFromMarket();
 				return true;
 			}
-		}
-		for (Order order : orders) {
-			if (order.getState() == OrderState.Done) {
-				plateIt(order);
-				return true;
+			for (Food food : foods.values()) {
+				if (food.getState() == FoodState.ReceivedOrder) {
+					addFood(food);
+					return true;
+				}
 			}
-		}
-		for (Order order : orders) {
-			if (order.getState() == OrderState.Pending) {
-				cookIt(order);
-				return true;
+			for (Food food : foods.values()) {
+				if (food.getState() == FoodState.MustBeOrdered) {
+					orderFoodFromMarket();
+					return true;
+				}
 			}
+			for (Order order : orders) {
+				if (order.getState() == OrderState.Done) {
+					plateIt(order);
+					return true;
+				}
+			}
+			for (Order order : orders) {
+				if (order.getState() == OrderState.Pending) {
+					cookIt(order);
+					return true;
+				}
+			}
+		} catch (ConcurrentModificationException e) {
+			return false;
 		}
 
 		return false;
