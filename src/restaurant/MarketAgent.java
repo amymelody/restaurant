@@ -10,8 +10,7 @@ import java.util.*;
  */
 
 public class MarketAgent extends Agent {
-	public List<Order> orders
-	= new ArrayList<Order>();
+	public List<Order> orders = Collections.synchronizedList(new ArrayList<Order>());
 
 	private String name;
 	private CookAgent cook;
@@ -93,22 +92,24 @@ public class MarketAgent extends Agent {
 	 * Scheduler.  Determine what action is called for, and do it.
 	 */
 	public boolean pickAndExecuteAnAction() {
-		for (Order order : orders) {
-			if (order.getState() == OrderState.Ready) {
-				deliverOrder(order);
-				return true;
+		synchronized(orders) {
+			for (Order order : orders) {
+				if (order.getState() == OrderState.Ready) {
+					deliverOrder(order);
+					return true;
+				}
 			}
-		}
-		for (Order order : orders) {
-			if (order.getState() == OrderState.Received && !order.canFulfillOrder) {
-				respondToCook(order);
-				return true;
+			for (Order order : orders) {
+				if (order.getState() == OrderState.Received && !order.canFulfillOrder) {
+					respondToCook(order);
+					return true;
+				}
 			}
-		}
-		for (Order order : orders) {
-			if (order.getState() == OrderState.Received && order.canFulfillOrder) {
-				produceOrder(order);
-				return true;
+			for (Order order : orders) {
+				if (order.getState() == OrderState.Received && order.canFulfillOrder) {
+					produceOrder(order);
+					return true;
+				}
 			}
 		}
 

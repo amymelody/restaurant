@@ -15,7 +15,7 @@ import java.util.*;
  */
 
 public class CashierAgent extends Agent implements Cashier {
-	public List<Check> checks = new ArrayList<Check>();
+	public List<Check> checks = Collections.synchronizedList(new ArrayList<Check>());
 
 	private String name;
 	private int cash;
@@ -48,11 +48,13 @@ public class CashierAgent extends Agent implements Cashier {
 	}
 	
 	public void msgPayment(Customer c, int cash) {
-		for (Check check : checks) {
-			if (check.cust == c & check.state == CheckState.GivenToWaiter) {
-				check.setPayment(cash);
-				check.setState(CheckState.Paid);
-				stateChanged();
+		synchronized(checks) {
+			for (Check check : checks) {
+				if (check.cust == c & check.state == CheckState.GivenToWaiter) {
+					check.setPayment(cash);
+					check.setState(CheckState.Paid);
+					stateChanged();
+				}
 			}
 		}
 	}
@@ -67,16 +69,20 @@ public class CashierAgent extends Agent implements Cashier {
 	 * Scheduler.  Determine what action is called for, and do it.
 	 */
 	public boolean pickAndExecuteAnAction() { //Changed to public for unit testing
-		for (Check check : checks) {
-			if (check.state == CheckState.Created) {
-				giveToWaiter(check);
-				return true;
+		synchronized(checks) {
+			for (Check check : checks) {
+				if (check.state == CheckState.Created) {
+					giveToWaiter(check);
+					return true;
+				}
 			}
 		}
-		for (Check check : checks) {
-			if (check.state == CheckState.Paid) {
-				giveCustomerChange(check);
-				return true;
+		synchronized(checks) {
+			for (Check check : checks) {
+				if (check.state == CheckState.Paid) {
+					giveCustomerChange(check);
+					return true;
+				}
 			}
 		}
 

@@ -13,10 +13,9 @@ import restaurant.WaiterAgent.CustomerState;
 
 public class HostAgent extends Agent {
 	static final int NTABLES = 3;
-	public List<MyCustomer> customers
-	= new ArrayList<MyCustomer>();
-	public List<MyWaiter> waiters = new ArrayList<MyWaiter>();
-	public List<String> foods = new ArrayList<String>();
+	public List<MyCustomer> customers = Collections.synchronizedList(new ArrayList<MyCustomer>());
+	public List<MyWaiter> waiters = Collections.synchronizedList(new ArrayList<MyWaiter>());
+	public List<String> foods = Collections.synchronizedList(new ArrayList<String>());
 	public Collection<Table> tables;
 
 	private String name;
@@ -29,7 +28,7 @@ public class HostAgent extends Agent {
 
 		this.name = name;
 		// make some tables
-		tables = new ArrayList<Table>(NTABLES);
+		tables = Collections.synchronizedList(new ArrayList<Table>(NTABLES));
 		for (int ix = 1; ix <= NTABLES; ix++) {
 			tables.add(new Table(ix));//how you add to a collections
 		}
@@ -56,18 +55,22 @@ public class HostAgent extends Agent {
 	}
 	
 	public boolean restaurantFull() {
-		for (Table table : tables) {
-			if (!table.isOccupied()) {
-				return false;
+		synchronized(tables) {
+			for (Table table : tables) {
+				if (!table.isOccupied()) {
+					return false;
+				}
 			}
 		}
 		return true;
 	}
 	
 	public boolean noWaitersOnBreak() {
-		for (MyWaiter waiter : waiters) {
-			if (waiter.getState() == WaiterState.OnBreak || waiter.getState() == WaiterState.AboutToGoOnBreak) {
-				return false;
+		synchronized(waiters) {
+			for (MyWaiter waiter : waiters) {
+				if (waiter.getState() == WaiterState.OnBreak || waiter.getState() == WaiterState.AboutToGoOnBreak) {
+					return false;
+				}
 			}
 		}
 		return true;
@@ -81,28 +84,34 @@ public class HostAgent extends Agent {
 	}
 
 	public void msgWantToGoOnBreak(WaiterAgent waiter) {
-		for (MyWaiter mw : waiters) {
-			if (mw.getWaiter() == waiter) {
-				mw.setState(WaiterState.WantToGoOnBreak);
-				stateChanged();
+		synchronized(waiters) {
+			for (MyWaiter mw : waiters) {
+				if (mw.getWaiter() == waiter) {
+					mw.setState(WaiterState.WantToGoOnBreak);
+					stateChanged();
+				}
 			}
 		}
 	}
 	
 	public void msgGoingOnBreak(WaiterAgent waiter) {
-		for (MyWaiter mw : waiters) {
-			if (mw.getWaiter() == waiter) {
-				mw.setState(WaiterState.OnBreak);
-				stateChanged();
+		synchronized(waiters) {
+			for (MyWaiter mw : waiters) {
+				if (mw.getWaiter() == waiter) {
+					mw.setState(WaiterState.OnBreak);
+					stateChanged();
+				}
 			}
 		}
 	}
 	
 	public void msgGoingOffBreak(WaiterAgent waiter) {
-		for (MyWaiter mw : waiters) {
-			if (mw.getWaiter() == waiter) {
-				mw.setState(WaiterState.OnTheJob);
-				stateChanged();
+		synchronized(waiters) {
+			for (MyWaiter mw : waiters) {
+				if (mw.getWaiter() == waiter) {
+					mw.setState(WaiterState.OnTheJob);
+					stateChanged();
+				}
 			}
 		}
 	}
@@ -113,10 +122,12 @@ public class HostAgent extends Agent {
 	}
 
 	public void msgTableAvailable(int tableNum) {
-		for (Table table : tables) {
-			if (table.getTableNumber() == tableNum) {
-				table.setOccupied(false);
-				stateChanged();
+		synchronized(tables) {
+			for (Table table : tables) {
+				if (table.getTableNumber() == tableNum) {
+					table.setOccupied(false);
+					stateChanged();
+				}
 			}
 		}
 	}
@@ -127,11 +138,13 @@ public class HostAgent extends Agent {
 	}
 	
 	public void msgImLeaving(CustomerAgent c) {
-		for (MyCustomer mc : customers) {
-			if (mc.cust == c) {
-				customers.remove(mc);
-				stateChanged();
-				return;
+		synchronized(customers) {
+			for (MyCustomer mc : customers) {
+				if (mc.cust == c) {
+					customers.remove(mc);
+					stateChanged();
+					return;
+				}
 			}
 		}
 	}
@@ -140,49 +153,58 @@ public class HostAgent extends Agent {
 	 * Scheduler.  Determine what action is called for, and do it.
 	 */
 	public boolean pickAndExecuteAnAction() {
-		for (MyCustomer mc : customers) {
-			if (mc.waiting && restaurantFull()) {
-				tellCustomer(mc);
+		synchronized(customers) {
+			for (MyCustomer mc : customers) {
+				if (mc.waiting && restaurantFull()) {
+					tellCustomer(mc);
+				}
 			}
 		}
-		for (Table table : tables) {
-			if (!table.isOccupied()) {
-				if (!customers.isEmpty() && !waiters.isEmpty()) {
-					int index = 0;
-					if (waiters.size() > 1) {
-						for (int i = waiters.size()-2; i>=0; i--) {
-							if (waiters.get(i+1).getState() == WaiterState.OnTheJob || waiters.get(i+1).getState() == WaiterState.WantToGoOnBreak) {
-								if (waiters.get(i).customerCount > waiters.get(i+1).customerCount) {
-									index = i+1;
+		
+		synchronized(tables) {
+			for (Table table : tables) {
+				if (!table.isOccupied()) {
+					if (!customers.isEmpty() && !waiters.isEmpty()) {
+						int index = 0;
+						if (waiters.size() > 1) {
+							for (int i = waiters.size()-2; i>=0; i--) {
+								if (waiters.get(i+1).getState() == WaiterState.OnTheJob || waiters.get(i+1).getState() == WaiterState.WantToGoOnBreak) {
+									if (waiters.get(i).customerCount > waiters.get(i+1).customerCount) {
+										index = i+1;
+									}
 								}
 							}
 						}
+						if (index == 0 && (waiters.get(index).getState() == WaiterState.AboutToGoOnBreak || waiters.get(index).getState() == WaiterState.OnBreak)) {
+							index = 1;
+						}
+						callWaiter(waiters.get(index).getWaiter(), customers.get(0), table);//the action
+						waiters.get(index).addCustomer();
+						return true;//return true to the abstract agent to reinvoke the scheduler.
 					}
-					if (index == 0 && (waiters.get(index).getState() == WaiterState.AboutToGoOnBreak || waiters.get(index).getState() == WaiterState.OnBreak)) {
-						index = 1;
-					}
-					callWaiter(waiters.get(index).getWaiter(), customers.get(0), table);//the action
-					waiters.get(index).addCustomer();
-					return true;//return true to the abstract agent to reinvoke the scheduler.
 				}
 			}
 		}
 		
-		for (MyWaiter mw : waiters) {
-			if (mw.getState() == WaiterState.WantToGoOnBreak) {
-				if (waiters.size() > 1 && noWaitersOnBreak()) {
-					canGoOnBreak(mw);
+		synchronized(waiters) {
+			for (MyWaiter mw : waiters) {
+				if (mw.getState() == WaiterState.WantToGoOnBreak) {
+					if (waiters.size() > 1 && noWaitersOnBreak()) {
+						canGoOnBreak(mw);
+						return true;
+					}
+					cantGoOnBreak(mw);
 					return true;
 				}
-				cantGoOnBreak(mw);
-				return true;
 			}
 		}
 		
-		for (String f : foods) {
-			notifyWaiters(f);
-			foods.remove(f);
-			return true;
+		synchronized(foods) {
+			for (String f : foods) {
+				notifyWaiters(f);
+				foods.remove(f);
+				return true;
+			}
 		}
 
 		return false;
@@ -196,9 +218,11 @@ public class HostAgent extends Agent {
 	private void callWaiter(WaiterAgent waiter, MyCustomer mc, Table table) {
 		print(waiter + ", please bring " + mc.cust + " to " + table);
 		waiter.msgPleaseSeatCustomer(mc.cust, table.getTableNumber());
-		for (Table t : tables) {
-			if (t == table) {
-				t.setOccupied(true);
+		synchronized(tables) {
+			for (Table t : tables) {
+				if (t == table) {
+					t.setOccupied(true);
+				}
 			}
 		}
 		customers.remove(mc);
@@ -217,8 +241,10 @@ public class HostAgent extends Agent {
 	}
 	
 	private void notifyWaiters(String food) {
-		for (MyWaiter mw : waiters) {
-			mw.getWaiter().msgFoodArrived(food);
+		synchronized(waiters) {
+			for (MyWaiter mw : waiters) {
+				mw.getWaiter().msgFoodArrived(food);
+			}
 		}
 	}
 	
