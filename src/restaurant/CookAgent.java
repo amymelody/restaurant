@@ -5,6 +5,8 @@ import agent.Agent;
 import java.util.*;
 
 import restaurant.HostAgent.WaiterState;
+import restaurant.gui.CustomerGui;
+import restaurant.gui.CookGui;
 
 
 /**
@@ -21,6 +23,7 @@ public class CookAgent extends Agent {
 	private String name;
 	private Timer timer = new Timer();
 	private boolean orderedItems;
+	private CookGui cookGui;
 	
 	Food steak = new Food("steak", 15, 3, 1, 1);
 	Food chicken = new Food("chicken", 20, 3, 1, 1);
@@ -56,6 +59,10 @@ public class CookAgent extends Agent {
 	
 	public void setHost(HostAgent h) {
 		host = h;
+	}
+	
+	public void setGui(CookGui g) {
+		cookGui = g;
 	}
 	
 	// Messages
@@ -143,6 +150,7 @@ public class CookAgent extends Agent {
 			return;
 		}
 		o.setState(OrderState.Cooking);
+		cookGui.DoCookFood(o.choice);
 		timer.schedule(new CookingTimerTask(o) {
 			@Override
 			public void run() {
@@ -159,6 +167,8 @@ public class CookAgent extends Agent {
 	}
 	
 	private void plateIt(Order o) {
+		print(o.choice + " is done");
+		cookGui.DoPlateFood(o.choice);
 		o.getWaiter().msgOrderDone(o.getChoice(), o.getTable());
 		o.setState(OrderState.Finished);
 	}
