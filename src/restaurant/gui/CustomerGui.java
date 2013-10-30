@@ -106,14 +106,14 @@ public class CustomerGui implements Gui{
 	public void setHungry(int numCustomers) {
 		isHungry = true;
 		xDestination = (numCustomers%6)*30;
-		yDestination = 30*((numCustomers + 6-((numCustomers)%6))/6 - 1);
+		yDestination = 30*((numCustomers - numCustomers%6)/6);
 		agent.gotHungry();
 		setPresent(true);
 	}
 	
 	public void moveForwardInWait(int numCustomers) {
 		xDestination = (numCustomers%6)*30;
-		yDestination = 30*((numCustomers + 6-((numCustomers)%6))/6 - 1);
+		yDestination = 30*((numCustomers - numCustomers%6)/6);
 	}
 	
 	public boolean isHungry() {
