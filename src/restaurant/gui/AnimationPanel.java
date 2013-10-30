@@ -30,7 +30,7 @@ public class AnimationPanel extends JPanel implements ActionListener {
         
         bufferSize = this.getSize();
  
-    	timer = new Timer(12, this );
+    	timer = new Timer(10, this );
     	timer.start();
     }
 
@@ -78,6 +78,10 @@ public class AnimationPanel extends JPanel implements ActionListener {
     }
 
     public void addGui(WaiterGui gui) {
+        guis.add(gui);
+    }
+    
+    public void addGui(CookGui gui) {
         guis.add(gui);
     }
 }

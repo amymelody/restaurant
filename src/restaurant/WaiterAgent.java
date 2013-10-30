@@ -3,6 +3,7 @@ package restaurant;
 import agent.Agent;
 import restaurant.CustomerAgent.AgentEvent;
 import restaurant.gui.WaiterGui;
+import restaurant.gui.CookGui;
 import restaurant.interfaces.Waiter;
 import restaurant.interfaces.Customer;
 
@@ -37,6 +38,7 @@ public class WaiterAgent extends Agent implements Waiter {
 	private WaiterState state = WaiterState.OnTheJob;
 	
 	public WaiterGui waiterGui = null;
+	public CookGui cookGui = null;
 
 	public WaiterAgent(String name) {
 		super();
@@ -401,13 +403,14 @@ public class WaiterAgent extends Agent implements Waiter {
 	
 	private void retrieveOrder(MyCustomer mc) {
 		print("Retrieving order for table " + mc.getTable());
-		waiterGui.DoGoToCook();
+		waiterGui.DoGoToPlatingArea();
 		try {
 			atCook.acquire();
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		cookGui.DoRemoveFood(mc.getChoice());
 		print("Delivering " + mc.getChoice() + " to table " + mc.getTable());
 		waiterGui.DoDeliverFood(mc.getChoice());
 		mc.setState(CustomerState.ReadyToEat);
@@ -459,6 +462,10 @@ public class WaiterAgent extends Agent implements Waiter {
 
 	public void setGui(WaiterGui gui) {
 		waiterGui = gui;
+	}
+	
+	public void setGui(CookGui gui) {
+		cookGui = gui;
 	}
 
 	public WaiterGui getGui() {

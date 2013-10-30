@@ -36,7 +36,7 @@ public class CustomerGui implements Gui{
 	Map<Integer, Point> tablePositions = new HashMap<Integer, Point>();
 	Map<String, String> foodSymbols = new HashMap<String, String>();
 
-	public CustomerGui(CustomerAgent c, RestaurantGui gui){
+	public CustomerGui(CustomerAgent c, RestaurantGui gui) {
 		agent = c;
 		xPos = -2*CUSTWIDTH;
 		yPos = -2*CUSTWIDTH;
@@ -102,11 +102,20 @@ public class CustomerGui implements Gui{
 	public boolean isPresent() {
 		return isPresent;
 	}
-	public void setHungry() {
+	
+	public void setHungry(int numCustomers) {
 		isHungry = true;
+		xDestination = (numCustomers%6)*30;
+		yDestination = 30*((numCustomers + 6-((numCustomers)%6))/6 - 1);
 		agent.gotHungry();
 		setPresent(true);
 	}
+	
+	public void moveForwardInWait(int numCustomers) {
+		xDestination = (numCustomers%6)*30;
+		yDestination = 30*((numCustomers + 6-((numCustomers)%6))/6 - 1);
+	}
+	
 	public boolean isHungry() {
 		return isHungry;
 	}
@@ -129,6 +138,7 @@ public class CustomerGui implements Gui{
 	public void DoGoToSeat(int seatnumber) {
 		xDestination = (int)tablePositions.get(seatnumber).getX();
 		yDestination = (int)tablePositions.get(seatnumber).getY();
+		gui.removeWaitingCustomer(agent);
 		command = Command.GoToSeat;
 	}
 	

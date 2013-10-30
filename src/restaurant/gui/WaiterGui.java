@@ -13,8 +13,8 @@ public class WaiterGui implements Gui {
     
     RestaurantGui gui;
 
-    private int xPos = -20, yPos = -20;//default waiter position
-    private int xDestination = -20, yDestination = -20;//default start position
+    private int xPos, yPos;
+    private int xDestination, yDestination;
     private boolean atTable = false;
 
     //Get rid of the "magic numbers"
@@ -22,6 +22,10 @@ public class WaiterGui implements Gui {
 	static final int WAITERHEIGHT = 20;
 	static final int COOKX = 200;
 	static final int COOKY = 10;
+	static final int PLATINGX = 250;
+	static final int PLATINGY = 60;
+	final int HOMEX;
+	final int HOMEY;
 	
     public static final int xTable = 150;
     public static final int yTable = 250;
@@ -32,9 +36,15 @@ public class WaiterGui implements Gui {
     Map<String, String> foodSymbols = new HashMap<String, String>();
     ArrayList<String> orders = new ArrayList<String>();
 
-    public WaiterGui(WaiterAgent agent, RestaurantGui gui) {
+    public WaiterGui(WaiterAgent agent, RestaurantGui gui, int waiterNum) {
         this.agent = agent;
         this.gui = gui;
+        HOMEX = 30*((waiterNum + 6-((waiterNum-1)%7))/7 - 1);
+        HOMEY = ((waiterNum-1)%7)*30 + 160;
+        xPos = HOMEX;
+        yPos = HOMEY;
+        xDestination = HOMEX;
+        yDestination = HOMEY;
         
         tablePositions.put(1, new Point(xTable + WAITERWIDTH, yTable - WAITERWIDTH));
 		tablePositions.put(2, new Point(xTable + 2*tableWidth + WAITERWIDTH, yTable - WAITERWIDTH));
@@ -67,10 +77,10 @@ public class WaiterGui implements Gui {
 	        		}
         		}
         	}
-        	if (xDestination == -WAITERWIDTH && yDestination == -WAITERWIDTH) {
+        	if (xDestination == HOMEX && yDestination == HOMEY) {
         		agent.msgAtHome();
         	}
-        	if (xDestination == COOKX && yDestination == COOKY) {
+        	if ((xDestination == COOKX && yDestination == COOKY) || (xDestination == PLATINGX && yDestination == PLATINGY)) {
         		agent.msgAtCook();
         	}
         }
@@ -106,10 +116,15 @@ public class WaiterGui implements Gui {
         xDestination = COOKX;
         yDestination = COOKY;
     }
+    
+    public void DoGoToPlatingArea() {
+        xDestination = PLATINGX;
+        yDestination = PLATINGY;
+    }
 
     public void DoReturnHome() {
-        xDestination = -WAITERWIDTH;
-        yDestination = -WAITERWIDTH;
+        xDestination = HOMEX;
+        yDestination = HOMEY;
     }
     
     public void DoDeliverFood(String choice) {

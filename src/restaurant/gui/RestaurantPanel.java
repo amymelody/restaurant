@@ -6,6 +6,7 @@ import restaurant.MarketAgent;
 import restaurant.WaiterAgent;
 import restaurant.CookAgent;
 import restaurant.CashierAgent;
+import restaurant.WaiterAgent.CustomerState;
 
 import javax.swing.*;
 
@@ -23,9 +24,10 @@ public class RestaurantPanel extends JPanel {
     private HostAgent host = new HostAgent("Sarah");
     private CookAgent cook = new CookAgent("John");
     private CashierAgent cashier = new CashierAgent("Jake");
-    private Vector<CustomerAgent> customers = new Vector<CustomerAgent>();
+    private Vector<MyCustomer> customers = new Vector<MyCustomer>();
     private Vector<WaiterAgent> waiters = new Vector<WaiterAgent>();
     private Vector<MarketAgent> markets = new Vector<MarketAgent>();
+    private int numCustomers = 0;
 
     private JPanel restLabel = new JPanel();
     private ListPanel customerPanel = new ListPanel(this, "Customers");
@@ -33,6 +35,7 @@ public class RestaurantPanel extends JPanel {
     private JPanel group = new JPanel();
 
     private RestaurantGui gui; //reference to main gui
+    private CookGui cookGui;
 
     public RestaurantPanel(RestaurantGui gui) {
         this.gui = gui;
@@ -46,6 +49,10 @@ public class RestaurantPanel extends JPanel {
 		cook.addMarket(markets.get(2));
 		cook.setHost(host);
         
+		cookGui = new CookGui(cook, gui);
+		gui.animationPanel.addGui(cookGui);
+		cook.setGui(cookGui);
+		
         host.startThread();
         cook.startThread();
         cashier.startThread();
@@ -71,6 +78,39 @@ public class RestaurantPanel extends JPanel {
     	return gui.getInfoLabelText();
     }
     
+    public void addCustomer(CustomerAgent c) {
+    	for (MyCustomer mc : customers) {
+    		if (mc.cust == c) {
+    			mc.waiting = true;
+    		}
+    	}
+    }
+    
+    public void removeCustomer(CustomerAgent c) {
+    	for (MyCustomer mc : customers) {
+    		if (mc.cust == c) {
+    			mc.waiting = false;
+    		}
+    	}
+    	int total = 0;
+    	for (MyCustomer mc : customers) {
+    		if (mc.waiting) {
+    			mc.cust.getGui().moveForwardInWait(total);
+    			total++;
+    		}
+    	}
+    }
+    
+    public int getNumCustomers() {
+    	int total = 0;
+    	for (MyCustomer mc : customers) {
+    		if (mc.waiting) {
+    			total++;
+    		}
+    	}
+    	return total;
+    }
+    
     public void pauseAgents() {
     	host.pause();
     	cook.pause();
@@ -78,8 +118,8 @@ public class RestaurantPanel extends JPanel {
     	for (WaiterAgent w : waiters) {
     		w.pause();
     	}
-    	for (CustomerAgent c : customers) {
-    		c.pause();
+    	for (MyCustomer mc : customers) {
+    		mc.cust.pause();
     	}
     	for (MarketAgent m : markets) {
     		m.pause();
@@ -92,8 +132,8 @@ public class RestaurantPanel extends JPanel {
     	for (WaiterAgent w : waiters) {
     		w.resume();
     	}
-    	for (CustomerAgent c : customers) {
-    		c.resume();
+    	for (MyCustomer mc : customers) {
+    		mc.cust.resume();
     	}
     	for (MarketAgent m : markets) {
     		m.resume();
@@ -130,7 +170,7 @@ public class RestaurantPanel extends JPanel {
         if (type.equals("Customers")) {
 
             for (int i = 0; i < customers.size(); i++) {
-                CustomerAgent temp = customers.get(i);
+                CustomerAgent temp = customers.get(i).cust;
                 if (temp.getName() == name)
                     gui.updateInfoPanel(temp);
             }
@@ -157,26 +197,36 @@ public class RestaurantPanel extends JPanel {
     		CustomerAgent c = new CustomerAgent(name);	
     		CustomerGui g = new CustomerGui(c, gui);
 
-    		gui.animationPanel.addGui(g);// dw
+    		gui.animationPanel.addGui(g);
     		c.setHost(host);
     		c.setCashier(cashier);
     		c.setGui(g);
-    		customers.add(c);
+    		customers.add(new MyCustomer(c));
     		c.startThread();
     	}
     	if (type.equals("Waiters")) {
     		WaiterAgent w = new WaiterAgent(name);	
-    		WaiterGui g = new WaiterGui(w, gui);
+    		WaiterGui g = new WaiterGui(w, gui, waiters.size()+1);
 
     		gui.animationPanel.addGui(g);
      		w.setHost(host);
      		w.setCashier(cashier);
      		w.setCook(cook);
      		w.setGui(g);
+     		w.setGui(cookGui);
      		waiters.add(w);
      		w.startThread();
      		host.addWaiter(w);
     	}
     }
 
+    private class MyCustomer {
+		CustomerAgent cust;
+		boolean waiting;
+
+		MyCustomer(CustomerAgent c) {
+			cust = c;
+			waiting = false;
+		}
+    }
 }

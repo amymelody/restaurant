@@ -163,7 +163,8 @@ public class RestaurantGui extends JFrame implements ActionListener {
         	if (stateCB.getText().equals("Hungry?")) {
 	            if (currentPerson instanceof CustomerAgent) {
 	                CustomerAgent c = (CustomerAgent) currentPerson;
-	                c.getGui().setHungry();
+	                c.getGui().setHungry(restPanel.getNumCustomers());
+	                restPanel.addCustomer(c);
 	                stateCB.setEnabled(false);
 	            }
         	}
@@ -194,6 +195,10 @@ public class RestaurantGui extends JFrame implements ActionListener {
                 stateCB.setSelected(false);
             }
         }
+    }
+    
+    public void removeWaitingCustomer(CustomerAgent c) {
+    	restPanel.removeCustomer(c);
     }
     
     public void setWaiterEnabled(WaiterAgent w) {
