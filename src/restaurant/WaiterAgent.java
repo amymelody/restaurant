@@ -22,6 +22,7 @@ public class WaiterAgent extends Agent implements Waiter {
 
 	private String name;
 	private Semaphore atHome = new Semaphore(0,true);
+	private Semaphore atCustomer = new Semaphore(0,true);
 	private Semaphore atTable = new Semaphore(0,true);
 	private Semaphore atCook = new Semaphore(0,true);
 	private boolean returningHome = false;
@@ -223,6 +224,11 @@ public class WaiterAgent extends Agent implements Waiter {
 			returningHome = false;
 		}
 	}
+	
+	public void msgAtCustomer() {//from animation
+		atCustomer.release();// = true;
+		stateChanged();
+	}
 
 	public void msgAtTable() {//from animation
 		atTable.release();// = true;
@@ -342,9 +348,9 @@ public class WaiterAgent extends Agent implements Waiter {
 
 	private void seatCustomer(MyCustomer mc) {
 		returningHome = true;
-		waiterGui.DoReturnHome();
+		waiterGui.DoGoToCustomer();
 		try {
-			atHome.acquire();
+			atCustomer.acquire();
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

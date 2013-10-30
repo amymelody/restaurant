@@ -22,6 +22,8 @@ public class WaiterGui implements Gui {
 	static final int WAITERHEIGHT = 20;
 	static final int COOKX = 200;
 	static final int COOKY = 10;
+	static final int CUSTX = 20;
+	static final int CUSTY = 20;
 	static final int PLATINGX = 250;
 	static final int PLATINGY = 60;
 	final int HOMEX;
@@ -80,6 +82,9 @@ public class WaiterGui implements Gui {
         	if (xDestination == HOMEX && yDestination == HOMEY) {
         		agent.msgAtHome();
         	}
+        	if (xDestination == CUSTX && yDestination == CUSTY) {
+        		agent.msgAtCustomer();
+        	}
         	if ((xDestination == COOKX && yDestination == COOKY) || (xDestination == PLATINGX && yDestination == PLATINGY)) {
         		agent.msgAtCook();
         	}
@@ -110,6 +115,11 @@ public class WaiterGui implements Gui {
         xDestination = (int)tablePositions.get(tableNumber).getX();
 		yDestination = (int)tablePositions.get(tableNumber).getY();
 		atTable = false;
+    }
+    
+    public void DoGoToCustomer() {
+    	xDestination = CUSTX;
+		yDestination = CUSTY;
     }
     
     public void DoGoToCook() {
