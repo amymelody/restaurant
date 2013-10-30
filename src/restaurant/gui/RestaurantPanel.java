@@ -40,7 +40,7 @@ public class RestaurantPanel extends JPanel {
     public RestaurantPanel(RestaurantGui gui) {
         this.gui = gui;
         
-        markets.add(new MarketAgent("Market 1", cook, cashier, 10, 10, 10, 10));
+        markets.add(new MarketAgent("Market 1", cook, cashier, 0, 10, 10, 10));
 		markets.add(new MarketAgent("Market 2", cook, cashier, 1, 1, 1, 1));
 		markets.add(new MarketAgent("Market 3", cook, cashier, 2, 2, 2, 2));
 		

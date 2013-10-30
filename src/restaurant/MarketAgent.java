@@ -34,9 +34,9 @@ public class MarketAgent extends Agent {
 		cook = c;
 		cashier = ca;
 		
-		steak = new Food("steak", 15, stAmt);
-		chicken = new Food("chicken", 20, cAmt);
-		salad = new Food("salad", 20, saAmt);
+		steak = new Food("steak", 10, stAmt);
+		chicken = new Food("chicken", 10, cAmt);
+		salad = new Food("salad", 10, saAmt);
 		pizza = new Food("pizza", 10, pAmt);
 		
 		foods.put("steak", steak);
@@ -59,15 +59,6 @@ public class MarketAgent extends Agent {
 		return orders;
 	}
 	
-	public boolean canFulfillOrder(List<ItemOrder> items) {
-		for (ItemOrder io : items) {
-			if (foods.get(io.getFood()).amount < io.getAmount()) {
-				return false;
-			}
-		}
-		return true;
-	}
-	
 	public int timeToProduceOrder(Order o) {
 		int time = 0;
 		for (ItemOrder io : o.items) {
@@ -81,9 +72,11 @@ public class MarketAgent extends Agent {
 	public void msgHereIsOrder(List<ItemOrder> io) {
 		List<ItemOrder> temp = new ArrayList<ItemOrder>();
 		for (ItemOrder o : io) {
-			temp.add(o);
+			if (foods.get(o.getFood()).amount >= o.getAmount()) {
+				temp.add(o);
+			}
 		}
-		orders.add(new Order(temp, canFulfillOrder(io), OrderState.Received));
+		orders.add(new Order(temp, OrderState.Received));
 		stateChanged();
 	}
 
@@ -100,13 +93,7 @@ public class MarketAgent extends Agent {
 				}
 			}
 			for (Order order : orders) {
-				if (order.getState() == OrderState.Received && !order.canFulfillOrder) {
-					respondToCook(order);
-					return true;
-				}
-			}
-			for (Order order : orders) {
-				if (order.getState() == OrderState.Received && order.canFulfillOrder) {
+				if (order.getState() == OrderState.Received) {
 					produceOrder(order);
 					return true;
 				}
@@ -122,17 +109,27 @@ public class MarketAgent extends Agent {
 	// Actions
 
 	private void produceOrder(Order o) {
-		o.setState(OrderState.ProducingOrder);
-		timer.schedule(new ProducingTimerTask(o) {
-			@Override
-			public void run() {
-				order.setState(OrderState.Ready);
-				stateChanged();
-			}
-		},
-		timeToProduceOrder(o));
+		print("Here is what I can fulfill: ");
 		for (ItemOrder io : o.items) {
-			foods.get(io.getFood()).amount -= io.getAmount();
+			print(io.getAmount() + " " + io.getFood() + "s");
+		}
+		cook.msgHereIsWhatICanFulfill(o.items);
+		if (!o.items.isEmpty()) {
+			o.setState(OrderState.ProducingOrder);
+			timer.schedule(new ProducingTimerTask(o) {
+				@Override
+				public void run() {
+					order.setState(OrderState.Ready);
+					stateChanged();
+				}
+			},
+			timeToProduceOrder(o));
+			for (ItemOrder io : o.items) {
+				foods.get(io.getFood()).amount -= io.getAmount();
+			}
+		} else {
+			print("I can't fulfill this order");
+			o.setState(OrderState.Finished);
 		}
 	}
 	
@@ -149,32 +146,16 @@ public class MarketAgent extends Agent {
 		o.setState(OrderState.Finished);
 	}
 	
-	private void respondToCook(Order o) {
-		print("I can't fulfill this order");
-		cook.msgCantFulfillOrder(o.items);
-		o.setState(OrderState.Finished);
-	}
-	
 
 	//utilities
 
 	private class Order {
 		List<ItemOrder> items;
-		boolean canFulfillOrder;
 		OrderState state;
 
-		Order(List<ItemOrder> io, boolean c, OrderState s) {
+		Order(List<ItemOrder> io, OrderState s) {
 			items = io;
 			state = s;
-			canFulfillOrder = c;
-		}
-		
-		public boolean getCanFulfill() {
-			return canFulfillOrder;
-		}
-		
-		void setCanFulfill(boolean c) {
-			canFulfillOrder = c;
 		}
 		
 		OrderState getState() {

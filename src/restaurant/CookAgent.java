@@ -35,7 +35,7 @@ public class CookAgent extends Agent {
 	public enum OrderState
 	{Pending, Cooking, Done, Finished};
 	public enum FoodState
-	{Enough, MustBeOrdered, Ordered, ReceivedOrder};
+	{Enough, MustBeOrdered, Ordered, WaitingForOrder, ReceivedOrder};
 
 	public CookAgent(String name) {
 		super();
@@ -76,9 +76,14 @@ public class CookAgent extends Agent {
 		stateChanged();
 	}
 	
-	public void msgCantFulfillOrder(List<ItemOrder> orders) {
+	public void msgHereIsWhatICanFulfill(List<ItemOrder> orders) {
+		for (Food f : foods.values()) {
+			if (f.state == FoodState.Ordered) {
+				f.state = FoodState.MustBeOrdered;
+			}
+		}
 		for (ItemOrder o : orders) {
-			foods.get(o.getFood()).setState(FoodState.MustBeOrdered);
+			foods.get(o.getFood()).setState(FoodState.WaitingForOrder);
 		}
 		stateChanged();
 	}
