@@ -47,17 +47,21 @@ public class CookGui implements Gui{
 		g.setColor(Color.BLACK);
 		g.fillRect(PLATINGX, PLATINGY, PLATINGW, PLATINGH);
 		try {
+			int cookingTotal = 0;
+			int platedTotal = 0;
 			for (Order order : orders) {
 				if (order.done) { 
 					g.setColor(Color.WHITE);
-					g.fillRect(PLATINGX, PLATINGY, FOODW, FOODH);
+					g.fillRect(PLATINGX + (platedTotal%3)*20, PLATINGY + (platedTotal-platedTotal%3)/3, FOODW, FOODH);
 					g.setColor(Color.BLACK);
-					g.drawString(foodSymbols.get(order.food), PLATINGX+FOODW/4, PLATINGY+FOODH/2);
+					g.drawString(foodSymbols.get(order.food), PLATINGX+FOODW/4 + (platedTotal%3)*20, PLATINGY+FOODH/2 + (platedTotal-platedTotal%3)/3);
+					platedTotal++;
 				} else {
 					g.setColor(Color.WHITE);
-					g.fillRect(COOKINGX, COOKINGY, FOODW, FOODH);
+					g.fillRect(COOKINGX + (cookingTotal%3)*20, COOKINGY + (cookingTotal-cookingTotal%3)/3, FOODW, FOODH);
 					g.setColor(Color.BLACK);
-					g.drawString(foodSymbols.get(order.food), COOKINGX+FOODW/4, COOKINGY+FOODH/2);
+					g.drawString(foodSymbols.get(order.food), COOKINGX+FOODW/4 + (cookingTotal%3)*20, COOKINGY+FOODH/2 + (cookingTotal-cookingTotal%3)/3);
+					cookingTotal++;
 				}
 			}
 		} catch (ConcurrentModificationException e) {
