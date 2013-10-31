@@ -24,7 +24,11 @@ public class MockCustomer extends Mock implements Customer {
 	
 	@Override
 	public void msgChange(int change) {
-		log.add(new LoggedEvent("Received msgChange from cashier. Change = " + change));
+		log.add(new LoggedEvent("Received msgChange from cashier. Change = $" + change));
+	}
+	
+	public String toString() {
+		return "customer " + getName();
 	}
 
 	/*@Override

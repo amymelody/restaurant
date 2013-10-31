@@ -19,7 +19,11 @@ public class MockWaiter extends Mock implements Waiter {
 	
 	@Override
 	public void msgHereIsCheck(Customer c, int charge) {
-		log.add(new LoggedEvent("Received msgHereIsCheck from cashier. Customer = " + c.getName() + ". Charge = " + charge));
+		log.add(new LoggedEvent("Received msgHereIsCheck from cashier. Customer = " + c.getName() + ". Charge = $" + charge));
+	}
+	
+	public String toString() {
+		return getName();
 	}
 	
 }

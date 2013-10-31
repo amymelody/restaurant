@@ -6,6 +6,7 @@ import restaurant.interfaces.Waiter;
 import restaurant.interfaces.Cashier;
 import restaurant.interfaces.Cashier;
 import restaurant.test.mock.EventLog;
+import restaurant.test.mock.LoggedEvent;
 
 import java.util.*;
 
@@ -43,11 +44,13 @@ public class CashierAgent extends Agent implements Cashier {
 	// Messages
 	
 	public void msgProduceCheck(Waiter w, Customer c, String choice) {
+		log.add(new LoggedEvent("Received msgProduceCheck"));
 		checks.add(new Check(c, w, choice, prices.get(choice)+c.getCharge(), CheckState.Created));
 		stateChanged();
 	}
 	
 	public void msgPayment(Customer c, int cash) {
+		log.add(new LoggedEvent("Received msgPayment"));
 		synchronized(checks) {
 			for (Check check : checks) {
 				if (check.cust == c & check.state == CheckState.GivenToWaiter) {
@@ -60,6 +63,7 @@ public class CashierAgent extends Agent implements Cashier {
 	}
 	
 	public void msgHereIsBill(int bill) {
+		log.add(new LoggedEvent("Received msgHereIsBill"));
 		print("Paying bill");
 		cash -= bill;
 		stateChanged();
@@ -135,6 +139,30 @@ public class CashierAgent extends Agent implements Cashier {
 		
 		public void setState(CheckState state) {
 			this.state = state;
+		}
+		
+		public CheckState getState() {
+			return state;
+		}
+		
+		public int getCharge() {
+			return charge;
+		}
+		
+		public int getPayment() {
+			return payment;
+		}
+		
+		public Customer getCust() {
+			return cust;
+		}
+		
+		public Waiter getWaiter() {
+			return waiter;
+		}
+		
+		public String getChoice() {
+			return choice;
 		}
 	}
 }
