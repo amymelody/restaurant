@@ -1,6 +1,8 @@
 package restaurant;
 
 import agent.Agent;
+import restaurant.interfaces.Market;
+import restaurant.test.mock.LoggedEvent;
 
 import java.util.*;
 
@@ -9,13 +11,14 @@ import java.util.*;
  * Restaurant Market Agent
  */
 
-public class MarketAgent extends Agent {
+public class MarketAgent extends Agent implements Market {
 	public List<Order> orders = Collections.synchronizedList(new ArrayList<Order>());
 
 	private String name;
 	private CookAgent cook;
 	private CashierAgent cashier;
 	private Timer timer = new Timer();
+	private int cash;
 	
 	Food steak;
 	Food chicken;
@@ -33,6 +36,7 @@ public class MarketAgent extends Agent {
 		this.name = name;
 		cook = c;
 		cashier = ca;
+		cash = 1000;
 		
 		steak = new Food("steak", 10, stAmt);
 		chicken = new Food("chicken", 10, cAmt);
@@ -77,6 +81,12 @@ public class MarketAgent extends Agent {
 			}
 		}
 		orders.add(new Order(temp, OrderState.Received));
+		stateChanged();
+	}
+	
+	public void msgPayment(int cash) {
+		print("Received payment");
+		this.cash += cash;
 		stateChanged();
 	}
 
@@ -142,7 +152,7 @@ public class MarketAgent extends Agent {
 		}
 		cook.msgOrderDelivered(o.items);
 		print("Here is the bill: $" + bill);
-		cashier.msgHereIsBill(bill);
+		cashier.msgHereIsBill(bill, this);
 		o.setState(OrderState.Finished);
 	}
 	

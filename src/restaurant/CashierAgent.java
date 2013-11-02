@@ -4,7 +4,7 @@ import agent.Agent;
 import restaurant.interfaces.Customer;
 import restaurant.interfaces.Waiter;
 import restaurant.interfaces.Cashier;
-import restaurant.interfaces.Cashier;
+import restaurant.interfaces.Market;
 import restaurant.test.mock.EventLog;
 import restaurant.test.mock.LoggedEvent;
 
@@ -17,6 +17,7 @@ import java.util.*;
 
 public class CashierAgent extends Agent implements Cashier {
 	public List<Check> checks = Collections.synchronizedList(new ArrayList<Check>());
+	public List<Bill> bills = Collections.synchronizedList(new ArrayList<Bill>());
 
 	private String name;
 	private int cash;
@@ -66,10 +67,9 @@ public class CashierAgent extends Agent implements Cashier {
 		}
 	}
 	
-	public void msgHereIsBill(int bill) {
+	public void msgHereIsBill(int bill, Market market) {
 		log.add(new LoggedEvent("Received msgHereIsBill"));
-		print("Paying bill");
-		cash -= bill;
+		bills.add(new Bill(market, bill));
 		stateChanged();
 	}
 
@@ -91,6 +91,12 @@ public class CashierAgent extends Agent implements Cashier {
 					giveCustomerChange(check);
 					return true;
 				}
+			}
+		}
+		synchronized(bills) {
+			for (Bill bill : bills) {
+				payBill(bill);
+				return true;
 			}
 		}
 
@@ -117,8 +123,33 @@ public class CashierAgent extends Agent implements Cashier {
 		c.setState(CheckState.Done);
 		c.cust.msgChange(change);
 	}
+	
+	private void payBill(Bill bill) {
+		cash -= bill.charge;
+		print("Paying bill. Cash = $" + cash);
+		bill.market.msgPayment(bill.charge);
+		bills.remove(bill);
+	}
 
 	//utilities
+	
+	public class Bill {
+		Market market;
+		int charge;
+		
+		Bill(Market m, int c) {
+			market = m;
+			charge = c;
+		}
+		
+		public Market getMarket() {
+			return market;
+		}
+		
+		public int getCharge() {
+			return charge;
+		}
+	}
 
 	public class Check {
 		Customer cust;
