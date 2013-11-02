@@ -17,9 +17,12 @@ public class MockCustomer extends Mock implements Customer {
 
 	}
 	
-	@Override
 	public int getCharge() {
 		return charge;
+	}
+	
+	public void setCharge(int c) {
+		charge = c;
 	}
 	
 	@Override

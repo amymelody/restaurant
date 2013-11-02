@@ -41,6 +41,10 @@ public class CashierAgent extends Agent implements Cashier {
 		return name;
 	}
 	
+	public int getCash() {
+		return cash;
+	}
+	
 	// Messages
 	
 	public void msgProduceCheck(Waiter w, Customer c, String choice) {
