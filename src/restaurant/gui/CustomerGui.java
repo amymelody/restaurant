@@ -17,7 +17,7 @@ public class CustomerGui implements Gui{
 
 	private int xPos, yPos;
 	private int xDestination, yDestination;
-	private enum Command {noCommand, GoToSeat, GoToCashier, LeaveRestaurant};
+	private enum Command {noCommand, GoToRestaurant, GoToSeat, GoToCashier, LeaveRestaurant};
 	private Command command=Command.noCommand;
 	private boolean ordering;
 	private Timer timer = new Timer();
@@ -38,10 +38,10 @@ public class CustomerGui implements Gui{
 
 	public CustomerGui(CustomerAgent c, RestaurantGui gui) {
 		agent = c;
-		xPos = -2*CUSTWIDTH;
-		yPos = -2*CUSTWIDTH;
-		xDestination = -2*CUSTWIDTH;
-		yDestination = -2*CUSTWIDTH;
+		xPos = -CUSTWIDTH;
+		yPos = -CUSTWIDTH;
+		xDestination = -CUSTWIDTH;
+		yDestination = -CUSTWIDTH;
 		this.gui = gui;
 		
 		tablePositions.put(1, new Point(xTable, yTable));
@@ -72,6 +72,9 @@ public class CustomerGui implements Gui{
 				System.out.println("about to call gui.setCustomerEnabled(agent);");
 				isHungry = false;
 				gui.setCustomerEnabled(agent);
+			}
+			else if (command==Command.GoToRestaurant) {
+				agent.msgAnimationFinishedEnterRestaurant();
 			}
 			else if (command==Command.GoToCashier) {
 				agent.msgAtCashier();
@@ -107,6 +110,7 @@ public class CustomerGui implements Gui{
 		isHungry = true;
 		xDestination = (numCustomers%6)*30;
 		yDestination = 30*((numCustomers - numCustomers%6)/6);
+		command = Command.GoToRestaurant;
 		agent.gotHungry();
 		setPresent(true);
 	}
@@ -151,6 +155,7 @@ public class CustomerGui implements Gui{
 	public void DoExitRestaurant() {
 		xDestination = -2*CUSTWIDTH;
 		yDestination = -2*CUSTWIDTH;
+		gui.removeWaitingCustomer(agent);
 		command = Command.LeaveRestaurant;
 	}
 }

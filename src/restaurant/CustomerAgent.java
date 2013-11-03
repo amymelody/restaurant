@@ -33,11 +33,11 @@ public class CustomerAgent extends Agent implements Customer {
 
 	//    private boolean isHungry = false; //hack for gui
 	public enum AgentState
-	{DoingNothing, WaitingInRestaurant, BeingSeated, Seated, WantToLeave, ReadyToOrder, Ordered, Eating, WaitingForCheck, Paying, Leaving};
+	{DoingNothing, GoingToRestaurant, WaitingInRestaurant, BeingSeated, Seated, WantToLeave, ReadyToOrder, Ordered, Eating, WaitingForCheck, Paying, Leaving};
 	private AgentState state = AgentState.DoingNothing;//The start state
 
 	public enum AgentEvent 
-	{none, gotHungry, gotImpatient, followWaiter, seated, looksAtMenuAndCries, toldWaiter, madeChoice, order, receivedFood, doneEating, receivedCheck, receivedChange, doneLeaving};
+	{none, gotHungry, arrivedAtRestaurant, gotImpatient, followWaiter, seated, looksAtMenuAndCries, toldWaiter, madeChoice, order, receivedFood, doneEating, receivedCheck, receivedChange, doneLeaving};
 	AgentEvent event = AgentEvent.none;
 
 	/**
@@ -115,7 +115,7 @@ public class CustomerAgent extends Agent implements Customer {
 		waiter = w;
 		menu = m;
 		this.tableNumber = tableNumber;
-		print("Received msgSitAtTable");
+		print("Received msgFollowMe");
 		event = AgentEvent.followWaiter;
 		stateChanged();
 	}
@@ -161,6 +161,12 @@ public class CustomerAgent extends Agent implements Customer {
 		stateChanged();
 	}
 	
+	public void msgAnimationFinishedEnterRestaurant() {
+		//from animation
+		event = AgentEvent.arrivedAtRestaurant;
+		stateChanged();
+	}
+	
 	public void  msgHereIsCheck(int c) {
 		charge += c;
 		event = AgentEvent.receivedCheck;
@@ -197,8 +203,12 @@ public class CustomerAgent extends Agent implements Customer {
 		//	CustomerAgent is a finite state machine
 
 		if (state == AgentState.DoingNothing && event == AgentEvent.gotHungry){
+			state = AgentState.GoingToRestaurant;
+			return true;
+		}
+		if (state == AgentState.GoingToRestaurant && event == AgentEvent.arrivedAtRestaurant) {
 			state = AgentState.WaitingInRestaurant;
-			goToRestaurant();
+			requestSeat();
 			return true;
 		}
 		if (state == AgentState.WaitingInRestaurant && event == AgentEvent.followWaiter){
@@ -272,8 +282,8 @@ public class CustomerAgent extends Agent implements Customer {
 
 	// Actions
 
-	private void goToRestaurant() {
-		Do("Going to restaurant");
+	private void requestSeat() {
+		Do("Table for 1");
 		host.msgIWantFood(this);
 	}
 	
