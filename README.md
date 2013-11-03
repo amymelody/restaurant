@@ -12,9 +12,11 @@
   + Press the Add button under "Cusomters" or "Waiters" to add that name to respective list.
   + Select a customer's name in the list to display their name at the top along with a "Hungry" checkbox.
   + Select a waiter's name in the list to display their name at the top along with a "Break" checkbox.
+  + Once a waiter is added, it will appear in its home position. A customer will appear in the waiting area once its "Hungry" checkbox is checked.
 
 ###Running the Different Scenarios
-  + The first market has 10 of each item, the second has 1 of each item, and the last has 2 of each item
+  + The first market has 10 of each item except for steak (0), the second has 1 of each item, and the last has 2 of each item except for steak (10)
+  + The "one order from two markets" scenario will happen as soon as the program is started. To test the normative market bill scenario, add a customer with the name "salad" and the cook will order salad once the customer orders it and the inventory gets low.
   + The cook starts out with 1 steak, 1 chicken, 2 salads, and 3 pizzas (capacity 3 and low 1 for each)
   + The cook orders steak and chicken from the first market right away, so to test the backup market scenario, create a customer named "salad" (the second market will be unable to fulfill the order of 2 salads).
   + To test the out of food scenario, create 2 waiters and 2 customers named "steak". By the time the second customer orders steak, the steak inventory will be 0 (as long as the market's order hasn't arrived, but the order takes a while).
