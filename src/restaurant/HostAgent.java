@@ -1,11 +1,7 @@
 package restaurant;
 
 import agent.Agent;
-
 import java.util.*;
-import java.util.concurrent.Semaphore;
-
-import restaurant.WaiterAgent.CustomerState;
 
 /**
  * Restaurant Host Agent
@@ -23,6 +19,11 @@ public class HostAgent extends Agent {
 	public enum WaiterState
 	{OnTheJob, WantToGoOnBreak, AboutToGoOnBreak, OnBreak};
 
+	/**
+	 * Constructor
+	 *
+	 * @param name Agent name for messages
+	 */
 	public HostAgent(String name) {
 		super();
 
@@ -34,26 +35,32 @@ public class HostAgent extends Agent {
 		}
 	}
 
+	/**
+	 * Returns the Agent's name
+	 */
 	public String getMaitreDName() {
 		return name;
 	}
 
+	/**
+	 * Returns the Agent's name
+	 */
 	public String getName() {
 		return name;
 	}
-
-	public List getCustomers() {
-		return customers;
-	}
-
-	public Collection getTables() {
-		return tables;
-	}
 	
+	/**
+	 * Returns a String that represents the Agent
+	 */
 	public String toString() {
 		return getName();
 	}
 	
+	/**
+	 * Checks if all tables in restaurant are occupied
+	 * 
+	 * @return true if all tables are occupied, false otherwise
+	 */
 	public boolean restaurantFull() {
 		synchronized(tables) {
 			for (Table table : tables) {
@@ -65,6 +72,11 @@ public class HostAgent extends Agent {
 		return true;
 	}
 	
+	/**
+	 * Checks if there are no WaiterAgents on break
+	 * 
+	 * @return true if there are no waiters on break, false otherwise
+	 */
 	public boolean noWaitersOnBreak() {
 		synchronized(waiters) {
 			for (MyWaiter waiter : waiters) {
@@ -76,12 +88,17 @@ public class HostAgent extends Agent {
 		return true;
 	}
 	
-	// Messages
-	
+	/**
+	 * Hack to establish connection with WaiterAgents
+	 * 
+	 * @param waiter Reference to WaiterAgent
+	 */
 	public void addWaiter(WaiterAgent waiter) {
 		waiters.add(new MyWaiter(waiter));
 		stateChanged();
 	}
+	
+	// Messages
 
 	public void msgWantToGoOnBreak(WaiterAgent waiter) {
 		synchronized(waiters) {

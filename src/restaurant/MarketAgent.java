@@ -2,7 +2,6 @@ package restaurant;
 
 import agent.Agent;
 import restaurant.interfaces.Market;
-import restaurant.test.mock.LoggedEvent;
 
 import java.util.*;
 
@@ -31,6 +30,17 @@ public class MarketAgent extends Agent implements Market {
 	public enum OrderState
 	{Received, ProducingOrder, Ready, Finished};
 	
+	/**
+	 * Constructor
+	 *
+	 * @param name Agent name for messages
+	 * @param c Reference to CookAgent
+	 * @param ca Reference to CashierAgent
+	 * @param stAmt Amount of steak in inventory
+	 * @param cAmt Amount of chicken in inventory
+	 * @param saAmt Amount of salad in inventory
+	 * @param pAmt Amount of pizza in inventory
+	 */
 	public MarketAgent(String name, CookAgent c, CashierAgent ca, int stAmt, int cAmt, int saAmt, int pAmt) {
 		super();
 		this.name = name;
@@ -43,10 +53,10 @@ public class MarketAgent extends Agent implements Market {
 		salad = new Food("salad", 10, saAmt);
 		pizza = new Food("pizza", 10, pAmt);
 		
-		foods.put("steak", steak);
-		foods.put("chicken", chicken);
-		foods.put("salad", salad);
-		foods.put("pizza", pizza);
+		foods.put(steak.type, steak);
+		foods.put(chicken.type, chicken);
+		foods.put(salad.type, salad);
+		foods.put(pizza.type, pizza);
 		
 		foodPrices.put("steak", 12);
 		foodPrices.put("chicken", 9);
@@ -54,15 +64,18 @@ public class MarketAgent extends Agent implements Market {
 		foodPrices.put("pizza", 6);
 	}
 	
-
+	/**
+	 * Returns the Agent's name
+	 */
 	public String getName() {
 		return name;
 	}
-
-	public List getOrders() {
-		return orders;
-	}
 	
+	/**
+	 * Returns the integer total time to produce an order of one or more items
+	 * 
+	 * @param o Reference to Order
+	 */
 	public int timeToProduceOrder(Order o) {
 		int time = 0;
 		for (ItemOrder io : o.items) {
@@ -187,22 +200,6 @@ public class MarketAgent extends Agent implements Market {
 			timeToProduce = p;
 			amount = a;
 		}
-		
-		String getType() {
-			return type;
-		}
-		
-		int getTimeToProduce() {
-			return timeToProduce;
-		}
-		
-		void setAmount(int a) {
-			amount = a;
-		}
-		
-		int getAmount() {
-			return amount;
-		}
 	}
 	
 	private class ProducingTimerTask extends TimerTask {
@@ -212,9 +209,7 @@ public class MarketAgent extends Agent implements Market {
 			order = o;
 		}
 		
-		public void run() {
-			order = order;
-		}
+		public void run() {};
 	}
 }
 

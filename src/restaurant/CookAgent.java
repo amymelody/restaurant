@@ -1,11 +1,7 @@
 package restaurant;
 
 import agent.Agent;
-
 import java.util.*;
-
-import restaurant.HostAgent.WaiterState;
-import restaurant.gui.CustomerGui;
 import restaurant.gui.CookGui;
 
 
@@ -37,6 +33,11 @@ public class CookAgent extends Agent {
 	public enum FoodState
 	{Enough, MustBeOrdered, Ordered, WaitingForOrder, ReceivedOrder};
 
+	 /**
+	 * Constructor
+	 *
+	 * @param name Agent name for messages
+	 */
 	public CookAgent(String name) {
 		super();
 		this.name = name;
@@ -48,19 +49,27 @@ public class CookAgent extends Agent {
 		foods.put("pizza", pizza);
 	}
 	
-
+	/**
+	 * Returns the Agent's name
+	 */
 	public String getName() {
 		return name;
 	}
-
-	public List getOrders() {
-		return orders;
-	}
 	
+	/**
+	 * Hack to establish connection to HostAgent.
+	 * 
+	 * @param h Reference to HostAgent
+	 */
 	public void setHost(HostAgent h) {
 		host = h;
 	}
 	
+	/**
+	 * Assigns a GUI to Agent
+	 * 
+	 * @param g Reference to CookGui
+	 */
 	public void setGui(CookGui g) {
 		cookGui = g;
 	}
@@ -212,7 +221,7 @@ public class CookAgent extends Agent {
 	}
 	
 
-	//utilities
+	//Inner classes
 	
 	private class MyMarket {
 		MarketAgent market;
@@ -260,10 +269,6 @@ public class CookAgent extends Agent {
 		String getChoice() {
 			return choice;
 		}
-		
-		void setChoice(String c) {
-			choice = c;
-		}
 	}
 	
 	private class Food {
@@ -283,10 +288,6 @@ public class CookAgent extends Agent {
 			state = FoodState.Enough;
 		}
 		
-		String getType() {
-			return type;
-		}
-		
 		int getCookingTime() {
 			return cookingTime;
 		}
@@ -297,14 +298,6 @@ public class CookAgent extends Agent {
 		
 		int getAmount() {
 			return amount;
-		}
-		
-		int getLow() {
-			return low;
-		}
-		
-		int getCapacity() {
-			return capacity;
 		}
 		
 		FoodState getState() {
@@ -323,9 +316,7 @@ public class CookAgent extends Agent {
 			order = o;
 		}
 		
-		public void run() {
-			order = order;
-		}
+		public void run() {};
 	}
 }
 

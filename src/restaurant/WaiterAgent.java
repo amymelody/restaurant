@@ -1,7 +1,6 @@
 package restaurant;
 
 import agent.Agent;
-import restaurant.CustomerAgent.AgentEvent;
 import restaurant.gui.WaiterGui;
 import restaurant.gui.CookGui;
 import restaurant.interfaces.Waiter;
@@ -41,6 +40,11 @@ public class WaiterAgent extends Agent implements Waiter {
 	public WaiterGui waiterGui = null;
 	public CookGui cookGui = null;
 
+	/**
+	 * Constructor
+	 *
+	 * @param name Agent name for messages
+	 */
 	public WaiterAgent(String name) {
 		super();
 		this.name = name;
@@ -58,32 +62,76 @@ public class WaiterAgent extends Agent implements Waiter {
 	}
 	
 	/**
-	 * hack to establish connection to Host agent.
+	 * Hack to establish connection to HostAgent.
+	 * 
+	 * @param h Reference to HostAgent
 	 */
 	public void setHost(HostAgent host) {
 		this.host = host;
 	}
 	
+	/**
+	 * Hack to establish connection to CookAgent.
+	 * 
+	 * @param cook Reference to CookAgent
+	 */
 	public void setCook(CookAgent cook) {
 		this.cook = cook;
 	}
 	
+	/**
+	 * Hack to establish connection to CashierAgent.
+	 * 
+	 * @param cashier Reference to CashierAgent
+	 */
 	public void setCashier(CashierAgent cashier) {
 		this.cashier = cashier;
 	}
+	
+	/**
+	 * Assigns a GUI to Agent
+	 * 
+	 * @param gui Reference to WaiterGui
+	 */
+	public void setGui(WaiterGui gui) {
+		waiterGui = gui;
+	}
+	
+	/**
+	 * Assigns a CookGui to Agent
+	 * 
+	 * @param gui Reference to CookGui
+	 */
+	public void setGui(CookGui gui) {
+		cookGui = gui;
+	}
 
+	/**
+	 * Returns WaiterAgent's GUI
+	 */
+	public WaiterGui getGui() {
+		return waiterGui;
+	}
+
+	/**
+	 * Returns the Agent's name
+	 */
 	public String getName() {
 		return name;
 	}
-
-	public List getCustomers() {
-		return customers;
-	}
 	
+	/**
+	 * Returns a String that represents the Agent
+	 */
 	public String toString() {
 		return getName();
 	}
 	
+	/**
+	 * Checks if the Waiter is done serving all his Customers
+	 * 
+	 * @return true if all CustomerAgents in Waiter's list are DoingNothing, false otherwise
+	 */
 	public boolean doneServingCustomers() {
 		for (MyCustomer mc : customers) {
 			if (mc.getState() != CustomerState.DoingNothing) {
@@ -93,6 +141,11 @@ public class WaiterAgent extends Agent implements Waiter {
 		return true;
 	}
 	
+	/**
+	 * Checks if the WaiterAgent is either on break or about to go on break
+	 * 
+	 * @return true if WaiterAgent's state is AboutToGoOnBreak or OnBreak, false otherwise
+	 */
 	public boolean isOnBreak() {
 		if (state == WaiterState.AboutToGoOnBreak || state == WaiterState.OnBreak) {
 			return true;
@@ -100,6 +153,11 @@ public class WaiterAgent extends Agent implements Waiter {
 		return false;
 	}
 	
+	/**
+	 * Checks if the WaiterAgent is about to go on break
+	 * 
+	 * @return true if WaiterAgent's state is AboutToGoOnBreak, false otherwise
+	 */
 	public boolean isAboutToGoOnBreak() {
 		if (state == WaiterState.AboutToGoOnBreak) {
 			return true;
@@ -464,19 +522,7 @@ public class WaiterAgent extends Agent implements Waiter {
 
 	}
 
-	//utilities
-
-	public void setGui(WaiterGui gui) {
-		waiterGui = gui;
-	}
-	
-	public void setGui(CookGui gui) {
-		cookGui = gui;
-	}
-
-	public WaiterGui getGui() {
-		return waiterGui;
-	}
+	//Inner classes
 
 	private class MyCustomer {
 		CustomerAgent cust;

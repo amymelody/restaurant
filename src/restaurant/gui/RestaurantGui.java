@@ -31,8 +31,6 @@ public class RestaurantGui extends JFrame implements ActionListener {
     
     private JPanel idPanel;
     private JLabel idLabel;
-    private ImageIcon icon;
-    private JLabel iconLabel;
 
     private Object currentPerson;/* Holds the agent that the info is about.
     								Seems like a hack */
@@ -103,10 +101,6 @@ public class RestaurantGui extends JFrame implements ActionListener {
         idLabel = new JLabel();
         idLabel.setText("Josh DiGiovanni");
         idPanel.add(idLabel);
-        
-        icon = new ImageIcon("C:/Users/Jo/CS201/restaurant_jmdigiov/src/restaurant/gui/icon.png");
-        iconLabel = new JLabel(icon);
-        idPanel.add(iconLabel);
         
         controlPanel.add(idPanel, BorderLayout.SOUTH);
         
@@ -214,6 +208,7 @@ public class RestaurantGui extends JFrame implements ActionListener {
             }
         }
     }
+    
     /**
      * Main routine to get gui started
      */

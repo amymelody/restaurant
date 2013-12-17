@@ -9,7 +9,6 @@ import junit.framework.*;
 
 public class CashierTest extends TestCase
 {
-	//these are instantiated for each test separately via the setUp() method.
 	CashierAgent cashier;
 	MockWaiter waiter;
 	MockCustomer customer;

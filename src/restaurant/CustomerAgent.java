@@ -1,7 +1,6 @@
 package restaurant;
 
 import restaurant.gui.CustomerGui;
-import restaurant.gui.RestaurantGui;
 import restaurant.interfaces.Customer;
 import agent.Agent;
 
@@ -15,14 +14,14 @@ import java.util.concurrent.Semaphore;
 public class CustomerAgent extends Agent implements Customer {
 	private String name;
 	private int hungerLevel = 1;
-	Timer timer = new Timer();
+	private Timer timer = new Timer();
 	private CustomerGui customerGui;
 	private Menu menu;
 	private String choice;
 	private Semaphore doneOrdering = new Semaphore(0,true);
 	private Semaphore atCashier = new Semaphore(0,true);
 	
-	public int tableNumber;
+	private int tableNumber;
 	private int cash;
 	private int charge;
 	
@@ -31,7 +30,6 @@ public class CustomerAgent extends Agent implements Customer {
 	private WaiterAgent waiter;
 	private CashierAgent cashier;
 
-	//    private boolean isHungry = false; //hack for gui
 	public enum AgentState
 	{DoingNothing, GoingToRestaurant, WaitingInRestaurant, BeingSeated, Seated, WantToLeave, ReadyToOrder, Ordered, Eating, WaitingForCheck, Paying, Leaving};
 	private AgentState state = AgentState.DoingNothing;//The start state
@@ -41,10 +39,9 @@ public class CustomerAgent extends Agent implements Customer {
 	AgentEvent event = AgentEvent.none;
 
 	/**
-	 * Constructor for CustomerAgent class
+	 * Constructor
 	 *
-	 * @param name name of the customer
-	 * @param gui  reference to the customergui so the customer can send it messages
+	 * @param name Agent name for messages
 	 */
 	public CustomerAgent(String name){
 		super();
@@ -61,37 +58,86 @@ public class CustomerAgent extends Agent implements Customer {
 	}
 
 	/**
-	 * hack to establish connection to Host agent.
+	 * Hack to establish connection to HostAgent.
+	 * 
+	 * @param h Reference to HostAgent
 	 */
 	public void setHost(HostAgent host) {
 		this.host = host;
 	}
 	
+	/**
+	 * Hack to establish connection to CashierAgent.
+	 * 
+	 * @param cashier Reference to CashierAgent
+	 */
 	public void setCashier(CashierAgent cashier) {
 		this.cashier = cashier;
 	}
-
-	public String getCustomerName() {
-		return name;
-	}
 	
+	/**
+	 * Returns the CustomerAgent's current food choice
+	 */
 	public String getChoice() {
 		return choice;
 	}
 	
+	/**
+	 * Returns an integer of what the CustomerAgent currently owes
+	 */
 	public int getCharge() {
 		return charge;
 	}
 	
+	/**
+	 * Returns whether the CustomerAgent is currently eating
+	 * 
+	 * @return true if the Customer's current state is Eating, false otherwise
+	 */
 	public boolean isEating() {
 		if (state == AgentState.Eating) {
 			return true;
 		}
 		return false;
 	}
-	
-	public WaiterAgent getWaiter() {
-		return waiter;
+
+	/**
+	 * Returns the Agent's name
+	 */
+	public String getName() {
+		return name;
+	}
+
+	/**
+	 * Sets the CustomerAgent's hunger level
+	 * 
+	 * @param hungerLevel Integer hunger level to assign to CustomerAgent
+	 */
+	public void setHungerLevel(int hungerLevel) {
+		this.hungerLevel = hungerLevel;
+	}
+
+	/**
+	 * Returns a String that represents the Agent
+	 */
+	public String toString() {
+		return "customer " + getName();
+	}
+
+	/**
+	 * Assigns a GUI to Agent
+	 * 
+	 * @param g Reference to CustomerGui
+	 */
+	public void setGui(CustomerGui g) {
+		customerGui = g;
+	}
+
+	/**
+	 * Returns CustomerAgent's GUI
+	 */
+	public CustomerGui getGui() {
+		return customerGui;
 	}
 	
 	// Messages
@@ -239,7 +285,7 @@ public class CustomerAgent extends Agent implements Customer {
 					stateChanged();
 				}
 			},
-			getHungerLevel() * 500);//how long to wait before running task
+			hungerLevel * 500);//how long to wait before running task
 			return true;
 		}
 		if (state == AgentState.Seated && event == AgentEvent.madeChoice){
@@ -342,7 +388,7 @@ public class CustomerAgent extends Agent implements Customer {
 				stateChanged();
 			}
 		},
-		getHungerLevel() * 1000);//how long to wait before running task
+		hungerLevel * 1000);//how long to wait before running task
 	}
 	
 	private void askForCheck() {
@@ -366,34 +412,6 @@ public class CustomerAgent extends Agent implements Customer {
 		Do("Paying $" + payment);
 		cashier.msgPayment(this, payment);
 		cash -= payment;
-	}
-
-	// Accessors, etc.
-
-	public String getName() {
-		return name;
-	}
-	
-	public int getHungerLevel() {
-		return hungerLevel;
-	}
-
-	public void setHungerLevel(int hungerLevel) {
-		this.hungerLevel = hungerLevel;
-		//could be a state change. Maybe you don't
-		//need to eat until hunger lever is > 5?
-	}
-
-	public String toString() {
-		return "customer " + getName();
-	}
-
-	public void setGui(CustomerGui g) {
-		customerGui = g;
-	}
-
-	public CustomerGui getGui() {
-		return customerGui;
 	}
 }
 

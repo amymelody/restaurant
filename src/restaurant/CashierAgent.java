@@ -5,7 +5,6 @@ import restaurant.interfaces.Customer;
 import restaurant.interfaces.Waiter;
 import restaurant.interfaces.Cashier;
 import restaurant.interfaces.Market;
-import restaurant.test.mock.EventLog;
 import restaurant.test.mock.LoggedEvent;
 
 import java.util.*;
@@ -16,7 +15,7 @@ import java.util.*;
  */
 
 public class CashierAgent extends Agent implements Cashier {
-	public List<Check> checks = Collections.synchronizedList(new ArrayList<Check>());
+	public List<Check> checks = Collections.synchronizedList(new ArrayList<Check>());	//Public for unit testing
 	public List<Bill> bills = Collections.synchronizedList(new ArrayList<Bill>());
 
 	private String name;
@@ -26,6 +25,11 @@ public class CashierAgent extends Agent implements Cashier {
 	
 	public enum CheckState {Created, GivenToWaiter, Paid, Done};
 
+	 /**
+	 * Constructor
+	 *
+	 * @param name Agent name for messages
+	 */
 	public CashierAgent(String name) {
 		super();
 		this.name = name;
@@ -37,11 +41,16 @@ public class CashierAgent extends Agent implements Cashier {
 		prices.put("pizza", 9);
 	}
 	
-
+	/**
+	 * Returns the Agent's name
+	 */
 	public String getName() {
 		return name;
 	}
 	
+	/**
+	 * Returns integer amount of cash in restaurant
+	 */
 	public int getCash() {
 		return cash;
 	}
@@ -131,7 +140,7 @@ public class CashierAgent extends Agent implements Cashier {
 		bills.remove(bill);
 	}
 
-	//utilities
+	//Inner classes
 	
 	public class Bill {
 		Market market;

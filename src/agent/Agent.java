@@ -1,7 +1,5 @@
 package agent;
 
-import java.io.*;
-import java.util.*;
 import java.util.concurrent.*;
 
 import restaurant.test.mock.EventLog;
@@ -10,7 +8,7 @@ import restaurant.test.mock.EventLog;
  * Base class for simple agents
  */
 public abstract class Agent {
-    Semaphore stateChange = new Semaphore(1, true);//binary semaphore, fair
+    Semaphore stateChange = new Semaphore(1, true);
     Semaphore pause = new Semaphore(0, true);
     private AgentThread agentThread;
     private boolean paused = false;
@@ -87,10 +85,16 @@ public abstract class Agent {
         }
     }
     
+    /**
+     * Pause the agent
+     */
     public void pause() {
     	paused = true;
     }
     
+    /**
+     * Resume the agent
+     */
     public void resume() {
     	paused = false;
     	pause.release();
@@ -99,8 +103,6 @@ public abstract class Agent {
     /**
      * Stop agent scheduler thread.
      */
-    //In this implementation, nothing calls stopThread().
-    //When we have a user interface to agents, this can be called.
     public void stopThread() {
         if (agentThread != null) {
             agentThread.stopAgent();
