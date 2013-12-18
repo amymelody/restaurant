@@ -142,12 +142,18 @@ public class CustomerAgent extends Agent implements Customer {
 	
 	// Messages
 
-	public void gotHungry() {//from animation
+	/**
+	 * Makes the CustomerAgent's event "gotHungry"
+	 */
+	public void gotHungry() { //from animation
 		print("I'm hungry");
 		event = AgentEvent.gotHungry;
 		stateChanged();
 	}
 	
+	/**
+	 * If CustomerAgent's name is "impatient" (hack), makes his event "gotImpatient". Otherwise he waits.
+	 */
 	public void msgRestaurantIsFull() {
 		if (name.equals("impatient")) {
 			event = AgentEvent.gotImpatient;
@@ -157,7 +163,14 @@ public class CustomerAgent extends Agent implements Customer {
 		stateChanged();
 	}
 
-	public void msgFollowMe(WaiterAgent w, Menu m, int tableNumber) { //Menu will be added later
+	/**
+	 * Tells customer to follow the waiter to the specified table
+	 * 
+	 * @param w Reference to WaiterAgent
+	 * @param m Reference to restaurant menu
+	 * @param tableNumber Number of the assigned table
+	 */
+	public void msgFollowMe(WaiterAgent w, Menu m, int tableNumber) {
 		waiter = w;
 		menu = m;
 		this.tableNumber = tableNumber;
@@ -166,8 +179,10 @@ public class CustomerAgent extends Agent implements Customer {
 		stateChanged();
 	}
 
-	public void msgAnimationFinishedGoToSeat() {
-		//from animation
+	/**
+	 * Seats customer once he has reached his table
+	 */
+	public void msgAnimationFinishedGoToSeat() { //from animation
 		if (!name.equals("cheapskate") && cash < menu.lowestPrice()) {
 			event = AgentEvent.looksAtMenuAndCries;
 		}
@@ -177,11 +192,19 @@ public class CustomerAgent extends Agent implements Customer {
 		stateChanged();
 	}
 	
+	/**
+	 * Waiter asks customer what he would like to order and customer's event is set to "order"
+	 */
 	public void msgWhatWouldYouLike() {
 		event = AgentEvent.order;
 		stateChanged();
 	}
 	
+	/**
+	 * Waiter asks customer if he would like something different since his choice is not available
+	 * 
+	 * @param menu Reference to updated menu
+	 */
 	public void msgWantSomethingElse(Menu menu) {
 		this.menu = menu;
 		if (name != "cheapskate" && cash < menu.lowestPrice()) {
@@ -194,6 +217,11 @@ public class CustomerAgent extends Agent implements Customer {
 		stateChanged();
 	}
 	
+	/**
+	 * Notifies customer that his food has arrived and sets his event to "receivedFood"
+	 * 
+	 * @param choice Name of customer's choice
+	 */
 	public void msgHereIsFood(String choice) {
 		if (this.choice == choice) {
 			event = AgentEvent.receivedFood;
@@ -201,24 +229,38 @@ public class CustomerAgent extends Agent implements Customer {
 		}
 	}
 	
-	public void msgAnimationFinishedLeaveRestaurant() {
-		//from animation
+	/**
+	 * Sets customer's event to "doneLeaving" since he has left the restaurant
+	 */
+	public void msgAnimationFinishedLeaveRestaurant() { //from animation
 		event = AgentEvent.doneLeaving;
 		stateChanged();
 	}
 	
-	public void msgAnimationFinishedEnterRestaurant() {
-		//from animation
+	/**
+	 * Sets customer's event to "arrivedAtRestaurant" since he has entered the restaurant
+	 */
+	public void msgAnimationFinishedEnterRestaurant() { //from animation
 		event = AgentEvent.arrivedAtRestaurant;
 		stateChanged();
 	}
 	
+	/**
+	 * Tells customer what he owes
+	 * 
+	 * @param c Integer amount of money that the customer owes
+	 */
 	public void  msgHereIsCheck(int c) {
 		charge += c;
 		event = AgentEvent.receivedCheck;
 		stateChanged();
 	}
 	
+	/**
+	 * Gives the customer his change. If he underpaid, the change will be negative and he will owe this amount next time.
+	 * 
+	 * @param change Integer amount of change the customer receives
+	 */
 	public void msgChange(int change) {
 		if (change < 0) {
 			charge = -change;
@@ -232,13 +274,19 @@ public class CustomerAgent extends Agent implements Customer {
 		stateChanged();
 	}
 	
-	public void msgDoneOrdering() {//from animation
-		doneOrdering.release();// = true;
+	/**
+	 * Once the ordering animation has finished, this is called so the customer knows that he has finished ordering
+	 */
+	public void msgDoneOrdering() { //from animation
+		doneOrdering.release();
 		stateChanged();
 	}
 	
-	public void msgAtCashier() {//from animation
-		atCashier.release();// = true;
+	/**
+	 * Lets the CustomerAgent know that he has reached the cashier's location
+	 */
+	public void msgAtCashier() { //from animation
+		atCashier.release();
 		stateChanged();
 	}
 
@@ -324,42 +372,66 @@ public class CustomerAgent extends Agent implements Customer {
 			return true;
 		}
 		return false;
+		//we have tried all our rules and found
+		//nothing to do. So return false to main loop of abstract agent
+		//and wait.
 	}
 
 	// Actions
 
+	/**
+	 * Tells the host that he wants to be seated
+	 */
 	private void requestSeat() {
 		Do("Table for 1");
 		host.msgIWantFood(this);
 	}
 	
+	/**
+	 * Tells the host that he is leaving the restaurant
+	 */
 	private void leaveAndNotifyHost() {
 		Do("I don't want to wait. Leaving restaurant");
 		customerGui.DoExitRestaurant();
 		host.msgImLeaving(this);
 	}
 
+	/**
+	 * Tells the customer's GUI to go to the table
+	 */
 	private void SitDown() {
 		Do("Being seated. Going to table");
 		customerGui.DoGoToSeat(tableNumber);
 	}
 	
+	/**
+	 * Tells the waiter that he wants to leave the restaurant
+	 */
 	private void tellWaiter() {
 		Do("This food is too expensive. I'm leaving.");
 		waiter.msgIWantToLeave(this);
 		event = AgentEvent.toldWaiter;
 	}
 	
+	/**
+	 * Tells the customer's GUI to leave the restaurant
+	 */
 	private void leaveRestaurant() {
 		Do("Leaving restaurant");
 		customerGui.DoExitRestaurant();
 	}
 	
+	/**
+	 * Tells the waiter that he is ready to order
+	 */
 	private void callWaiter() {
 		Do("I'm ready to order.");
 		waiter.msgReadyToOrder(this);
 	}
 	
+	/**
+	 * Tells the waiter what his order is
+	 */
 	private void giveOrder() {
 		if (menu.checkItem(name)) {
 			choice = name;
@@ -379,6 +451,9 @@ public class CustomerAgent extends Agent implements Customer {
 		waiter.msgHereIsChoice(this, choice);
 	}
 
+	/**
+	 * Start eating and run a timer to determine how long the customer eats
+	 */
 	private void EatFood() {
 		Do("Eating Food");
 		timer.schedule(new TimerTask() {
@@ -391,11 +466,17 @@ public class CustomerAgent extends Agent implements Customer {
 		hungerLevel * 1000);//how long to wait before running task
 	}
 	
+	/**
+	 * Tells the waiter that he is done eating and would like his check
+	 */
 	private void askForCheck() {
 		Do("Check please.");
 		waiter.msgDoneEating(this);
 	}
 
+	/**
+	 * Tells the customer's GUI to go to the cashier and pays what he owes
+	 */
 	private void leaveTable() {
 		Do("Going to cashier");
 		customerGui.DoGoToCashier();

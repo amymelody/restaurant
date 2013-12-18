@@ -7,6 +7,7 @@ import javax.swing.*;
 
 import java.awt.*;
 import java.awt.event.*;
+
 /**
  * Main GUI class.
  * Contains the main frame and subsequent panels
@@ -19,12 +20,13 @@ public class RestaurantGui extends JFrame implements ActionListener {
     /* restPanel holds 2 panels
      * 1) the staff listing, menu, and lists of current customers all constructed
      *    in RestaurantPanel()
-     * 2) the infoPanel about the clicked Customer (created just below)
+     * 2) the infoPanel about the clicked customer or waiter
      */    
     private RestaurantPanel restPanel = new RestaurantPanel(this);
     
-    /* infoPanel holds information about the clicked customer, if there is one*/
+    /* infoPanel holds information about the clicked customer or waiter, if there is one*/
     private JPanel infoPanel;
+    
     private JButton pause;
     private JTextField infoLabel; //part of infoPanel
     private JCheckBox stateCB;//part of infoLabel

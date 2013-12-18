@@ -100,6 +100,11 @@ public class HostAgent extends Agent {
 	
 	// Messages
 
+	/**
+	 * Tells the host that the specified waiter wants to go on break
+	 * 
+	 * @param waiter Reference to WaiterAgent
+	 */
 	public void msgWantToGoOnBreak(WaiterAgent waiter) {
 		synchronized(waiters) {
 			for (MyWaiter mw : waiters) {
@@ -111,6 +116,11 @@ public class HostAgent extends Agent {
 		}
 	}
 	
+	/**
+	 * Tells the host that the specified waiter is going on break
+	 * 
+	 * @param waiter Reference to WaiterAgent
+	 */
 	public void msgGoingOnBreak(WaiterAgent waiter) {
 		synchronized(waiters) {
 			for (MyWaiter mw : waiters) {
@@ -122,6 +132,11 @@ public class HostAgent extends Agent {
 		}
 	}
 	
+	/**
+	 * Tells the host that the specified waiter is going off break
+	 * 
+	 * @param waiter Reference to WaiterAgent
+	 */
 	public void msgGoingOffBreak(WaiterAgent waiter) {
 		synchronized(waiters) {
 			for (MyWaiter mw : waiters) {
@@ -133,11 +148,21 @@ public class HostAgent extends Agent {
 		}
 	}
 	
+	/**
+	 * Tells the host that the specified customer wants to be seated
+	 * 
+	 * @param cust Reference to CustomerAgent
+	 */
 	public void msgIWantFood(CustomerAgent cust) {
 		customers.add(new MyCustomer(cust));
 		stateChanged();
 	}
 
+	/**
+	 * Tells the host that the table with the specified number is unoccupied
+	 * 
+	 * @param tableNum Number of the unoccupied table
+	 */
 	public void msgTableAvailable(int tableNum) {
 		synchronized(tables) {
 			for (Table table : tables) {
@@ -149,11 +174,21 @@ public class HostAgent extends Agent {
 		}
 	}
 	
+	/**
+	 * Tells the host that the restaurant has received an order of the specified food
+	 * 
+	 * @param food Name of the food
+	 */
 	public void msgReceivedOrder(String food) {
 		foods.add(food);
 		stateChanged();
 	}
 	
+	/**
+	 * Tells the host that the specified customer is leaving the restaurant
+	 * 
+	 * @param c Reference to CustomerAgent
+	 */
 	public void msgImLeaving(CustomerAgent c) {
 		synchronized(customers) {
 			for (MyCustomer mc : customers) {
@@ -232,6 +267,13 @@ public class HostAgent extends Agent {
 
 	// Actions
 
+	/**
+	 * Tells a waiter to seat a customer at a table
+	 * 
+	 * @param waiter Reference to WaiterAgent
+	 * @param mc Reference to MyCustomer
+	 * @param table Reference to Table
+	 */
 	private void callWaiter(WaiterAgent waiter, MyCustomer mc, Table table) {
 		print(waiter + ", please bring " + mc.cust + " to " + table);
 		waiter.msgPleaseSeatCustomer(mc.cust, table.getTableNumber());
@@ -245,18 +287,33 @@ public class HostAgent extends Agent {
 		customers.remove(mc);
 	}
 	
+	/**
+	 * Tells the specified waiter that he can go on break
+	 * 
+	 * @param mw Reference to MyWaiter
+	 */
 	private void canGoOnBreak(MyWaiter mw) {
 		print(mw.getWaiter() + ", you can go on break.");
 		mw.getWaiter().msgCanGoOnBreak();
 		mw.setState(WaiterState.AboutToGoOnBreak);
 	}
 	
+	/**
+	 * Tells the specified waiter that he can't go on break
+	 * 
+	 * @param mw Reference to MyWaiter
+	 */
 	private void cantGoOnBreak(MyWaiter mw) {
 		print(mw.getWaiter() + ", you can't go on break.");
 		mw.getWaiter().msgCantGoOnBreak();
 		mw.setState(WaiterState.OnTheJob);
 	}
 	
+	/**
+	 * Tells all waiters that the restaurant has received an order of the specified food
+	 * 
+	 * @param food Name of the food
+	 */
 	private void notifyWaiters(String food) {
 		synchronized(waiters) {
 			for (MyWaiter mw : waiters) {
@@ -265,14 +322,22 @@ public class HostAgent extends Agent {
 		}
 	}
 	
+	/**
+	 * Tells specified customer that the restaurant is full
+	 * 
+	 * @param mc Reference to MyCustomer
+	 */
 	private void tellCustomer(MyCustomer mc) {
 		print(mc.cust + ", the restaurant is full");
 		mc.cust.msgRestaurantIsFull();
 		mc.waiting = false;
 	}
 
-	//utilities
+	//Inner classes
 
+	/**
+	 * Contains all information about a table relevant to the host
+	 */
 	private class Table {
 		boolean occupied;
 		int tableNumber;
@@ -298,6 +363,9 @@ public class HostAgent extends Agent {
 		}
 	}
 	
+	/**
+	 * Contains all information about a customer relevant to the host
+	 */
 	private class MyCustomer {
 		CustomerAgent cust;
 		boolean waiting;
@@ -308,6 +376,9 @@ public class HostAgent extends Agent {
 		}
 	}
 	
+	/**
+	 * Contains all information about a waiter relevant to the host
+	 */
 	private class MyWaiter {
 		WaiterAgent waiter;
 		WaiterState state;

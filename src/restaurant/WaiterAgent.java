@@ -167,27 +167,45 @@ public class WaiterAgent extends Agent implements Waiter {
 	
 	// Messages
 	
+	/**
+	 * Sets waiter's state to "WantToGoOnBreak"
+	 */
 	public void msgWantToGoOnBreak() {
 		state = WaiterState.WantToGoOnBreak;
 		stateChanged();
 	}
 	
+	/**
+	 * Tells the waiter that he can go on break and sets his state to "AboutToGoOnBreak"
+	 */
 	public void msgCanGoOnBreak() {
 		state = WaiterState.AboutToGoOnBreak;
 		stateChanged();
 	}
 	
+	/**
+	 * Tells the waiter that he can't go on break and sets his state to "OnTheJob"
+	 */
 	public void msgCantGoOnBreak() {
 		state = WaiterState.OnTheJob;
 		waiterGui.setCBEnabled();
 		stateChanged();
 	}
 	
+	/**
+	 * Sets waiter's state to "GoingOffBreak"
+	 */
 	public void msgGoOffBreak() {
 		state = WaiterState.GoingOffBreak;
 		stateChanged();
 	}
 	
+	/**
+	 * Tells the waiter to seat a customer at a table
+	 * 
+	 * @param cust Reference to CustomerAgent
+	 * @param tableNumber Number of the assigned table
+	 */
 	public void msgPleaseSeatCustomer(CustomerAgent cust, int tableNumber) {
 		for (MyCustomer mc : customers) {
 			if (mc.getCust() == cust) {
@@ -201,6 +219,11 @@ public class WaiterAgent extends Agent implements Waiter {
 		stateChanged();
 	}
 	
+	/**
+	 * Sets a customer's state to "Leaving"
+	 * 
+	 * @param cust Reference to CustomerAgent
+	 */
 	public void msgIWantToLeave(CustomerAgent cust) {
 		for (MyCustomer mc : customers) {
 			if (mc.getCust() == cust) {
@@ -212,6 +235,11 @@ public class WaiterAgent extends Agent implements Waiter {
 		}
 	}
 	
+	/**
+	 * Sets a customer's state to "AskedToOrder"
+	 * 
+	 * @param cust Reference to CustomerAgent
+	 */
 	public void msgReadyToOrder(CustomerAgent cust) {
 		for (MyCustomer mc : customers) {
 			if (mc.getCust() == cust) {
@@ -221,6 +249,12 @@ public class WaiterAgent extends Agent implements Waiter {
 		}
 	}
 	
+	/**
+	 * Sets a customer's state to "Ordered" and his choice to the specified choice
+	 * 
+	 * @param cust Reference to CustomerAgent
+	 * @param choice Name of customer's food choice
+	 */
 	public void msgHereIsChoice(CustomerAgent cust, String choice) {
 		for (MyCustomer mc : customers) {
 			if (mc.getCust() == cust) {
@@ -231,6 +265,12 @@ public class WaiterAgent extends Agent implements Waiter {
 		}
 	}
 	
+	/**
+	 * Tells the waiter that the restaurant is out of the specified food
+	 * 
+	 * @param choice Name of the food
+	 * @param table 
+	 */
 	public void msgOutOfFood(String choice, int table) {
 		menu.removeItem(choice);
 		for (MyCustomer mc : customers) {

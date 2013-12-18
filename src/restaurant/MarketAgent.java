@@ -86,6 +86,11 @@ public class MarketAgent extends Agent implements Market {
 	
 	// Messages
 	
+	/**
+	 * Adds an order to the market's list of orders (removing any parts it cannot fulfill)
+	 * 
+	 * @param io List of ItemOrders
+	 */
 	public void msgHereIsOrder(List<ItemOrder> io) {
 		List<ItemOrder> temp = new ArrayList<ItemOrder>();
 		for (ItemOrder o : io) {
@@ -97,6 +102,11 @@ public class MarketAgent extends Agent implements Market {
 		stateChanged();
 	}
 	
+	/**
+	 * Adds payment to the market's total cash
+	 * 
+	 * @param cash Integer amount of money paid to market
+	 */
 	public void msgPayment(int cash) {
 		print("Received payment");
 		this.cash += cash;
@@ -131,6 +141,11 @@ public class MarketAgent extends Agent implements Market {
 
 	// Actions
 
+	/**
+	 * Tells the cook what it can fulfill and starts producing the order
+	 * 
+	 * @param o Reference to the Order
+	 */
 	private void produceOrder(Order o) {
 		print("Here is what I can fulfill: ");
 		for (ItemOrder io : o.items) {
@@ -156,6 +171,11 @@ public class MarketAgent extends Agent implements Market {
 		}
 	}
 	
+	/**
+	 * Delivers an order to the cook and sends the cashier the bill
+	 * 
+	 * @param o Reference to the Order
+	 */
 	private void deliverOrder(Order o) {
 		int bill = 0;
 		print("Here is your order: ");
@@ -170,8 +190,11 @@ public class MarketAgent extends Agent implements Market {
 	}
 	
 
-	//utilities
+	//Inner classes
 
+	/**
+	 * Contains all information about an order relevant to the MarketAgent
+	 */
 	private class Order {
 		List<ItemOrder> items;
 		OrderState state;
@@ -190,6 +213,9 @@ public class MarketAgent extends Agent implements Market {
 		}
 	}
 	
+	/**
+	 * Contains all information about food relevant to the MarketAgent
+	 */
 	private class Food {
 		String type;
 		int timeToProduce;
@@ -202,6 +228,9 @@ public class MarketAgent extends Agent implements Market {
 		}
 	}
 	
+	/**
+	 * TimerTask necessary for the order timer
+	 */
 	private class ProducingTimerTask extends TimerTask {
 		Order order;
 		

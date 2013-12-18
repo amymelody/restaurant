@@ -74,17 +74,34 @@ public class CookAgent extends Agent {
 		cookGui = g;
 	}
 	
-	// Messages
-	
+	/**
+	 * Hack to establish connection with MarketAgents
+	 * 
+	 * @param m Reference to MarketAgent
+	 */
 	public void addMarket(MarketAgent m) {
 		markets.add(new MyMarket(m));
 	}
 	
+	// Messages
+	
+	/**
+	 * Tells the CookAgent to produce an order
+	 * 
+	 * @param waiter Reference to WaiterAgent delivering the order
+	 * @param choice String representing the customer's choice
+	 * @param table Number of the table assigned to the customer
+	 */
 	public void msgHereIsOrder(WaiterAgent waiter, String choice, int table) {
 		orders.add(new Order(waiter, choice, table, OrderState.Pending));
 		stateChanged();
 	}
 	
+	/**
+	 * Tells the CookAgent how much of an order can be fulfilled so he knows whether to order from another MarketAgent
+	 * 
+	 * @param orders List of ItemOrders that can be fulfilled
+	 */
 	public void msgHereIsWhatICanFulfill(List<ItemOrder> orders) {
 		for (Food f : foods.values()) {
 			if (f.state == FoodState.Ordered) {
@@ -97,6 +114,11 @@ public class CookAgent extends Agent {
 		stateChanged();
 	}
 	
+	/**
+	 * Tells the cook that an order has arrived from the market
+	 * 
+	 * @param orders List of ItemOrders that have arrived
+	 */
 	public void msgOrderDelivered(List<ItemOrder> orders) {
 		List<ItemOrder> temp = new ArrayList<ItemOrder>();
 		for (ItemOrder o : orders) {
@@ -156,6 +178,11 @@ public class CookAgent extends Agent {
 
 	// Actions
 
+	/**
+	 * Starts cooking an order. If inventory of that specific food is empty, notify the waiter.
+	 * 
+	 * @param o Reference to Order
+	 */
 	private void cookIt(Order o) {
 		if (foods.get(o.choice).getAmount() == 0) {
 			print("We're out of " + o.choice);
@@ -180,6 +207,11 @@ public class CookAgent extends Agent {
 		}
 	}
 	
+	/**
+	 * Takes a finished order and puts it on the plating area and notifies the waiter
+	 * 
+	 * @param o Reference to Order
+	 */
 	private void plateIt(Order o) {
 		print(o.choice + " is done");
 		cookGui.DoPlateFood(o.choice);
@@ -187,6 +219,9 @@ public class CookAgent extends Agent {
 		o.setState(OrderState.Finished);
 	}
 	
+	/**
+	 * Checks the inventory for any items that are low and orders those items from the market
+	 */
 	private void orderFoodFromMarket() {
 		for (Food food : foods.values()) {
 			if ((food.getState() == FoodState.MustBeOrdered || food.getState() == FoodState.Enough) && food.amount <= food.low) {
@@ -211,6 +246,11 @@ public class CookAgent extends Agent {
 		itemOrders.clear();
 	}
 	
+	/**
+	 * Notifies the host that a food order has been received
+	 * 
+	 * @param f Reference to Food
+	 */
 	private void addFood(Food f) {
 		for (Food food : foods.values()) {
 			if (food == f) {
@@ -223,6 +263,9 @@ public class CookAgent extends Agent {
 
 	//Inner classes
 	
+	/**
+	 * Contains all information about a Market relevant to the CookAgent
+	 */
 	private class MyMarket {
 		MarketAgent market;
 		int orderedFrom;
@@ -237,6 +280,9 @@ public class CookAgent extends Agent {
 		}
 	}
 
+	/**
+	 * Contains all information about a customer's order relevant to the CookAgent
+	 */
 	private class Order {
 		WaiterAgent waiter;
 		int table;
@@ -271,6 +317,9 @@ public class CookAgent extends Agent {
 		}
 	}
 	
+	/**
+	 * Contains all information about food relevant to the CookAgent
+	 */
 	private class Food {
 		String type;
 		int cookingTime;
@@ -309,6 +358,9 @@ public class CookAgent extends Agent {
 		}
 	}
 	
+	/**
+	 * TimerTask necessary for the order timer
+	 */
 	private class CookingTimerTask extends TimerTask {
 		Order order;
 		

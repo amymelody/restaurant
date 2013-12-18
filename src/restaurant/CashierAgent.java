@@ -57,12 +57,25 @@ public class CashierAgent extends Agent implements Cashier {
 	
 	// Messages
 	
+	/**
+	 * Tells CashierAgent to produce a check for Customer c
+	 * 
+	 * @param w Reference to Waiter assigned to Customer
+	 * @param c Reference to Customer
+	 * @param choice Name of Customer's food choice
+	 */
 	public void msgProduceCheck(Waiter w, Customer c, String choice) {
 		log.add(new LoggedEvent("Received msgProduceCheck"));
 		checks.add(new Check(c, w, choice, prices.get(choice)+c.getCharge(), CheckState.Created));
 		stateChanged();
 	}
 	
+	/**
+	 * Tells CashierAgent that a Customer paid his check
+	 * 
+	 * @param c Reference to Customer
+	 * @param cash Amount of cash paid by Customer
+	 */
 	public void msgPayment(Customer c, int cash) {
 		log.add(new LoggedEvent("Received msgPayment"));
 		synchronized(checks) {
@@ -76,6 +89,12 @@ public class CashierAgent extends Agent implements Cashier {
 		}
 	}
 	
+	/**
+	 * Tells CashierAgent that there is a Market bill that needs to be paid
+	 * 
+	 * @param bill Integer amount owed
+	 * @param market Reference to Market
+	 */
 	public void msgHereIsBill(int bill, Market market) {
 		log.add(new LoggedEvent("Received msgHereIsBill"));
 		bills.add(new Bill(market, bill));
@@ -110,16 +129,29 @@ public class CashierAgent extends Agent implements Cashier {
 		}
 
 		return false;
+		//we have tried all our rules and found
+		//nothing to do. So return false to main loop of abstract agent
+		//and wait.
 	}
 
 	// Actions
 
+	/**
+	 * Sends a check to its Waiter
+	 * 
+	 * @param c Reference to Check
+	 */
 	private void giveToWaiter(Check c) {
 		print(c.waiter + ", here is the check for " + c.cust);
 		c.setState(CheckState.GivenToWaiter);
 		c.waiter.msgHereIsCheck(c.cust, c.charge);
 	}
 	
+	/**
+	 * Sends a certain Check's Customer his change
+	 * 
+	 * @param c Reference to Check
+	 */
 	private void giveCustomerChange(Check c) {
 		int change = c.payment - c.charge;
 		if (change >= 0) {
@@ -133,6 +165,11 @@ public class CashierAgent extends Agent implements Cashier {
 		c.cust.msgChange(change);
 	}
 	
+	/**
+	 * Subtracts a Bill's amount from restaurant's cash and notifies the Market
+	 * 
+	 * @param bill Reference to Bill
+	 */
 	private void payBill(Bill bill) {
 		cash -= bill.charge;
 		print("Paying bill. Cash = $" + cash);
@@ -142,6 +179,9 @@ public class CashierAgent extends Agent implements Cashier {
 
 	//Inner classes
 	
+	/**
+	 * Contains all the info about a bill that is needed by the CashierAgent
+	 */
 	public class Bill {
 		Market market;
 		int charge;
@@ -160,6 +200,9 @@ public class CashierAgent extends Agent implements Cashier {
 		}
 	}
 
+	/**
+	 * Contains all the info about a check that is needed by the CashierAgent
+	 */
 	public class Check {
 		Customer cust;
 		Waiter waiter;
