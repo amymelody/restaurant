@@ -8,6 +8,7 @@
   + Lab: Tues 9 am
 
 ###Using the GUI
+  + Run restaurant.gui.RestaurantGui.java
   + Enter the name of either a customer or a waiter.
   + Press the Add button under "Cusomters" or "Waiters" to add that name to respective list.
   + Select a customer's name in the list to display their name at the top along with a "Hungry" checkbox.
