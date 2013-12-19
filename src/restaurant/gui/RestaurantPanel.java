@@ -6,12 +6,10 @@ import restaurant.MarketAgent;
 import restaurant.WaiterAgent;
 import restaurant.CookAgent;
 import restaurant.CashierAgent;
-import restaurant.WaiterAgent.CustomerState;
 
 import javax.swing.*;
 
 import java.awt.*;
-import java.awt.event.*;
 import java.util.Vector;
 
 /**
@@ -27,7 +25,6 @@ public class RestaurantPanel extends JPanel {
     private Vector<MyCustomer> customers = new Vector<MyCustomer>();
     private Vector<WaiterAgent> waiters = new Vector<WaiterAgent>();
     private Vector<MarketAgent> markets = new Vector<MarketAgent>();
-    private int numCustomers = 0;
 
     private JPanel restLabel = new JPanel();
     private ListPanel customerPanel = new ListPanel(this, "Customers");
@@ -49,7 +46,7 @@ public class RestaurantPanel extends JPanel {
 		cook.addMarket(markets.get(2));
 		cook.setHost(host);
         
-		cookGui = new CookGui(cook, gui);
+		cookGui = new CookGui(gui);
 		gui.animationPanel.addGui(cookGui);
 		cook.setGui(cookGui);
 		
@@ -78,6 +75,11 @@ public class RestaurantPanel extends JPanel {
     	return gui.getInfoLabelText();
     }
     
+    /**
+     * If a customer exists in the RestaurantPanel's list of customers, this sets that customer's "waiting" to true
+     * 
+     * @param c Reference to CustomerAgent
+     */
     public void addCustomer(CustomerAgent c) {
     	for (MyCustomer mc : customers) {
     		if (mc.cust == c) {
@@ -86,6 +88,12 @@ public class RestaurantPanel extends JPanel {
     	}
     }
     
+    /**
+     * If a customer exists in the RestaurantPanel's list of customers, this sets that customer's "waiting" to false
+     * and moves all other customers forward in the line of waiting customers
+     * 
+     * @param c Reference to CustomerAgent
+     */
     public void removeCustomer(CustomerAgent c) {
     	for (MyCustomer mc : customers) {
     		if (mc.cust == c) {
@@ -101,6 +109,9 @@ public class RestaurantPanel extends JPanel {
     	}
     }
     
+    /**
+     * Returns the number of waiting customers
+     */
     public int getNumCustomers() {
     	int total = 0;
     	for (MyCustomer mc : customers) {
@@ -111,6 +122,9 @@ public class RestaurantPanel extends JPanel {
     	return total;
     }
     
+    /**
+     * Pauses all agents in the restaurant
+     */
     public void pauseAgents() {
     	host.pause();
     	cook.pause();
@@ -126,6 +140,9 @@ public class RestaurantPanel extends JPanel {
     	}
     }
     
+    /**
+     * Resumes all agents in the restaurant
+     */
     public void resumeAgents() {
     	host.resume();
     	cook.resume();
@@ -141,8 +158,7 @@ public class RestaurantPanel extends JPanel {
     }
 
     /**
-     * Sets up the restaurant label that includes the menu,
-     * and host and cook information
+     * Sets up the restaurant label that includes the menu, and host and cook information
      */
     private void initRestLabel() {
         JLabel label = new JLabel();
@@ -162,8 +178,8 @@ public class RestaurantPanel extends JPanel {
      * updatedInfoPanel() from the main gui so that person's information
      * will be shown
      *
-     * @param type indicates whether the person is a customer or waiter
-     * @param name name of person
+     * @param type Indicates whether the person is a customer or waiter
+     * @param name Name of person
      */
     public void showInfo(String type, String name) {
 
@@ -188,8 +204,8 @@ public class RestaurantPanel extends JPanel {
     /**
      * Adds a customer or waiter to the appropriate list
      *
-     * @param type indicates whether the person is a customer or waiter (later)
-     * @param name name of person
+     * @param type Indicates whether the person is a customer or waiter
+     * @param name Name of person
      */
     public void addPerson(String type, String name) {
 
@@ -220,6 +236,9 @@ public class RestaurantPanel extends JPanel {
     	}
     }
 
+    /**
+     * Contains all information about a customer relevant to the RestaurantPanel
+     */
     private class MyCustomer {
 		CustomerAgent cust;
 		boolean waiting;

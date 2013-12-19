@@ -1,7 +1,8 @@
 package restaurant.interfaces;
 
-import restaurant.interfaces.Customer;
-
+/**
+ * Market Interface
+ */
 public interface Market {
 	
 	public void msgPayment(int cash);

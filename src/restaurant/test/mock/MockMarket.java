@@ -3,6 +3,9 @@ package restaurant.test.mock;
 import restaurant.CashierAgent;
 import restaurant.interfaces.Market;
 
+/**
+ * Market for purposes of unit testing
+ */
 public class MockMarket extends Mock implements Market {
 	
 	public CashierAgent cashier;

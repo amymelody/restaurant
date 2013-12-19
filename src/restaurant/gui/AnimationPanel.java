@@ -8,6 +8,9 @@ import java.awt.event.ActionListener;
 import java.util.List;
 import java.util.ArrayList;
 
+/**
+ * Panel in frame that displays the restaurant animation
+ */
 public class AnimationPanel extends JPanel implements ActionListener {
 
 	//Get rid of the "magic numbers"
@@ -24,6 +27,9 @@ public class AnimationPanel extends JPanel implements ActionListener {
 
     private List<Gui> guis = new ArrayList<Gui>();
 
+    /**
+     * Constructor. Starts the animation timer
+     */
     public AnimationPanel() {
     	setSize(WINDOWX, WINDOWY);
         setVisible(true);
@@ -34,18 +40,30 @@ public class AnimationPanel extends JPanel implements ActionListener {
     	timer.start();
     }
 
+    /**
+     * Action listener method that fires after each timer interval to display the animation
+     */
 	public void actionPerformed(ActionEvent e) {
 		repaint();  //Will have paintComponent called
 	}
 	
+	/**
+	 * Stops the timer and pauses the animation
+	 */
 	public void pauseAnimation() {
 		timer.stop();
 	}
 	
+	/**
+	 * Starts the timer and resumes the animation
+	 */
 	public void resumeAnimation() {
 		timer.start();
 	}
 
+	/**
+	 * Paints all the static images in the restaurant and updates all individual GUI positions
+	 */
     public void paintComponent(Graphics g) {
         Graphics2D g2 = (Graphics2D)g;
 
@@ -73,14 +91,29 @@ public class AnimationPanel extends JPanel implements ActionListener {
         }
     }
 
+    /**
+     * Adds a CustomerGui to the list of GUIs
+     * 
+     * @param gui Reference to CustomerGui
+     */
     public void addGui(CustomerGui gui) {
         guis.add(gui);
     }
 
+    /**
+     * Adds a WaiterGui to the list of GUIs
+     * 
+     * @param gui Reference to WaiterGui
+     */
     public void addGui(WaiterGui gui) {
         guis.add(gui);
     }
     
+    /**
+     * Adds a CookGui to the list of GUIs
+     * 
+     * @param gui Reference to CookGui
+     */
     public void addGui(CookGui gui) {
         guis.add(gui);
     }

@@ -1,7 +1,8 @@
 package restaurant.interfaces;
 
-import restaurant.test.mock.EventLog;
-
+/**
+ * Customer Interface
+ */
 public interface Customer {
 	
 	public abstract String getName();

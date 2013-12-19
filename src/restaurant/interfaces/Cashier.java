@@ -1,5 +1,8 @@
 package restaurant.interfaces;
 
+/**
+ * Cashier Interface
+ */
 public interface Cashier {
 	
 	public abstract void msgProduceCheck(Waiter w, Customer c, String choice);

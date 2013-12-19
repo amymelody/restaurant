@@ -1,18 +1,14 @@
 package restaurant.gui;
 
-import restaurant.CookAgent;
-import restaurant.WaiterAgent;
-import restaurant.CashierAgent.Check;
-import restaurant.CookAgent.OrderState;
-
 import java.awt.*;
 import java.util.*;
 
+/**
+ * Restaurant Cooking Area GUI
+ */
 public class CookGui implements Gui{
 	
-	private CookAgent agent = null;
 	RestaurantGui gui;
-	private Timer timer = new Timer();
 	public ArrayList<Order> orders = new ArrayList<Order>();
 	
 	static final int COOKINGW = 60;
@@ -28,7 +24,12 @@ public class CookGui implements Gui{
 
 	Map<String, String> foodSymbols = new HashMap<String, String>();
 
-	public CookGui(CookAgent c, RestaurantGui gui){
+	/**
+	 * Constructor
+	 * 
+	 * @param gui Reference to RestaurantGui
+	 */
+	public CookGui(RestaurantGui gui){
 		this.gui = gui;
 		
 		foodSymbols.put("steak", "St");
@@ -37,10 +38,16 @@ public class CookGui implements Gui{
 		foodSymbols.put("salad", "Sa");
 	}
 
+	/**
+	 * This is what drives the animation; called each time the animation timer fires
+	 */
 	public void updatePosition() {
 		
 	}
 
+	/**
+     * This creates the visuals themselves based on the position set in updatePosition
+     */
 	public void draw(Graphics2D g) {
 		g.setColor(Color.RED);
 		g.fillRect(COOKINGX, COOKINGY, COOKINGW, COOKINGH);
@@ -69,10 +76,20 @@ public class CookGui implements Gui{
 		}
 	}
 	
+	/**
+	 * Adds a new order to the list of orders
+	 * 
+	 * @param food Name of food
+	 */
 	public void DoCookFood(String food) {
 		orders.add(new Order(food));
 	}
 	
+	/**
+	 * Makes an order done so that it can be put in the plating area
+	 * 
+	 * @param food Name of food
+	 */
 	public void DoPlateFood(String food) {
 		try {
 			for (Order order : orders) {
@@ -86,6 +103,11 @@ public class CookGui implements Gui{
 		}
 	}
 	
+	/**
+	 * Removes an order from the list of orders
+	 * 
+	 * @param food Name of food
+	 */
 	public void DoRemoveFood(String food) {
 		try {
 			for (Order order : orders) {
@@ -99,10 +121,16 @@ public class CookGui implements Gui{
 		}
 	}
 
+	/**
+	 * This returns true if the GUI is currently present in the animation window, false otherwise
+	 */
 	public boolean isPresent() {
 		return true;
 	}
 	
+	/**
+	 * Contains all information about an order relevant to the CookGui
+	 */
 	private class Order {
 		String food;
 		boolean done;

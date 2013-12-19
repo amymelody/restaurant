@@ -7,6 +7,9 @@ import restaurant.test.mock.MockWaiter;
 import restaurant.test.mock.MockMarket;
 import junit.framework.*;
 
+/**
+ * Unit testing for CashierAgent
+ */
 public class CashierTest extends TestCase
 {
 	CashierAgent cashier;
@@ -16,6 +19,9 @@ public class CashierTest extends TestCase
 	MockMarket market;
 	MockMarket market2;
 	
+	/**
+	 * Provides the common setup for all tests and is called at the beginning of each test
+	 */
 	public void setUp() throws Exception{
 		super.setUp();		
 		cashier = new CashierAgent("cashier");		
@@ -26,6 +32,9 @@ public class CashierTest extends TestCase
 		market2 = new MockMarket("mockmarket2");
 	}	
 	
+	/**
+	 * Tests the most basic normative scenario - one customer paying a check
+	 */
 	public void testOneNormalCustomerScenario()
 	{
 		customer.cashier = cashier;		
@@ -99,6 +108,9 @@ public class CashierTest extends TestCase
 		
 	}
 	
+	/**
+	 * Tests a customer who cannot pay for his meal and must pay next time
+	 */
 	public void testOneCheapskateCustomerScenario()
 	{
 		customer.cashier = cashier;		
@@ -224,6 +236,9 @@ public class CashierTest extends TestCase
 		
 	}
 	
+	/**
+	 * Tests a normative market bill scenario
+	 */
 	public void testOneMarketBillScenario()
 	{
 		market.cashier = cashier;		
@@ -267,6 +282,9 @@ public class CashierTest extends TestCase
 		
 	}
 	
+	/**
+	 * Tests two market bills in succession
+	 */
 	public void testTwoMarketBillsScenario()
 	{
 		market.cashier = cashier;
@@ -338,6 +356,9 @@ public class CashierTest extends TestCase
 		
 	}
 	
+	/**
+	 * Tests a scenario in which cashier is told to produce a check and then to pay a bill
+	 */
 	public void testOneCustomerOneMarketBillScenario()
 	{
 		customer.cashier = cashier;	
@@ -441,6 +462,9 @@ public class CashierTest extends TestCase
 		
 	}
 	
+	/**
+	 * Tests a scenario in which cashier is told to produce 2 checks and then to pay a bill
+	 */
 	public void testTwoCustomersOneMarketBillScenario()
 	{
 		customer.cashier = cashier;

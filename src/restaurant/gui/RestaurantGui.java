@@ -57,7 +57,6 @@ public class RestaurantGui extends JFrame implements ActionListener {
         restPanel.setMaximumSize(restDim);
         controlPanel.add(restPanel, BorderLayout.CENTER);
         
-        // Now, setup the info panel
         Dimension infoDim = new Dimension(WINDOWX, (int) (WINDOWY * .15));
         infoPanel = new JPanel();
         infoPanel.setPreferredSize(infoDim);
@@ -95,7 +94,6 @@ public class RestaurantGui extends JFrame implements ActionListener {
         infoPanel.add(stateCB);
         controlPanel.add(infoPanel, BorderLayout.NORTH);
         
-        //Set up the ID panel
         idPanel = new JPanel();
         idPanel.setBorder(BorderFactory.createTitledBorder("ID"));
         idPanel.setLayout(new FlowLayout());
@@ -118,8 +116,7 @@ public class RestaurantGui extends JFrame implements ActionListener {
     }
     
     /**
-     * updateInfoPanel() takes the given customer (or, for v3, Host) object and
-     * changes the information panel to hold that person's info.
+     * Takes the given customer or waiter object and changes the information panel to hold that person's info.
      *
      * @param person customer (or waiter) object
      */
@@ -149,10 +146,11 @@ public class RestaurantGui extends JFrame implements ActionListener {
         }
         infoPanel.validate();
     }
+    
     /**
      * Action listener method that reacts to the checkbox being clicked;
      * If it's the customer's checkbox, it will make him hungry
-     * For v3, it will propose a break for the waiter.
+     * If it's the waiter's checkbox, it will propose a break for the waiter.
      */
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == stateCB) {
@@ -177,11 +175,11 @@ public class RestaurantGui extends JFrame implements ActionListener {
         	}
         }
     }
+    
     /**
-     * Message sent from a customer gui to enable that customer's
-     * "I'm hungry" checkbox.
+     * Message sent from a customer gui to enable that customer's "Hungry?" checkbox
      *
-     * @param c reference to the customer
+     * @param c Reference to CustomerAgent
      */
     public void setCustomerEnabled(CustomerAgent c) {
         if (currentPerson instanceof CustomerAgent) {
@@ -193,10 +191,20 @@ public class RestaurantGui extends JFrame implements ActionListener {
         }
     }
     
+    /**
+     * Tells the restaurant panel to remove a customer from the list of waiting customers
+     * 
+     * @param c Reference to CustomerAgent
+     */
     public void removeWaitingCustomer(CustomerAgent c) {
     	restPanel.removeCustomer(c);
     }
     
+    /**
+     * Message sent from a waiter gui to enable that waiter's "Break?" checkbox
+     *
+     * @param c Reference to WaiterAgent
+     */
     public void setWaiterEnabled(WaiterAgent w) {
         if (currentPerson instanceof WaiterAgent) {
             WaiterAgent waiter = (WaiterAgent) currentPerson;

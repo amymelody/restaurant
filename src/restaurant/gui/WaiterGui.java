@@ -1,12 +1,13 @@
 package restaurant.gui;
 
-
-import restaurant.CustomerAgent;
 import restaurant.WaiterAgent;
 
 import java.awt.*;
 import java.util.*;
 
+/**
+ * Restaurant Waiter GUI
+ */
 public class WaiterGui implements Gui {
 
     private WaiterAgent agent = null;
@@ -38,6 +39,13 @@ public class WaiterGui implements Gui {
     Map<String, String> foodSymbols = new HashMap<String, String>();
     ArrayList<String> orders = new ArrayList<String>();
 
+    /**
+     * Constructor
+     * 
+     * @param agent Reference to WaiterAgent
+     * @param gui Reference to RestaurantGUI
+     * @param waiterNum Number of other waiters in restaurant
+     */
     public WaiterGui(WaiterAgent agent, RestaurantGui gui, int waiterNum) {
         this.agent = agent;
         this.gui = gui;
@@ -58,6 +66,9 @@ public class WaiterGui implements Gui {
 		foodSymbols.put("salad", "Sa");
     }
 
+    /**
+	 * This is what drives the animation; called each time the animation timer fires
+	 */
     public void updatePosition() {
         if (xPos < xDestination)
             xPos++;
@@ -91,6 +102,9 @@ public class WaiterGui implements Gui {
         }
     }
 
+    /**
+     * This creates the visuals themselves based on the position set in updatePosition
+     */
     public void draw(Graphics2D g) {
         g.setColor(Color.MAGENTA);
         g.fillRect(xPos, yPos, WAITERWIDTH, WAITERHEIGHT);
@@ -103,49 +117,69 @@ public class WaiterGui implements Gui {
 		}
     }
 
+    /**
+	 * This returns true if the GUI is currently present in the animation window, false otherwise
+	 */
     public boolean isPresent() {
         return true;
     }
     
+    /**
+     * Tells the RestaurantGUI to enable the waiter's "Break?" checkbox
+     */
     public void setCBEnabled() {
     	gui.setWaiterEnabled(agent);
     }
 
+    /**
+	 * Sets the destination as the assigned table
+	 * 
+	 * @param tablenumber Number of the assigned table
+	 */
     public void DoGoToTable(int tableNumber) {
         xDestination = (int)tablePositions.get(tableNumber).getX();
 		yDestination = (int)tablePositions.get(tableNumber).getY();
 		atTable = false;
     }
     
+    /**
+     * Sets the destination as the customers' waiting area
+     */
     public void DoGoToCustomer() {
     	xDestination = CUSTX;
 		yDestination = CUSTY;
     }
     
+    /**
+     * Sets the destination as the cook's position
+     */
     public void DoGoToCook() {
         xDestination = COOKX;
         yDestination = COOKY;
     }
     
+    /**
+     * Sets the destination as the plating area
+     */
     public void DoGoToPlatingArea() {
         xDestination = PLATINGX;
         yDestination = PLATINGY;
     }
 
+    /**
+     * Sets the destination as the waiter's home position
+     */
     public void DoReturnHome() {
         xDestination = HOMEX;
         yDestination = HOMEY;
     }
     
+    /**
+     * Adds the appropriate food symbol to the list of orders, so that the waiter can "carry" the order to a table
+     * 
+     * @param choice Name of the customer's choice
+     */
     public void DoDeliverFood(String choice) {
     	orders.add(foodSymbols.get(choice));
-    }
-
-    public int getXPos() {
-        return xPos;
-    }
-
-    public int getYPos() {
-        return yPos;
     }
 }

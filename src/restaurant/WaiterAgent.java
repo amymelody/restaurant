@@ -269,7 +269,7 @@ public class WaiterAgent extends Agent implements Waiter {
 	 * Tells the waiter that the restaurant is out of the specified food
 	 * 
 	 * @param choice Name of the food
-	 * @param table 
+	 * @param table Number of the waiter's current table
 	 */
 	public void msgOutOfFood(String choice, int table) {
 		menu.removeItem(choice);
@@ -281,6 +281,12 @@ public class WaiterAgent extends Agent implements Waiter {
 		}
 	}
 	
+	/**
+	 * Tells the waiter that his customer's order is ready
+	 * 
+	 * @param choice Name of the customer's food choice
+	 * @param tableNum Number of the customer's table
+	 */
 	public void msgOrderDone(String choice, int tableNum) {
 		for (MyCustomer mc : customers) {
 			if (mc.getTable() == tableNum && mc.getChoice() == choice) {
@@ -290,6 +296,11 @@ public class WaiterAgent extends Agent implements Waiter {
 		}
 	}
 
+	/**
+	 * Tells waiter that the customer has finished eating and sets the customer's state to "WaitingForCheck"
+	 * 
+	 * @param cust Reference to the CustomerAgent
+	 */
 	public void msgDoneEating(CustomerAgent cust) {
 		for (MyCustomer mc : customers) {
 			if (mc.getCust() == cust) {
@@ -299,6 +310,11 @@ public class WaiterAgent extends Agent implements Waiter {
 		}
 	}
 	
+	/**
+	 * Tells waiter that the restaurant is no longer out of the specified food and adds that food to the menu
+	 * 
+	 * @param food Name of the food
+	 */
 	public void msgFoodArrived(String food) {
 		if (!menu.checkItem(food)) {
 			menu.addItem(food, prices.get(food));
@@ -306,6 +322,12 @@ public class WaiterAgent extends Agent implements Waiter {
 		}
 	}
 	
+	/**
+	 * Gives the waiter a check to be delivered to the specified customer
+	 * 
+	 * @param c Reference to Customer
+	 * @param charge Integer amount that the customer owes
+	 */
 	public void msgHereIsCheck(Customer c, int charge) {
 		for (MyCustomer mc : customers) {
 			if (mc.getCust() == c) {
@@ -315,6 +337,9 @@ public class WaiterAgent extends Agent implements Waiter {
 		}
 	}
 	
+	/**
+	 * Lets the waiter know that he has reached his home position
+	 */
 	public void msgAtHome() {//from animation
 		if (returningHome) {
 			atHome.release();// = true;
@@ -323,16 +348,25 @@ public class WaiterAgent extends Agent implements Waiter {
 		}
 	}
 	
+	/**
+	 * Lets the waiter know that he has reached the customer's home position
+	 */
 	public void msgAtCustomer() {//from animation
 		atCustomer.release();// = true;
 		stateChanged();
 	}
 
+	/**
+	 * Lets the waiter know that he has reached the customer's table
+	 */
 	public void msgAtTable() {//from animation
 		atTable.release();// = true;
 		stateChanged();
 	}
 	
+	/**
+	 * Lets the waiter know that he has reached the cook's home position
+	 */
 	public void msgAtCook() {//from animation
 		atCook.release();// = true;
 		stateChanged();
@@ -417,12 +451,18 @@ public class WaiterAgent extends Agent implements Waiter {
 
 	// Actions
 	
+	/**
+	 * Waiter tells the host that he wants to go on break
+	 */
 	private void wantToGoOnBreak() {
 		print(host + ", I want to go on break.");
 		host.msgWantToGoOnBreak(this);
 		state = WaiterState.OnTheJob;
 	}
 	
+	/**
+	 * Waiter goes on break and tells the host
+	 */
 	private void goOnBreak() {
 		print(host + ", I'm going on break.");
 		host.msgGoingOnBreak(this);
@@ -438,12 +478,20 @@ public class WaiterAgent extends Agent implements Waiter {
 		waiterGui.setCBEnabled();
 	}
 	
+	/**
+	 * Waiter goes back to work and tells the host
+	 */
 	private void goOffBreak() {
 		print(host + ", I'm going off break.");
 		host.msgGoingOffBreak(this);
 		state = WaiterState.OnTheJob;
 	}
 
+	/**
+	 * Waiter goes to the customer and takes him to his assigned table
+	 * 
+	 * @param mc Reference to MyCustomer
+	 */
 	private void seatCustomer(MyCustomer mc) {
 		returningHome = true;
 		waiterGui.DoGoToCustomer();
@@ -465,6 +513,11 @@ public class WaiterAgent extends Agent implements Waiter {
 		waiterGui.DoReturnHome();
 	}
 	
+	/**
+	 * Waiter goes to the customer's table and asks what he would like to order
+	 * 
+	 * @param mc Reference to MyCustomer
+	 */
 	private void takeOrder(MyCustomer mc) {
 		waiterGui.DoGoToTable(mc.getTable());
 		try {
@@ -478,6 +531,11 @@ public class WaiterAgent extends Agent implements Waiter {
 		mc.setState(CustomerState.Asked);
 	}
 	
+	/**
+	 * Waiter goes to the customer's table and asks if he would like to reorder
+	 * 
+	 * @param mc Reference to MyCustomer
+	 */
 	private void askToReorder(MyCustomer mc) {
 		waiterGui.DoGoToTable(mc.getTable());
 		try {
@@ -491,6 +549,11 @@ public class WaiterAgent extends Agent implements Waiter {
 		mc.setState(CustomerState.Asked);
 	}
 	
+	/**
+	 * Waiter goes to the cook and gives him the customer's order
+	 * 
+	 * @param mc Reference to MyCustomer
+	 */
 	private void giveOrderToCook(MyCustomer mc) {
 		mc.setState(CustomerState.WaitingForFood);
 		waiterGui.DoGoToCook();
@@ -505,6 +568,11 @@ public class WaiterAgent extends Agent implements Waiter {
 		waiterGui.DoReturnHome();
 	}
 	
+	/**
+	 * Waiter goes to the plating area and picks up the customer's order
+	 * 
+	 * @param mc Reference to MyCustomer
+	 */
 	private void retrieveOrder(MyCustomer mc) {
 		print("Retrieving order for table " + mc.getTable());
 		waiterGui.DoGoToPlatingArea();
@@ -520,6 +588,11 @@ public class WaiterAgent extends Agent implements Waiter {
 		mc.setState(CustomerState.ReadyToEat);
 	}
 	
+	/**
+	 * Waiter delivers customer's order to his table and asks the cashier to produce a check
+	 * 
+	 * @param mc Reference to MyCustomer
+	 */
 	private void deliverFood(MyCustomer mc) {
 		waiterGui.DoGoToTable(mc.getTable());
 		try {
@@ -535,12 +608,22 @@ public class WaiterAgent extends Agent implements Waiter {
 		waiterGui.DoReturnHome();
 	}
 	
+	/**
+	 * Waiter goes back to his home position and tells the host that a customer has left and his table is available
+	 * 
+	 * @param mc Reference to MyCustomer
+	 */
 	private void notifyHost(MyCustomer mc) {
 		host.msgTableAvailable(mc.getTable());
 		waiterGui.DoReturnHome();
 		mc.setState(CustomerState.DoingNothing);
 	}
 	
+	/**
+	 * Waiter goes to customer's table and gives him his check
+	 * 
+	 * @param mc Reference to MyCustomer
+	 */
 	private void giveCheckToCustomer(MyCustomer mc) {
 		waiterGui.DoGoToTable(mc.getTable());
 		try {
@@ -556,6 +639,11 @@ public class WaiterAgent extends Agent implements Waiter {
 		waiterGui.DoReturnHome();
 	}
 
+	/**
+	 * Waiter goes to the customer's table
+	 * 
+	 * @param mc Reference to MyCustomer
+	 */
 	private void DoSeatCustomer(MyCustomer mc) {
 		print("Seating " + mc.getCust() + " at table " + mc.getTable());
 		waiterGui.DoGoToTable(mc.getTable()); 
@@ -564,6 +652,9 @@ public class WaiterAgent extends Agent implements Waiter {
 
 	//Inner classes
 
+	/**
+	 * Contains all information about a customer relevant to the WaiterAgent
+	 */
 	private class MyCustomer {
 		CustomerAgent cust;
 		int table;

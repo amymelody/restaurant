@@ -1,12 +1,13 @@
 package restaurant.gui;
 
 import restaurant.CustomerAgent;
-import restaurant.HostAgent;
-import restaurant.CustomerAgent.AgentEvent;
 
 import java.awt.*;
 import java.util.*;
 
+/**
+ * Restaurant Customer GUI
+ */
 public class CustomerGui implements Gui{
 
 	private CustomerAgent agent = null;
@@ -36,6 +37,12 @@ public class CustomerGui implements Gui{
 	Map<Integer, Point> tablePositions = new HashMap<Integer, Point>();
 	Map<String, String> foodSymbols = new HashMap<String, String>();
 
+	/**
+	 * Constructor
+	 * 
+	 * @param c Reference to CustomerAgent
+	 * @param gui Reference to RestaurantGui
+	 */
 	public CustomerGui(CustomerAgent c, RestaurantGui gui) {
 		agent = c;
 		xPos = -CUSTWIDTH;
@@ -54,6 +61,9 @@ public class CustomerGui implements Gui{
 		foodSymbols.put("salad", "Sa");
 	}
 
+	/**
+	 * This is what drives the animation; called each time the animation timer fires
+	 */
 	public void updatePosition() {
 		if (xPos < xDestination)
 			xPos++;
@@ -83,6 +93,9 @@ public class CustomerGui implements Gui{
 		}
 	}
 
+	/**
+     * This creates the visuals themselves based on the position set in updatePosition
+     */
 	public void draw(Graphics2D g) {
 		g.setColor(Color.GREEN);
 		g.fillRect(xPos, yPos, CUSTWIDTH, CUSTHEIGHT);
@@ -102,10 +115,18 @@ public class CustomerGui implements Gui{
 		}
 	}
 
+	/**
+	 * This returns true if the GUI is currently present in the animation window, false otherwise
+	 */
 	public boolean isPresent() {
 		return isPresent;
 	}
 	
+	/**
+	 * Makes the customer hungry and sets his destination as the last spot in the line of waiting customers
+	 * 
+	 * @param numCustomers Current number of customers waiting
+	 */
 	public void setHungry(int numCustomers) {
 		isHungry = true;
 		xDestination = (numCustomers%6)*30;
@@ -115,19 +136,35 @@ public class CustomerGui implements Gui{
 		setPresent(true);
 	}
 	
+	/**
+	 * Updates the customer's destination so that he will move forward in line
+	 * 
+	 * @param numCustomers Current number of customers waiting
+	 */
 	public void moveForwardInWait(int numCustomers) {
 		xDestination = (numCustomers%6)*30;
 		yDestination = 30*((numCustomers - numCustomers%6)/6);
 	}
 	
+	/**
+	 * Returns true if isHungry is true, false otherwise
+	 */
 	public boolean isHungry() {
 		return isHungry;
 	}
 
+	/**
+	 * Sets whether the customer is present in the animation frame
+	 * 
+	 * @param p Boolean to set isPresent to
+	 */
 	public void setPresent(boolean p) {
 		isPresent = p;
 	}
 	
+	/**
+	 * Starts the customer's ordering animation (a text bubble with the food item he wants)
+	 */
 	public void order() {
 		ordering = true;
 		timer.schedule(new TimerTask() {
@@ -139,6 +176,11 @@ public class CustomerGui implements Gui{
 		1000);
 	}
 
+	/**
+	 * Sets the destination as the assigned table
+	 * 
+	 * @param seatnumber Number of the assigned table
+	 */
 	public void DoGoToSeat(int seatnumber) {
 		xDestination = (int)tablePositions.get(seatnumber).getX();
 		yDestination = (int)tablePositions.get(seatnumber).getY();
@@ -146,12 +188,18 @@ public class CustomerGui implements Gui{
 		command = Command.GoToSeat;
 	}
 	
+	/**
+	 * Sets the destination as the cashier's location
+	 */
 	public void DoGoToCashier() {
 		xDestination = CASHIERX;
 		yDestination = CASHIERY;
 		command = Command.GoToCashier;
 	}
 
+	/**
+	 * Sets the destination as the restaurant's exit
+	 */
 	public void DoExitRestaurant() {
 		xDestination = -2*CUSTWIDTH;
 		yDestination = -2*CUSTWIDTH;

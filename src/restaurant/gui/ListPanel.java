@@ -1,8 +1,5 @@
 package restaurant.gui;
 
-import restaurant.CustomerAgent;
-import restaurant.HostAgent;
-
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
@@ -11,7 +8,7 @@ import java.util.ArrayList;
 
 /**
  * Subpanel of restaurantPanel.
- * This holds the scroll panes for the customers and, later, for waiters
+ * This holds the scroll panes for the customers and for waiters
  */
 public class ListPanel extends JPanel implements ActionListener {
 
@@ -26,10 +23,10 @@ public class ListPanel extends JPanel implements ActionListener {
     private String type;
 
     /**
-     * Constructor for ListPanel.  Sets up all the gui
+     * Constructor for ListPanel.  Sets up all the gui components
      *
-     * @param rp   reference to the restaurant panel
-     * @param type indicates if this is for customers or waiters
+     * @param rp   Reference to the restaurant panel
+     * @param type Indicates if this is for customers or waiters
      */
     public ListPanel(RestaurantPanel rp, String type) {
         restPanel = rp;
@@ -57,9 +54,6 @@ public class ListPanel extends JPanel implements ActionListener {
         	}
         }
         else {
-        	// Isn't the second for loop more beautiful?
-            /*for (int i = 0; i < list.size(); i++) {
-                JButton temp = list.get(i);*/
         	for (JButton temp:list){
                 if (e.getSource() == temp)
                     restPanel.showInfo(type, temp.getText());
@@ -72,7 +66,7 @@ public class ListPanel extends JPanel implements ActionListener {
      * a spot for it in the scroll pane, and tells the restaurant panel
      * to add a new person.
      *
-     * @param name name of new person
+     * @param name Name of new person
      */
     public void addPerson(String name) {
         if (name != null) {
